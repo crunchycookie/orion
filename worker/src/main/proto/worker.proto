@@ -2,12 +2,16 @@ syntax = "proto3";
 option java_package = "org.crunchycookie.orion.worker";
 
 service Worker {
-  // Upload task files to the worker. This file can either be the executable,
-  // or any of the input files.
+  /*
+  Upload task files to the worker. This file can either be the executable,
+  or any of the input files.
+  FileUploadRequest: An stream:-> <FileMetadata, FileStream...>
+  FileUploadResponse: Uploaded file metadata and it's status.
+   */
   rpc upload(stream FileUploadRequest) returns(FileUploadResponse) {};
 
   // Instruct worker to execute the job and provide output files of the job.
-  rpc execute(Task) returns (stream Result) {}
+  rpc execute(Task) returns (stream Result) {};
 }
 
 message Task {
@@ -35,8 +39,9 @@ message FileUploadRequest {
 }
 
 message FileMetaData {
-  string name = 1;
-  string type = 2;
+  string taskId = 1;
+  string name = 2;
+  string type = 3;
 }
 
 message File {

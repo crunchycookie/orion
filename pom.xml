@@ -31,6 +31,26 @@
         <artifactId>grpc-stub</artifactId>
         <version>${grpc-stub.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-core</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
+      </dependency>
       <!-- necessary for Java 9+ -->
       <dependency>
         <groupId>org.apache.tomcat</groupId>
@@ -82,6 +102,9 @@
     <maven.compiler.target>16</maven.compiler.target>
     <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+    <guava.version>30.1.1-jre</guava.version>
+    <log4j.version>2.13.0</log4j.version>
+    <commons-io.version>2.9.0</commons-io.version>
 
     <!--Comment the following property if you are not using an M1 mac.-->
     <os.detected.classifier>osx-x86_64</os.detected.classifier>
