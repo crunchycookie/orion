@@ -61,6 +61,7 @@ public class WorkerService extends WorkerImplBase {
       public void onNext(FileUploadRequest fileUploadRequest) {
 
         if (fileUploadRequest.hasMetadata()) {
+          fileMetaData = fileUploadRequest.getMetadata();
           initFileStream(fileUploadRequest.getMetadata());
         }
         if (!isStreamContentReadyToWrite(fileUploadRequest)) {

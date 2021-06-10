@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
@@ -59,14 +58,13 @@ public class PrimaryStorageWorkerStore implements WorkerStore {
           .getCodeSource().getLocation().toURI().getPath();
 
       // Create tasks folder.
-      createFolder(storeWorkspaceFolder, TASKS_FOLDER);
+      String tasksFolderPath = createFolder(storeWorkspaceFolder, TASKS_FOLDER);
 
       // Create the folder corresponding to the task id.
-      String tasksFolderPath = storeWorkspaceFolder + File.pathSeparator + TASKS_FOLDER;
-      createFolder(tasksFolderPath, metaData.getTaskId());
+      String taskFolderPath = createFolder(tasksFolderPath, metaData.getTaskId());
 
       // Delete file if exists.
-      File file = new File(tasksFolderPath + File.pathSeparator + metaData.getName() + "."
+      File file = new File(taskFolderPath + File.separator + metaData.getName() + "."
           + metaData.getType());
       if (file.exists()) {
         FileUtils.delete(file);
@@ -81,14 +79,6 @@ public class PrimaryStorageWorkerStore implements WorkerStore {
     }
   }
 
-  private void createFolder(String parent, String folder) throws IOException {
-    String tasksFolderPath = parent + File.separator + folder;
-    File tasksFolder = new File(tasksFolderPath);
-    if (!tasksFolder.exists()) {
-      FileUtils.forceMkdir(tasksFolder);
-    }
-  }
-
   @Override
   public Enum<OperationStatus> remove(FileMetaData metaData) {
     return null;
@@ -97,6 +87,16 @@ public class PrimaryStorageWorkerStore implements WorkerStore {
   @Override
   public String getName() {
     return "PrimaryStorageWorkerStore";
+  }
+
+  private String createFolder(String parent, String folder) throws IOException {
+    String tasksFolderPath = parent + (parent.endsWith(File.separator) ? "" : File.separator)
+        + folder;
+    File tasksFolder = new File(tasksFolderPath);
+    if (!tasksFolder.exists()) {
+      FileUtils.forceMkdir(tasksFolder);
+    }
+    return tasksFolderPath;
   }
 
   private static void handleStoreInitialization() {
