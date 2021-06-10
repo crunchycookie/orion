@@ -88,6 +88,11 @@
       <groupId>commons-io</groupId>
     </dependency>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
+    </dependency>
+    <dependency>
       <artifactId>grpc-testing</artifactId>
       <groupId>io.grpc</groupId>
       <scope>test</scope>
@@ -113,7 +118,7 @@
   </parent>
 
   <properties>
-    <maven.compiler.source>16</maven.compiler.source>
-    <maven.compiler.target>16</maven.compiler.target>
+    <maven.compiler.source>15</maven.compiler.source>
+    <maven.compiler.target>15</maven.compiler.target>
   </properties>
 </project>

@@ -66,6 +66,11 @@
         <artifactId>mockito-core</artifactId>
         <version>${mockito-core.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
+      </dependency>
       <!-- necessary for Java 9+ -->
       <dependency>
         <groupId>org.apache.tomcat</groupId>
@@ -113,8 +118,8 @@
     <protoc-gen-grpc-java.version>1.15.0</protoc-gen-grpc-java.version>
     <protoc-jar-maven-plugin.version>3.11.4</protoc-jar-maven-plugin.version>
     <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-    <maven.compiler.source>16</maven.compiler.source>
-    <maven.compiler.target>16</maven.compiler.target>
+    <maven.compiler.source>15</maven.compiler.source>
+    <maven.compiler.target>15</maven.compiler.target>
     <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
     <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     <guava.version>30.1.1-jre</guava.version>
@@ -123,6 +128,7 @@
     <junit.version>4.12</junit.version>
     <mockito-core.version>3.4.0</mockito-core.version>
     <grpc-testing.version>1.38.0</grpc-testing.version>
+    <commons-lang3.version>3.12.0</commons-lang3.version>
 
     <!--Comment the following property if you are not using an M1 mac.-->
     <os.detected.classifier>osx-x86_64</os.detected.classifier>

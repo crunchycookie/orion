@@ -17,20 +17,14 @@
 package org.crunchycookie.orion.worker.service;
 
 import io.grpc.stub.StreamObserver;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.worker.WorkerGrpc.WorkerImplBase;
-import org.crunchycookie.orion.worker.WorkerOuterClass.File;
-import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadRequest;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadResponse;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
-import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
-import org.crunchycookie.orion.worker.exception.WorkerRuntimeException;
-import org.crunchycookie.orion.worker.utils.WorkerUtils;
+import org.crunchycookie.orion.worker.service.observer.FileUploadRequestObserver;
 
 /**
  * This is the Worker service exposing the functionality of a worker node in the Orion RMS.
@@ -50,88 +44,29 @@ public class WorkerService extends WorkerImplBase {
    * {@link FileUploadRequest} stream.
    */
   @Override
-  public StreamObserver<FileUploadRequest> upload(
-      StreamObserver<FileUploadResponse> responseObserver) {
-
-    return new StreamObserver<>() {
-      private FileMetaData fileMetaData = null;
-      private FileOutputStream fileOutputStream = null;
-
-      @Override
-      public void onNext(FileUploadRequest fileUploadRequest) {
-
-        if (fileUploadRequest.hasMetadata()) {
-          fileMetaData = fileUploadRequest.getMetadata();
-          initFileStream(fileUploadRequest.getMetadata());
-        }
-        if (!isStreamContentReadyToWrite(fileUploadRequest)) {
-          LOG.warn("Skipped the uploading the stream element: " + fileUploadRequest + ", "
-              + "since storage is not initialized");
-          return;
-        }
-        writeStreamContent(fileUploadRequest.getFile());
-      }
-
-      @Override
-      public void onError(Throwable throwable) {
-        handleResponse(Status.FAILED);
-      }
-
-      @Override
-      public void onCompleted() {
-        if (closeStream()) {
-          handleResponse(Status.SUCCESS);
-        }
-      }
-
-      private boolean isStreamContentReadyToWrite(FileUploadRequest fileUploadRequest) {
-        return fileOutputStream != null && fileUploadRequest.hasFile();
-      }
-
-      private void handleResponse(Status failed) {
-        responseObserver.onNext(
-            FileUploadResponse.newBuilder()
-                .setMetadata(fileMetaData)
-                .setStatus(failed)
-                .build()
-        );
-        responseObserver.onCompleted();
-      }
-
-      private boolean closeStream() {
-        if (fileOutputStream != null) {
-          try {
-            fileOutputStream.close();
-            return true;
-          } catch (IOException e) {
-            onError(new WorkerRuntimeException(
-                "Failed to close the file: " + fileMetaData.getName(), e));
-          }
-        }
-        return false;
-      }
-
-      private void writeStreamContent(File file) {
-        try {
-          fileOutputStream.write(file.getContent().toByteArray());
-          // Should we flush, is it handled automatically?
-        } catch (IOException e) {
-          onError(new WorkerRuntimeException(
-              "Failed to write the content for the file: " + fileMetaData.getName(), e));
-        }
-      }
-
-      private void initFileStream(FileMetaData fileMetaData) {
-        WorkerUtils.getStore().store(fileMetaData).ifPresentOrElse(
-            fs -> fileOutputStream = fs,
-            () -> onError(new WorkerRuntimeException("Failed to open the file stream"))
-        );
-      }
-    };
+  public StreamObserver<FileUploadRequest> upload(StreamObserver<FileUploadResponse>
+      responseObserver) {
+    return new FileUploadRequestObserver(responseObserver);
   }
 
+  /**
+   * Execution of the tasks is based on shell scripts, as almost every task can be achieved via a
+   * shell script.
+   * <p/>
+   * Prior executing this action, all the necessary files should be uploaded to the node via the
+   * {@link #upload(StreamObserver)} action. The mandatory file in this process is the shell script.
+   * This is a .sh file.
+   * <p/>
+   * After that, this action is invoked. It will navigate to the workspace where the script resides
+   * and execute it in a new process. Any new file generated from the execution is then streamed
+   * back to the client who called this action.
+   * <p/>
+   *
+   * @param request          Includes information about the executable shell script.
+   * @param responseObserver Observer sent to the caller to obtain streaming results.
+   */
   @Override
   public void execute(Task request, StreamObserver<Result> responseObserver) {
-    super.execute(request, responseObserver);
+
   }
 }

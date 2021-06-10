@@ -20,6 +20,10 @@ public class StoreConstants {
 
   public enum OperationStatus {
     SUCCESS,
-    FAILED
+    FAILED,
+    IDLE,
+    BUSY,
+    SUCCESSFULLY_STARTED,
+    REJECTED_PROCESS_ALREADY_EXISTS
   }
 }

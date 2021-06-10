@@ -59,8 +59,9 @@ public class WorkerServiceTest {
   private final String TASK_ID = "hello-world";
   private final String FILE_EXECUTABLE_NAME = "hello-world-task";
   private final String FILE_EXECUTABLE_TYPE = "jar";
-  private final String FILE_INPUT_NAME = "in";
-  private final String FILE_INPUT_TYPE = "txt";
+  private final int K = 1024;
+  private final int M = 1 * K * K;
+  private final int ONE_MB_IN_BYTES = M;
   private WorkerServer server;
   private ManagedChannel inProcessChannel;
   private Collection<FileUploadRequest> fileUploadRequests;
@@ -124,22 +125,25 @@ public class WorkerServiceTest {
     // Then we set the actual executable file.
     try (InputStream executableStream = this.getClass().getClassLoader()
         .getResourceAsStream("hello-world-task.jar")) {
-      int streamElementSize = 1 * 1024 * 1024;
-      byte[] buffer = new byte[streamElementSize];
+      byte[] buffer = new byte[ONE_MB_IN_BYTES];
       try (BufferedInputStream bis = new BufferedInputStream(executableStream)) {
         while ((bis.read(buffer)) > 0) {
-          File chunk = File.newBuilder().setContent(ByteString.copyFrom(buffer)).build();
-          // Then the upload request.
-          FileUploadRequest chunkRequest = FileUploadRequest.newBuilder()
-              .setFile(chunk)
-              .build();
-          // Let's set chunk request in the payload.
-          requestObserver.onNext(chunkRequest);
+          setTheChunk(requestObserver, buffer);
         }
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private void setTheChunk(StreamObserver<FileUploadRequest> requestObserver, byte[] buffer) {
+    File chunk = File.newBuilder().setContent(ByteString.copyFrom(buffer)).build();
+    // Then the upload request.
+    FileUploadRequest chunkRequest = FileUploadRequest.newBuilder()
+        .setFile(chunk)
+        .build();
+    // Let's set chunk request in the payload.
+    requestObserver.onNext(chunkRequest);
   }
 
   private void setMetadataFileOfTheExecutableJar(

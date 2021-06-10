@@ -15,8 +15,8 @@ service Worker {
 }
 
 message Task {
-  FileMetaData executable = 1;
-  repeated string argument = 2;
+  FileMetaData executableShellScriptMetadata = 1;
+  repeated string outputFileNames = 2;
 }
 
 /*
