@@ -51,6 +51,20 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <groupId>org.apache.maven.plugins</groupId>
       </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <configuration>
+          <excludes>
+            <!--Exclude generated classes-->
+            <exclude>org/crunchycookie/orion/worker/WorkerOuterClass*</exclude>
+            <exclude>org/crunchycookie/orion/worker/WorkerGrpc*</exclude>
+            <!--Exclude exception classes-->
+            <exclude>org/crunchycookie/orion/worker/exception/**Exception</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

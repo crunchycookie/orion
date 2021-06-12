@@ -99,11 +99,29 @@
             <target>${maven.compiler.target}</target>
           </configuration>
         </plugin>
-
         <plugin>
           <groupId>org.xolstice.maven.plugins</groupId>
           <artifactId>protobuf-maven-plugin</artifactId>
           <version>${protobuf-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -129,6 +147,7 @@
     <mockito-core.version>3.4.0</mockito-core.version>
     <grpc-testing.version>1.38.0</grpc-testing.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
+    <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
 
     <!--Comment the following property if you are not using an M1 mac.-->
     <os.detected.classifier>osx-x86_64</os.detected.classifier>
