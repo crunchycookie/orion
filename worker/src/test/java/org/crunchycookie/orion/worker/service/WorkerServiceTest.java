@@ -29,48 +29,52 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import org.crunchycookie.orion.worker.WorkerGrpc;
-import org.crunchycookie.orion.worker.WorkerOuterClass.File;
+import org.crunchycookie.orion.worker.WorkerOuterClass;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadRequest;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadResponse;
+import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
+import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
+import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
 import org.crunchycookie.orion.worker.WorkerServer;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.junit.runners.MethodSorters;
 import org.mockito.ArgumentCaptor;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(JUnit4.class)
 public class WorkerServiceTest {
 
   /**
    * This rule manages automatic graceful shutdown for the registered channel at the end of test.
    */
-  @Rule
-  public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
+  @ClassRule
+  public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
+  private static WorkerServer server;
+  private static ManagedChannel inProcessChannel;
   private final String TASK_ID = "hello-world";
-  private final String FILE_EXECUTABLE_NAME = "hello-world-task";
-  private final String FILE_EXECUTABLE_TYPE = "jar";
+  private final String FILE_EXECUTABLE_NAME = "execute-task";
+  private final String FILE_EXECUTABLE_TYPE = "sh";
   private final int K = 1024;
   private final int M = 1 * K * K;
   private final int ONE_MB_IN_BYTES = M;
-  private WorkerServer server;
-  private ManagedChannel inProcessChannel;
-  private Collection<FileUploadRequest> fileUploadRequests;
 
-  @Before
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUp() throws Exception {
     // Generate a unique in-process server name.
     String serverName = InProcessServerBuilder.generateName();
-    fileUploadRequests = new ArrayList<>();
     // Use directExecutor for both InProcessServerBuilder and InProcessChannelBuilder can reduce the
     // usage timeouts and latches in test. But we still add timeout and latches where they would be
     // needed if no directExecutor were used, just for demo purpose.
@@ -81,28 +85,85 @@ public class WorkerServiceTest {
         InProcessChannelBuilder.forName(serverName).directExecutor().build());
   }
 
-  @After
-  public void tearDown() throws Exception {
+  @AfterClass
+  public static void tearDown() throws Exception {
     server.stop();
   }
 
   @Test
-  public void uploadTest() {
+  public void step1_uploadTest() {
+    WorkerGrpc.WorkerStub stub = WorkerGrpc.newStub(inProcessChannel);
+
+    uploadFile("execute-task.sh", stub);
+    uploadFile("in.txt", stub);
+  }
+
+  @Test(expected = Test.None.class)
+  public void step2_executeTest() throws InterruptedException{
+
+    WorkerGrpc.WorkerBlockingStub worker = WorkerGrpc.newBlockingStub(inProcessChannel);
+
+    // Build the description of the task to be executed.
+    Task task = Task.newBuilder().setExecutableShellScriptMetadata(FileMetaData.newBuilder()
+        .setName(FILE_EXECUTABLE_NAME)
+        .setType(FILE_EXECUTABLE_TYPE)
+        .setTaskId(TASK_ID)
+        .build()
+    ).build();
+
+    Result result = worker.execute(task);
+
+    // Wait some time hoping that by then the task will be completed.
+    Thread.sleep(2000);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(Status.SUCCESS, result.getTaskStatus());
+
+    assertFileExistence("out.txt");
+    assertFileExistence("log.txt");
+    assertFileExistence("error-log.txt");
+  }
+
+  @Test
+  public void step3_monitorTest() {
+
+    WorkerGrpc.WorkerBlockingStub worker = WorkerGrpc.newBlockingStub(inProcessChannel);
+
+    // Build the description of the task to be executed.
+    Task task = Task.newBuilder().setExecutableShellScriptMetadata(FileMetaData.newBuilder()
+        .setName(FILE_EXECUTABLE_NAME)
+        .setType(FILE_EXECUTABLE_TYPE)
+        .setTaskId(TASK_ID)
+        .build()
+    ).build();
+
+    Result result = worker.monitor(task);
+
+    Assert.assertNotNull(result);
+    Assert.assertEquals(Status.NOT_EXECUTING, result.getTaskStatus());
+  }
+
+  private void assertFileExistence(String file) {
+    File out = new File("target/classes/tasks" + File.separator + TASK_ID + File.separator + file);
+    Assert.assertTrue(out.exists());
+  }
+
+  private void uploadFile(String fileName, WorkerGrpc.WorkerStub stub) {
     @SuppressWarnings("unchecked")
     StreamObserver<FileUploadResponse> responseObserver =
         (StreamObserver<FileUploadResponse>) mock(StreamObserver.class);
-    WorkerGrpc.WorkerStub stub = WorkerGrpc.newStub(inProcessChannel);
+//    WorkerGrpc.WorkerStub stub = WorkerGrpc.newStub(inProcessChannel);
     ArgumentCaptor<FileUploadResponse> fileUploadResponseCaptor = ArgumentCaptor
         .forClass(FileUploadResponse.class);
 
     // Set request and response observers.
     StreamObserver<FileUploadRequest> requestObserver = stub.upload(responseObserver);
 
-    // Set executable in the payload.
-    setMetadataFileOfTheExecutableJar(requestObserver);
+    // Set file metadata in the payload.
+    setMetadataOfFile(requestObserver, fileName);
 
-    // Set executable jar in the payload.
-    setTheExecutableJar(requestObserver);
+    // Set file in the payload.
+    setTheFile(requestObserver, fileName);
 
     // Make sure that none of the file upload responses were called.
     verify(responseObserver, never()).onNext(any(FileUploadResponse.class));
@@ -113,7 +174,8 @@ public class WorkerServiceTest {
     // Allow some ms to let client receive the response.
     verify(responseObserver, timeout(100)).onNext(fileUploadResponseCaptor.capture());
     FileUploadResponse summary = fileUploadResponseCaptor.getValue();
-    Assert.assertEquals(FILE_EXECUTABLE_NAME, summary.getMetadata().getName());
+    Assert.assertEquals(fileName,
+        summary.getMetadata().getName() + "." + summary.getMetadata().getType());
 
     // Asset that the process completed.
     verify(responseObserver, timeout(100)).onCompleted();
@@ -121,15 +183,19 @@ public class WorkerServiceTest {
     verify(responseObserver, never()).onError(any(Throwable.class));
   }
 
-  private void setTheExecutableJar(StreamObserver<FileUploadRequest> requestObserver) {
+  private void setTheFile(StreamObserver<FileUploadRequest> requestObserver, String fileName) {
     // Then we set the actual executable file.
     try (InputStream executableStream = this.getClass().getClassLoader()
-        .getResourceAsStream("hello-world-task.jar")) {
+        .getResourceAsStream(fileName)) {
       byte[] buffer = new byte[ONE_MB_IN_BYTES];
       try (BufferedInputStream bis = new BufferedInputStream(executableStream)) {
-        while ((bis.read(buffer)) > 0) {
-          setTheChunk(requestObserver, buffer);
-        }
+        int lengthOfReadBytes;
+        do {
+          lengthOfReadBytes = bis.read(buffer);
+          if (lengthOfReadBytes > 0) {
+            setTheChunk(requestObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes - 1));
+          }
+        } while (lengthOfReadBytes > 0);
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -137,7 +203,8 @@ public class WorkerServiceTest {
   }
 
   private void setTheChunk(StreamObserver<FileUploadRequest> requestObserver, byte[] buffer) {
-    File chunk = File.newBuilder().setContent(ByteString.copyFrom(buffer)).build();
+    WorkerOuterClass.File chunk = WorkerOuterClass.File.newBuilder()
+        .setContent(ByteString.copyFrom(buffer)).build();
     // Then the upload request.
     FileUploadRequest chunkRequest = FileUploadRequest.newBuilder()
         .setFile(chunk)
@@ -146,12 +213,11 @@ public class WorkerServiceTest {
     requestObserver.onNext(chunkRequest);
   }
 
-  private void setMetadataFileOfTheExecutableJar(
-      StreamObserver<FileUploadRequest> requestObserver) {
+  private void setMetadataOfFile(StreamObserver<FileUploadRequest> requestObserver, String file) {
     // Let's upload the executable. First, lets create the metadata file.
     FileMetaData executableMetadata = FileMetaData.newBuilder()
-        .setName(FILE_EXECUTABLE_NAME)
-        .setType(FILE_EXECUTABLE_TYPE)
+        .setName(file.split("\\.")[0])
+        .setType(file.split("\\.")[1])
         .setTaskId(TASK_ID)
         .build();
 

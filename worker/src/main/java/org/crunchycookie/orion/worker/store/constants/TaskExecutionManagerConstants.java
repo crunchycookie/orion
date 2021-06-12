@@ -16,7 +16,7 @@
 
 package org.crunchycookie.orion.worker.store.constants;
 
-public class StoreConstants {
+public class TaskExecutionManagerConstants {
 
   public enum OperationStatus {
     SUCCESS,

@@ -16,22 +16,41 @@
 
 package org.crunchycookie.orion.worker.utils;
 
-import org.crunchycookie.orion.worker.store.WorkerStore;
-import org.crunchycookie.orion.worker.store.impl.PrimaryStorageWorkerStore;
+import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
+import org.crunchycookie.orion.worker.store.TaskExecutionManager;
+import org.crunchycookie.orion.worker.store.constants.TaskExecutionManagerConstants.OperationStatus;
+import org.crunchycookie.orion.worker.store.impl.PrimaryStorageBasedTaskExecutionManager;
 
 public class WorkerUtils {
 
   /**
-   * Get the store instance. Currently, the singleton instance of {@link PrimaryStorageWorkerStore}
-   * is returned.
+   * Get the execution manager instance. Currently, the singleton instance of {@link
+   * PrimaryStorageBasedTaskExecutionManager} is returned.
    *
-   * @return {@link WorkerStore} instance.
+   * @return {@link TaskExecutionManager} instance.
    */
-  public static WorkerStore getStore() {
+  public static TaskExecutionManager getTaskExecutionManager() {
     /*
-    This needs to be customizable such that a pluggable store can be injected. Currently, the
-    default store is returned.
+    This method chose the execution manager. Currently, the hardcoded one is returned. However, in
+    a scenario where containers can be executed, this method involves in selecting the correct
+    container and getting the execution manager for that container.
      */
-    return PrimaryStorageWorkerStore.getInstance();
+    return PrimaryStorageBasedTaskExecutionManager.getInstance();
+  }
+
+  /**
+   * Convert operation status to response status.
+   *
+   * @param status {@link OperationStatus}
+   * @return {@link Status} for the response.
+   */
+  public static Status getResponseStatus(OperationStatus status) {
+    return switch (status) {
+      case SUCCESSFULLY_STARTED -> Status.SUCCESS;
+      case REJECTED_PROCESS_ALREADY_EXISTS -> Status.IN_PROGRESS;
+      case IDLE -> Status.NOT_EXECUTING; // Either task is done executing or never executed at all.
+      case BUSY -> Status.IN_PROGRESS;
+      default -> Status.FAILED;
+    };
   }
 }

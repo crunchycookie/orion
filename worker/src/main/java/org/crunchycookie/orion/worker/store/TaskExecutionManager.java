@@ -21,13 +21,20 @@ package org.crunchycookie.orion.worker.store;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
 import org.crunchycookie.orion.worker.exception.WorkerRuntimeException;
-import org.crunchycookie.orion.worker.store.constants.StoreConstants.OperationStatus;
+import org.crunchycookie.orion.worker.exception.WorkerServerException;
+import org.crunchycookie.orion.worker.store.constants.TaskExecutionManagerConstants.OperationStatus;
 
-public interface WorkerStore {
+/**
+ * This class represents the Execution Manager. Within an actual physical node, there can be
+ * multiple agents capable of executing tasks such as containers, etc. Each of such element need to
+ * have an execution manager where they are managed by the worker service.
+ */
+public interface TaskExecutionManager {
 
   /**
    * Store a file in a task. This method creates a {@link FileOutputStream} based on the provide
@@ -37,7 +44,7 @@ public interface WorkerStore {
    * @return The {@link FileOutputStream} where caller needs to write the file. Stream should be
    * properly closed by the caller.
    */
-  Optional<FileOutputStream> store(FileMetaData file) throws WorkerRuntimeException;
+  Optional<OutputStream> store(FileMetaData file) throws WorkerServerException;
 
   /**
    * Given a file description, this API returns the stream to read it if available.
@@ -45,7 +52,7 @@ public interface WorkerStore {
    * @param file Metadata description.
    * @return The stream for the requested file and the file description.
    */
-  Pair<FileMetaData, FileInputStream> get(FileMetaData file) throws WorkerRuntimeException;
+  Pair<FileMetaData, FileInputStream> get(FileMetaData file) throws WorkerServerException;
 
   /**
    * Execute given command in the workspace where the provided file resides. This is a non-blocking
@@ -55,7 +62,7 @@ public interface WorkerStore {
    * @return Status of the execution process.
    * @throws WorkerRuntimeException
    */
-  Enum<OperationStatus> execute(FileMetaData executableFile) throws WorkerRuntimeException;
+  OperationStatus execute(FileMetaData executableFile) throws WorkerServerException;
 
   /**
    * Obtain current status of the task associated to the provided executable file.
@@ -64,7 +71,7 @@ public interface WorkerStore {
    * @return Current status.
    * @throws WorkerRuntimeException
    */
-  Enum<OperationStatus> getStatus(FileMetaData executableFile) throws WorkerRuntimeException;
+  OperationStatus getStatus(FileMetaData executableFile) throws WorkerServerException;
 
   /**
    * Remove a file object.
@@ -72,7 +79,7 @@ public interface WorkerStore {
    * @param metaData {@link FileMetaData} object representing file details.
    * @return Status of the action.
    */
-  Enum<OperationStatus> remove(FileMetaData metaData) throws WorkerRuntimeException;
+  OperationStatus remove(FileMetaData metaData) throws WorkerServerException;
 
   /**
    * Name of this worker storage.

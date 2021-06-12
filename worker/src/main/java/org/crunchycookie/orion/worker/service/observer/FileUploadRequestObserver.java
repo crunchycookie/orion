@@ -17,8 +17,8 @@
 package org.crunchycookie.orion.worker.service.observer;
 
 import io.grpc.stub.StreamObserver;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.worker.WorkerOuterClass.File;
@@ -27,6 +27,7 @@ import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadRequest;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadResponse;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
 import org.crunchycookie.orion.worker.exception.WorkerRuntimeException;
+import org.crunchycookie.orion.worker.exception.WorkerServerException;
 import org.crunchycookie.orion.worker.utils.WorkerUtils;
 
 public class FileUploadRequestObserver implements StreamObserver<FileUploadRequest> {
@@ -34,7 +35,7 @@ public class FileUploadRequestObserver implements StreamObserver<FileUploadReque
   private static final Logger LOG = LogManager.getLogger(FileUploadRequestObserver.class);
 
   private FileMetaData fileMetaData = null;
-  private FileOutputStream fileOutputStream = null;
+  private OutputStream outputStream = null;
   private StreamObserver<FileUploadResponse> responseObserver = null;
 
   public FileUploadRequestObserver(StreamObserver<FileUploadResponse> responseObserver) {
@@ -58,6 +59,7 @@ public class FileUploadRequestObserver implements StreamObserver<FileUploadReque
 
   @Override
   public void onError(Throwable throwable) {
+    LOG.error("File uploading failed", throwable);
     handleResponse(Status.FAILED);
   }
 
@@ -69,7 +71,7 @@ public class FileUploadRequestObserver implements StreamObserver<FileUploadReque
   }
 
   private boolean isStreamContentReadyToWrite(FileUploadRequest fileUploadRequest) {
-    return fileOutputStream != null && fileUploadRequest.hasFile();
+    return outputStream != null && fileUploadRequest.hasFile();
   }
 
   private void handleResponse(Status failed) {
@@ -83,9 +85,9 @@ public class FileUploadRequestObserver implements StreamObserver<FileUploadReque
   }
 
   private boolean closeStream() {
-    if (fileOutputStream != null) {
+    if (outputStream != null) {
       try {
-        fileOutputStream.close();
+        outputStream.close();
         return true;
       } catch (IOException e) {
         onError(new WorkerRuntimeException(
@@ -97,8 +99,8 @@ public class FileUploadRequestObserver implements StreamObserver<FileUploadReque
 
   private void writeStreamContent(File file) {
     try {
-      fileOutputStream.write(file.getContent().toByteArray());
-      // Should we flush, is it handled automatically?
+      outputStream.write(file.getContent().toByteArray());
+      outputStream.flush();
     } catch (IOException e) {
       onError(new WorkerRuntimeException(
           "Failed to write the content for the file: " + fileMetaData.getName(), e));
@@ -106,9 +108,13 @@ public class FileUploadRequestObserver implements StreamObserver<FileUploadReque
   }
 
   private void initFileStream(FileMetaData fileMetaData) {
-    WorkerUtils.getStore().store(fileMetaData).ifPresentOrElse(
-        fs -> fileOutputStream = fs,
-        () -> onError(new WorkerRuntimeException("Failed to open the file stream"))
-    );
+    try {
+      WorkerUtils.getTaskExecutionManager().store(fileMetaData).ifPresentOrElse(
+          fs -> outputStream = fs,
+          () -> onError(new WorkerRuntimeException("Failed to open the file stream"))
+      );
+    } catch (WorkerServerException e) {
+      onError(e);
+    }
   }
 }

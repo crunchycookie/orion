@@ -88,8 +88,8 @@
       <groupId>commons-io</groupId>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
+      <groupId>org.apache.commons</groupId>
       <version>${commons-lang3.version}</version>
     </dependency>
     <dependency>
@@ -98,8 +98,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <artifactId>junit</artifactId>
-      <groupId>junit</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <groupId>org.junit.jupiter</groupId>
       <scope>test</scope>
     </dependency>
     <dependency>

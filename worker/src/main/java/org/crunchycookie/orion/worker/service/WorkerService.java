@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.worker.service;
 
+import static org.crunchycookie.orion.worker.utils.WorkerUtils.getResponseStatus;
+
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,8 +25,12 @@ import org.crunchycookie.orion.worker.WorkerGrpc.WorkerImplBase;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadRequest;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadResponse;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
+import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
+import org.crunchycookie.orion.worker.exception.WorkerServerException;
 import org.crunchycookie.orion.worker.service.observer.FileUploadRequestObserver;
+import org.crunchycookie.orion.worker.store.constants.TaskExecutionManagerConstants.OperationStatus;
+import org.crunchycookie.orion.worker.utils.WorkerUtils;
 
 /**
  * This is the Worker service exposing the functionality of a worker node in the Orion RMS.
@@ -67,6 +73,36 @@ public class WorkerService extends WorkerImplBase {
    */
   @Override
   public void execute(Task request, StreamObserver<Result> responseObserver) {
+    try {
+      OperationStatus status = WorkerUtils.getTaskExecutionManager().execute(
+          request.getExecutableShellScriptMetadata()
+      );
+      handleResponse(responseObserver, getResponseStatus(status));
+    } catch (WorkerServerException e) {
+      LOG.error("Failed executing the task", e);
+    }
+  }
 
+  /**
+   * Check status of the requested {@link Task} and obtain the response.
+   *
+   * @param request
+   * @param responseObserver
+   */
+  @Override
+  public void monitor(Task request, StreamObserver<Result> responseObserver) {
+    try {
+      OperationStatus status = WorkerUtils.getTaskExecutionManager().getStatus(
+          request.getExecutableShellScriptMetadata()
+      );
+      handleResponse(responseObserver, getResponseStatus(status));
+    } catch (WorkerServerException e) {
+      LOG.error("Failed executing the task", e);
+    }
+  }
+
+  private void handleResponse(StreamObserver<Result> responseObserver, Status responseStatus) {
+    responseObserver.onNext(Result.newBuilder().setTaskStatus(responseStatus).build());
+    responseObserver.onCompleted();
   }
 }
