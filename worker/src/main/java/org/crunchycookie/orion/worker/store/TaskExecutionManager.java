@@ -21,6 +21,7 @@ package org.crunchycookie.orion.worker.store;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
@@ -52,7 +53,7 @@ public interface TaskExecutionManager {
    * @param file Metadata description.
    * @return The stream for the requested file and the file description.
    */
-  Pair<FileMetaData, FileInputStream> get(FileMetaData file) throws WorkerServerException;
+  Pair<FileMetaData, InputStream> get(FileMetaData file) throws WorkerServerException;
 
   /**
    * Execute given command in the workspace where the provided file resides. This is a non-blocking

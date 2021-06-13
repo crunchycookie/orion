@@ -16,6 +16,15 @@
 
 package org.crunchycookie.orion.worker.utils;
 
+import com.google.protobuf.ByteString;
+import io.grpc.stub.StreamObserver;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import org.crunchycookie.orion.worker.WorkerOuterClass;
+import org.crunchycookie.orion.worker.WorkerOuterClass.File;
+import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
 import org.crunchycookie.orion.worker.store.TaskExecutionManager;
 import org.crunchycookie.orion.worker.store.constants.TaskExecutionManagerConstants.OperationStatus;
@@ -52,5 +61,41 @@ public class WorkerUtils {
       case BUSY -> Status.IN_PROGRESS;
       default -> Status.FAILED;
     };
+  }
+
+  /**
+   * Set the provided byte array as a result element.
+   */
+  public static void setChunk(StreamObserver<Result> responseObserver, byte[] buffer) {
+    File chunk = WorkerOuterClass.File.newBuilder().setContent(ByteString.copyFrom(buffer)).build();
+    Result fileChunkResult = Result.newBuilder().setOutputFile(chunk).build();
+    responseObserver.onNext(fileChunkResult);
+  }
+
+  /**
+   * Set the Result in the stream.
+   */
+  public static void handleResponse(StreamObserver<Result> responseObserver,
+      Status responseStatus) {
+    responseObserver.onNext(Result.newBuilder().setTaskStatus(responseStatus).build());
+    responseObserver.onCompleted();
+  }
+
+  /**
+   * Read from the input and stream it over the gRPC connection in 1 MB byte chunks.
+   */
+  public static void streamInChunks(StreamObserver<Result> responseObserver,
+      InputStream fileInputStream)
+      throws IOException {
+    byte[] buffer = new byte[1024 * 1024];
+    try (BufferedInputStream bis = new BufferedInputStream(fileInputStream)) {
+      int lengthOfReadBytes;
+      do {
+        lengthOfReadBytes = bis.read(buffer);
+        if (lengthOfReadBytes > 0) {
+          setChunk(responseObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes - 1));
+        }
+      } while (lengthOfReadBytes > 0);
+    }
   }
 }

@@ -17,11 +17,16 @@
 package org.crunchycookie.orion.worker.service;
 
 import static org.crunchycookie.orion.worker.utils.WorkerUtils.getResponseStatus;
+import static org.crunchycookie.orion.worker.utils.WorkerUtils.handleResponse;
+import static org.crunchycookie.orion.worker.utils.WorkerUtils.streamInChunks;
 
 import io.grpc.stub.StreamObserver;
+import java.io.IOException;
+import java.io.InputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.worker.WorkerGrpc.WorkerImplBase;
+import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadRequest;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadResponse;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
@@ -80,6 +85,7 @@ public class WorkerService extends WorkerImplBase {
       handleResponse(responseObserver, getResponseStatus(status));
     } catch (WorkerServerException e) {
       LOG.error("Failed executing the task", e);
+      handleResponse(responseObserver, Status.FAILED);
     }
   }
 
@@ -97,12 +103,35 @@ public class WorkerService extends WorkerImplBase {
       );
       handleResponse(responseObserver, getResponseStatus(status));
     } catch (WorkerServerException e) {
-      LOG.error("Failed executing the task", e);
+      LOG.error("Failed monitoring the task", e);
+      handleResponse(responseObserver, Status.FAILED);
     }
   }
 
-  private void handleResponse(StreamObserver<Result> responseObserver, Status responseStatus) {
-    responseObserver.onNext(Result.newBuilder().setTaskStatus(responseStatus).build());
-    responseObserver.onCompleted();
+  /**
+   * Download files. Files can be the results of the execution task, etc. Following is the element
+   * order in the stream.
+   * 1. First element is the Metadata of the downloading file.
+   * 2. Subsequent elements are the actual file in 1 MB byte chunks.
+   * 3. Final element is the result of the operation. Unless its success, file is corrupted.
+   *
+   * @param request          {@link FileMetaData} describing the file.
+   * @param responseObserver A stream of the file.
+   */
+  @Override
+  public void download(FileMetaData request, StreamObserver<Result> responseObserver) {
+    try {
+      // Send file metadata as the first element in the stream.
+      responseObserver.onNext(Result.newBuilder().setOutputFileMetaData(request).build());
+      // Obtain input source for the file.
+      InputStream fileInputStream = WorkerUtils.getTaskExecutionManager().get(request).getValue();
+      // Stream input source over the gRPC connection.
+      streamInChunks(responseObserver, fileInputStream);
+      // Set the result as the last element, and conclude streaming.
+      handleResponse(responseObserver, Status.SUCCESS);
+    } catch (WorkerServerException | IOException e) {
+      LOG.error("Failed getting the file", e);
+      handleResponse(responseObserver, Status.FAILED);
+    }
   }
 }

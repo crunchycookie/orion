@@ -11,6 +11,9 @@ service Worker {
 
   // Obtain current status of the task.
   rpc monitor(Task) returns (Result) {};
+
+  // Download files. Files may include output files form the executed tasks, etc.
+  rpc download(FileMetaData) returns (stream Result) {};
 }
 
 message Task {
