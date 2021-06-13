@@ -45,6 +45,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.worker.WorkerGrpc;
 import org.crunchycookie.orion.worker.WorkerOuterClass;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
@@ -68,6 +70,8 @@ import org.mockito.ArgumentCaptor;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(JUnit4.class)
 public class WorkerServiceTest {
+
+  private static final Logger LOG = LogManager.getLogger(WorkerServiceTest.class);
 
   /**
    * This rule manages automatic graceful shutdown for the registered channel at the end of test.
@@ -104,15 +108,15 @@ public class WorkerServiceTest {
 
   @Test
   public void step1_uploadTest() {
+    LOG.info("Running upload test");
     WorkerGrpc.WorkerStub stub = WorkerGrpc.newStub(inProcessChannel);
-
     uploadFile("execute-task.sh", stub);
     uploadFile("in.txt", stub);
   }
 
   @Test(expected = Test.None.class)
   public void step2_executeTest() throws InterruptedException {
-
+    LOG.info("Running execute test");
     WorkerGrpc.WorkerBlockingStub worker = WorkerGrpc.newBlockingStub(inProcessChannel);
 
     // Build the description of the task to be executed.
@@ -138,7 +142,7 @@ public class WorkerServiceTest {
 
   @Test
   public void step3_monitorTest() {
-
+    LOG.info("Running monitor test");
     WorkerGrpc.WorkerBlockingStub worker = WorkerGrpc.newBlockingStub(inProcessChannel);
 
     // Build the description of the task to be executed.
@@ -157,7 +161,7 @@ public class WorkerServiceTest {
 
   @Test(expected = Test.None.class)
   public void step4_downloadTest() throws InterruptedException, IOException {
-
+    LOG.info("Running download test");
     // Results are in the order of: FileMeta, ...<each-file-part>, <download-task-status>.
     List<Result> streamedResults = new ArrayList<>();
     final CountDownLatch latch = new CountDownLatch(1);
