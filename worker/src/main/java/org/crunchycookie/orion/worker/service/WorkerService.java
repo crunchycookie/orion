@@ -21,7 +21,7 @@ import static org.crunchycookie.orion.worker.utils.WorkerUtils.handleResponse;
 import static org.crunchycookie.orion.worker.utils.WorkerUtils.streamInChunks;
 
 import io.grpc.stub.StreamObserver;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +32,6 @@ import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadResponse;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
-import org.crunchycookie.orion.worker.exception.WorkerServerException;
 import org.crunchycookie.orion.worker.service.observer.FileUploadRequestObserver;
 import org.crunchycookie.orion.worker.store.constants.TaskExecutionManagerConstants.OperationStatus;
 import org.crunchycookie.orion.worker.utils.WorkerUtils;
@@ -83,8 +82,8 @@ public class WorkerService extends WorkerImplBase {
           request.getExecutableShellScriptMetadata()
       );
       handleResponse(responseObserver, getResponseStatus(status));
-    } catch (WorkerServerException e) {
-      LOG.error("Failed executing the task", e);
+    } catch (Throwable t) {
+      LOG.error("Failed executing the task", t);
       handleResponse(responseObserver, Status.FAILED);
     }
   }
@@ -102,8 +101,8 @@ public class WorkerService extends WorkerImplBase {
           request.getExecutableShellScriptMetadata()
       );
       handleResponse(responseObserver, getResponseStatus(status));
-    } catch (WorkerServerException e) {
-      LOG.error("Failed monitoring the task", e);
+    } catch (Throwable t) {
+      LOG.error("Failed monitoring the task", t);
       handleResponse(responseObserver, Status.FAILED);
     }
   }
@@ -111,8 +110,11 @@ public class WorkerService extends WorkerImplBase {
   /**
    * Download files. Files can be the results of the execution task, etc. Following is the element
    * order in the stream.
+   * <p/>
    * 1. First element is the Metadata of the downloading file.
+   * <p/>
    * 2. Subsequent elements are the actual file in 1 MB byte chunks.
+   * <p/>
    * 3. Final element is the result of the operation. Unless its success, file is corrupted.
    *
    * @param request          {@link FileMetaData} describing the file.
@@ -129,8 +131,8 @@ public class WorkerService extends WorkerImplBase {
       streamInChunks(responseObserver, fileInputStream);
       // Set the result as the last element, and conclude streaming.
       handleResponse(responseObserver, Status.SUCCESS);
-    } catch (WorkerServerException | IOException e) {
-      LOG.error("Failed getting the file", e);
+    } catch (Throwable t) {
+      LOG.error("Failed getting the file", t);
       handleResponse(responseObserver, Status.FAILED);
     }
   }

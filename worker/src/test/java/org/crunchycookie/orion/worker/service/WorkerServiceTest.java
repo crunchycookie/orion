@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.worker.service;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -30,9 +32,19 @@ import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
 import org.crunchycookie.orion.worker.WorkerGrpc;
 import org.crunchycookie.orion.worker.WorkerOuterClass;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
@@ -99,7 +111,7 @@ public class WorkerServiceTest {
   }
 
   @Test(expected = Test.None.class)
-  public void step2_executeTest() throws InterruptedException{
+  public void step2_executeTest() throws InterruptedException {
 
     WorkerGrpc.WorkerBlockingStub worker = WorkerGrpc.newBlockingStub(inProcessChannel);
 
@@ -143,16 +155,115 @@ public class WorkerServiceTest {
     Assert.assertEquals(Status.NOT_EXECUTING, result.getTaskStatus());
   }
 
+  @Test(expected = Test.None.class)
+  public void step4_downloadTest() throws InterruptedException, IOException {
+
+    // Results are in the order of: FileMeta, ...<each-file-part>, <download-task-status>.
+    List<Result> streamedResults = new ArrayList<>();
+    final CountDownLatch latch = new CountDownLatch(1);
+    StreamObserver<Result> responseObserver =
+        new StreamObserver<Result>() {
+          @Override
+          public void onNext(Result result) {
+            streamedResults.add(result);
+          }
+
+          @Override
+          public void onError(Throwable t) {
+            fail();
+          }
+
+          @Override
+          public void onCompleted() {
+            latch.countDown();
+          }
+        };
+    // Build the file that requires downloading.
+    FileMetaData executionResultFileMeta = FileMetaData.newBuilder()
+        .setName("out")
+        .setType("txt")
+        .setTaskId(TASK_ID)
+        .build();
+    WorkerGrpc.WorkerStub worker = WorkerGrpc.newStub(inProcessChannel);
+
+    // Download the file.
+    worker.download(executionResultFileMeta, responseObserver);
+
+    // Wait until streaming is done. Here the total time is assumed one second.
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
+
+    // Assert.
+    compareAndAssertReceivedFile(streamedResults, executionResultFileMeta);
+  }
+
+  private void compareAndAssertReceivedFile(List<Result> streamedResults,
+      FileMetaData executionResultFileMeta)
+      throws IOException {
+    // Assert request and received file names.
+    assertTrue(streamedResults.get(0).getOutputFileMetaData().getName()
+        .equals(executionResultFileMeta.getName()));
+    // Assert action results.
+    assertTrue(streamedResults.get(streamedResults.size() - 1).getTaskStatus() == Status.SUCCESS);
+
+    // Assert received file content.
+    List<byte[]> receivedFileChunks = streamedResults.subList(1, streamedResults.size() - 1)
+        .stream().map(r -> r.getOutputFile().getContent().toByteArray())
+        .collect(Collectors.toList());
+
+    // Write received file.
+    File receivedFile = new File("temp_received_file.txt");
+    if (receivedFile.exists()) {
+      FileUtils.forceDelete(receivedFile);
+    }
+    writeReceivedFile(receivedFileChunks, receivedFile);
+
+    // Read reference file.
+    String reference = readFirstLine(getFileStreamFromTestResources("in.txt")).get();
+    String received = readFirstLine(new FileInputStream(receivedFile)).get();
+    Assert.assertTrue(reference.equals(received));
+
+    // Cleanup temp file.
+    FileUtils.forceDelete(receivedFile);
+  }
+
+  private InputStream getFileStreamFromTestResources(String fileName) {
+    return this.getClass().getClassLoader().getResourceAsStream(fileName);
+  }
+
+  private Optional<String> readFirstLine(InputStream inputStream) {
+    String referenceString = null;
+    try (InputStream in = inputStream;
+        Scanner sc = new Scanner(in);
+    ) {
+      while (sc.hasNextLine()) {
+        referenceString = sc.nextLine();
+        break;
+      }
+    } catch (IOException e) {
+      fail();
+    }
+    return Optional.of(referenceString);
+  }
+
+  private void writeReceivedFile(List<byte[]> recievedFileChunks, File recievedFile)
+      throws IOException {
+    try (FileOutputStream s = new FileOutputStream(recievedFile)) {
+      for (byte[] chunk : recievedFileChunks) {
+        s.write(chunk);
+        s.flush();
+      }
+    }
+  }
+
   private void assertFileExistence(String file) {
     File out = new File("target/classes/tasks" + File.separator + TASK_ID + File.separator + file);
-    Assert.assertTrue(out.exists());
+    assertTrue(out.exists());
   }
 
   private void uploadFile(String fileName, WorkerGrpc.WorkerStub stub) {
     @SuppressWarnings("unchecked")
     StreamObserver<FileUploadResponse> responseObserver =
         (StreamObserver<FileUploadResponse>) mock(StreamObserver.class);
-//    WorkerGrpc.WorkerStub stub = WorkerGrpc.newStub(inProcessChannel);
     ArgumentCaptor<FileUploadResponse> fileUploadResponseCaptor = ArgumentCaptor
         .forClass(FileUploadResponse.class);
 
@@ -185,21 +296,24 @@ public class WorkerServiceTest {
 
   private void setTheFile(StreamObserver<FileUploadRequest> requestObserver, String fileName) {
     // Then we set the actual executable file.
-    try (InputStream executableStream = this.getClass().getClassLoader()
-        .getResourceAsStream(fileName)) {
+    try (InputStream executableStream = getFileFromTestResources(fileName)) {
       byte[] buffer = new byte[ONE_MB_IN_BYTES];
       try (BufferedInputStream bis = new BufferedInputStream(executableStream)) {
         int lengthOfReadBytes;
         do {
           lengthOfReadBytes = bis.read(buffer);
           if (lengthOfReadBytes > 0) {
-            setTheChunk(requestObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes - 1));
+            setTheChunk(requestObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes));
           }
         } while (lengthOfReadBytes > 0);
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private InputStream getFileFromTestResources(String fileName) {
+    return this.getClass().getClassLoader().getResourceAsStream(fileName);
   }
 
   private void setTheChunk(StreamObserver<FileUploadRequest> requestObserver, byte[] buffer) {

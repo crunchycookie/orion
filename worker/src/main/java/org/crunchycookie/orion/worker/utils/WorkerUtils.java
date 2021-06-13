@@ -93,9 +93,10 @@ public class WorkerUtils {
       do {
         lengthOfReadBytes = bis.read(buffer);
         if (lengthOfReadBytes > 0) {
-          setChunk(responseObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes - 1));
+          setChunk(responseObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes));
         }
       } while (lengthOfReadBytes > 0);
+      fileInputStream.close();
     }
   }
 }
