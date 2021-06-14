@@ -1,0 +1,64 @@
+syntax = "proto3";
+option java_package = "org.crunchycookie.orion.master";
+
+service Worker {
+
+  // Upload task files including execution shell script, input files, etc.
+  rpc upload(stream FileUploadRequest) returns(FileUploadResponse) {};
+
+  // Trigger task execution.
+  rpc execute(Task) returns (Result) {};
+
+  // Obtain current status of the task.
+  rpc monitor(Task) returns (Result) {};
+
+  // Download files. Files may include output files form the executed tasks, etc.
+  rpc download(FileMetaData) returns (stream Result) {};
+}
+
+message Task {
+  FileMetaData executableShellScriptMetadata = 1;
+  repeated string outputFileNames = 2;
+}
+
+/*
+Results are sent in a stream in the order of,
+taskStatus -> output file metadata -> output file ...
+ */
+message Result {
+  oneof request {
+    Status taskStatus = 1;
+    FileMetaData outputFileMetaData = 2;
+    File outputFile = 3;
+  }
+}
+
+message FileUploadRequest {
+  oneof request {
+    FileMetaData metadata = 1;
+    File file = 2;
+  }
+}
+
+message FileMetaData {
+  string taskId = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message File {
+  bytes content = 1;
+}
+
+enum Status {
+  PENDING = 0;
+  IN_PROGRESS = 1;
+  SUCCESS = 2;
+  FAILED = 3;
+  NOT_EXECUTING = 4;
+}
+
+message FileUploadResponse {
+  FileMetaData metadata = 1;
+  Status status = 2;
+}
