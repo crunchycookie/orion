@@ -63,7 +63,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/BinaryFile'
       responses:
-        '201':
+        '202':
           description: task submitted successfully
           content:
             application/json:
@@ -71,15 +71,41 @@ paths:
                 $ref: '#/components/schemas/SubmittedTask'
         '400':
           description: task cannot be executed by orion. consult with orion task limitations
+  /tasks/{task-id}/files:
+    get:
+      tags:
+        - Client Admin
+      summary: download processed files from orion
+      operationId: downloadFiles
+      description: |
+        You can download files from the orion
+      parameters:
+        - in: path
+          name: task-id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: unique id of the task where files belogs to
+        - in: query
+          name: filename
+          schema:
+            type: string
+          required: true
+          description: name of the downloading file
+          example: out.txt
+      responses:
+        '200':
+          description: output file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: couldn't find the file
 components:
   schemas:
-    UploadingFile:
-      type: object
-      properties:
-        meta:
-          type: object
-        file:
-          $ref: '#/components/schemas/BinaryFile'
     BinaryFile:
       type: string
       format: binary
