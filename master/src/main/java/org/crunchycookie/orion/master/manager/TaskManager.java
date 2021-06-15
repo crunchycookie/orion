@@ -17,9 +17,9 @@
 package org.crunchycookie.orion.master.manager;
 
 import java.util.List;
-import org.crunchycookie.orion.master.models.ClientTask;
-import org.crunchycookie.orion.master.models.ClientTaskStatus;
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.TaskFile;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
@@ -42,15 +42,15 @@ public interface TaskManager {
    *
    * @return Resource limits.
    */
-  WorkerMetaData getTaskLimitations();
+  WorkerMetaData getTaskLimitations() throws MasterException;
 
   /**
    * Accept tasks from clients, and hand them to the scheduler.
    *
-   * @param clientTask Information about the tasks, including files.
+   * @param submittedTask Information about the tasks, including files.
    * @return Status of the submitted task. This contains the unique ID for the submitted task.
    */
-  ClientTaskStatus submit(SubmittedTask submittedTask);
+  SubmittedTaskStatus submit(SubmittedTask submittedTask) throws MasterException;
 
   /**
    * Provide information about the task status to clients.
@@ -58,14 +58,15 @@ public interface TaskManager {
    * @param uniqueTaskId task Id.
    * @return Status of the submitted task.
    */
-  ClientTaskStatus getTaskStatus(String uniqueTaskId);
+  SubmittedTaskStatus getTaskStatus(String uniqueTaskId) throws MasterException;
 
   /**
    * Upon completion, provide processed files to clients.
    *
-   * @param uniqueTaskId Task ID.
+   * @param uniqueTaskId    Task ID.
    * @param fileInformation Metadata of the files requesting.
    * @return Requested files.
    */
-  List<TaskFile> getFiles(String uniqueTaskId, List<TaskFileMetadata> fileInformation);
+  List<TaskFile> getFiles(String uniqueTaskId, List<TaskFileMetadata> fileInformation)
+      throws MasterException;
 }

@@ -28,6 +28,12 @@ public class SubmittedTask {
   private List<TaskFile> taskFiles;
   private TaskFileMetadata executable;
 
+  public SubmittedTask(UUID taskId, List<TaskFile> taskFiles, TaskFileMetadata executable) {
+    this.taskId = taskId;
+    this.taskFiles = taskFiles;
+    this.executable = executable;
+  }
+
   public List<TaskFile> getTaskFiles() {
     return taskFiles;
   }
@@ -44,10 +50,7 @@ public class SubmittedTask {
     this.executable = executable;
   }
 
-  public SubmittedTask(UUID taskId,
-      List<TaskFile> taskFiles, TaskFileMetadata executable) {
-    this.taskId = taskId;
-    this.taskFiles = taskFiles;
-    this.executable = executable;
+  public UUID getTaskId() {
+    return taskId;
   }
 }

@@ -16,41 +16,32 @@
 
 package org.crunchycookie.orion.master.models;
 
-import java.util.UUID;
+public class SubmittedTaskStatus {
 
-public class TaskFileMetadata {
+  private String taskId;
+  private TaskStatus status;
 
-  private String fileName;
-  private String fileType;
-  private UUID taskId;
-
-  public TaskFileMetadata(String fileName, String fileType, UUID taskId) {
-    this.fileName = fileName;
-    this.fileType = fileType;
+  public SubmittedTaskStatus(String taskId,
+      TaskStatus status) {
     this.taskId = taskId;
+    this.status = status;
   }
 
-  public String getFileName() {
-    return fileName;
+  public enum TaskStatus {
+    IN_PROGRESS,
+    SUCCESS,
+    FAILED
   }
 
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
-  }
-
-  public String getFileType() {
-    return fileType;
-  }
-
-  public void setFileType(String fileType) {
-    this.fileType = fileType;
-  }
-
-  public UUID getTaskId() {
+  public String getTaskId() {
     return taskId;
   }
 
-  public void setTaskId(UUID taskId) {
-    this.taskId = taskId;
+  public TaskStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(TaskStatus status) {
+    this.status = status;
   }
 }

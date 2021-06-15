@@ -14,30 +14,15 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master.models;
+package org.crunchycookie.orion.master.exception;
 
-public class ClientTaskStatus {
+public class MasterClientException extends MasterException {
 
-  private String taskId;
-  private TaskStatus status;
-
-  public ClientTaskStatus(String taskId,
-      TaskStatus status) {
-    this.taskId = taskId;
-    this.status = status;
+  public MasterClientException(String message) {
+    super(message);
   }
 
-  public enum TaskStatus {
-    IN_PROGRESS,
-    SUCCESS,
-    FAILED
-  }
-
-  public TaskStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(TaskStatus status) {
-    this.status = status;
+  public MasterClientException(String message, Throwable cause) {
+    super(message, cause);
   }
 }

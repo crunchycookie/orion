@@ -25,8 +25,8 @@ import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
  * <p/>
  * 1. Accept a set of sub-tasks derived from a submitted task from a client, assign workers to them,
  * and manage each of such sub-tasks set treating as a single task entity. Management includes
- * monitoring any worker failure and assigning a new worker, etc.
- * // TODO: 2021-06-14 Implement worker fault-tolerance
+ * monitoring any worker failure and assigning a new worker, etc. // TODO: 2021-06-14 Implement
+ * worker fault-tolerance
  */
 public interface TaskDistributor {
 

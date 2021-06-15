@@ -16,9 +16,21 @@
 
 package org.crunchycookie.orion.master.service.scheduler;
 
+import org.crunchycookie.orion.master.models.SubmittedTask;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
+
 /**
- *
+ * This class represents the task scheduler component. It handles task priority, task scheduling,
+ * and persisting data for scheduled tasks.
  */
 public interface TaskScheduler {
 
+  /**
+   * Validates whether a worker can execute this task, get the priority value for the task, insert
+   * into the priority queue based on that, and finally persist task files in the central store.
+   *
+   * @param submittedTask
+   * @return
+   */
+  SubmittedTaskStatus schedule(SubmittedTask submittedTask);
 }

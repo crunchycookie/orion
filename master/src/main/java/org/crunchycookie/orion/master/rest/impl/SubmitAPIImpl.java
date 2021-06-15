@@ -16,11 +16,17 @@
 
 package org.crunchycookie.orion.master.rest.impl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import org.crunchycookie.orion.master.manager.TaskManager;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
+import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.rest.api.SubmitApiDelegate;
 import org.crunchycookie.orion.master.rest.model.SubmittedTask;
-import org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus;
+import org.crunchycookie.orion.master.utils.MasterUtils;
+import org.crunchycookie.orion.master.utils.RESTUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,8 +38,53 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
   public ResponseEntity<SubmittedTask> submitTask(String executableShellScript,
       List<MultipartFile> filename) {
 
-    SubmittedTask submittedTask = new SubmittedTask();
-    return ResponseEntity
-        .ok(submittedTask.taskId(UUID.randomUUID()).status(SubmittedTaskStatus.INPROGRESS));
+    try {
+      // Build parameters.
+      UUID taskId = UUID.randomUUID();
+      org.crunchycookie.orion.master.models.SubmittedTask submittedTask = getSubmittedTask(
+          executableShellScript,
+          filename,
+          taskId
+      );
+
+      // Submit the task.
+      TaskManager taskManager = MasterUtils.getTaskManager();
+      SubmittedTaskStatus taskStatus = taskManager.submit(submittedTask);
+
+      // Return the response.
+      return switch (taskStatus.getStatus()) {
+        case SUCCESS -> ResponseEntity.status(HttpStatus.ACCEPTED).body(new SubmittedTask()
+            .taskId(taskId)
+            .status(
+                org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.SUCCESSFUL
+            ));
+        case IN_PROGRESS -> ResponseEntity.status(HttpStatus.ACCEPTED).body(new SubmittedTask()
+            .taskId(taskId)
+            .status(
+                org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.INPROGRESS
+            ));
+        case FAILED -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new SubmittedTask()
+            .taskId(taskId)
+            .status(
+                org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.FAILED
+            ));
+      };
+    } catch (Throwable t) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  private org.crunchycookie.orion.master.models.SubmittedTask getSubmittedTask(
+      String executableShellScript, List<MultipartFile> filename, UUID taskId) throws IOException {
+
+    return new org.crunchycookie.orion.master.models.SubmittedTask(
+        taskId,
+        RESTUtils.getTaskFiles(taskId, filename),
+        new TaskFileMetadata(
+            executableShellScript.split("\\.")[0],
+            executableShellScript.split("\\.")[1],
+            taskId
+        )
+    );
   }
 }

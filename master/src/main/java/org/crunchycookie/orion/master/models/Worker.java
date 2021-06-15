@@ -64,7 +64,7 @@ public class Worker {
   /**
    * Upload task files to the Worker.
    *
-   * @param fileUploadRequest  Details including file metadata and the input stream.
+   * @param fileUploadRequest Details including file metadata and the input stream.
    * @return Status of the upload process.
    */
   public FileUploadResponse upload(FileUploadRequest fileUploadRequest) {

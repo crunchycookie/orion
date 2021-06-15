@@ -18,11 +18,14 @@ package org.crunchycookie.orion.master.utils;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
+import org.crunchycookie.orion.master.manager.impl.DefaultTaskManager.DefaultTaskManagerSingleton;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.rest.model.Property;
 import org.crunchycookie.orion.master.rest.model.TaskLimits;
+import org.crunchycookie.orion.master.service.scheduler.TaskScheduler;
 
 public class MasterUtils {
 
@@ -39,10 +42,25 @@ public class MasterUtils {
 
   public static TaskManager getTaskManager() throws MasterException {
 
-    Optional<TaskManager> taskManager = Optional.empty();
+    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
+    Optional<TaskManager> taskManager = Optional.of(DefaultTaskManagerSingleton.INSTANCE.get());
+
     if (taskManager.isEmpty()) {
       throw new MasterException("Failed to obtain task manager");
     }
     return taskManager.get();
+  }
+
+  public static TaskScheduler getTaskScheduler() throws MasterException {
+
+    Optional<TaskScheduler> TaskScheduler = Optional.empty();
+    if (TaskScheduler.isEmpty()) {
+      throw new MasterException("Failed to obtain task manager");
+    }
+    return TaskScheduler.get();
+  }
+
+  public static void handleClientExceptionScenario(String msg) throws MasterClientException {
+    throw new MasterClientException(msg);
   }
 }

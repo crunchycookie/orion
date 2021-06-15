@@ -16,7 +16,6 @@
 
 package org.crunchycookie.orion.master.models;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
 
