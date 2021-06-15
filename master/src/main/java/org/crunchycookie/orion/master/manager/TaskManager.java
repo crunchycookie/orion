@@ -19,6 +19,7 @@ package org.crunchycookie.orion.master.manager;
 import java.util.List;
 import org.crunchycookie.orion.master.models.ClientTask;
 import org.crunchycookie.orion.master.models.ClientTaskStatus;
+import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.TaskFile;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
@@ -49,7 +50,7 @@ public interface TaskManager {
    * @param clientTask Information about the tasks, including files.
    * @return Status of the submitted task. This contains the unique ID for the submitted task.
    */
-  ClientTaskStatus submit(ClientTask clientTask);
+  ClientTaskStatus submit(SubmittedTask submittedTask);
 
   /**
    * Provide information about the task status to clients.
