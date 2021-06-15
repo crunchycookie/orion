@@ -41,8 +41,66 @@ paths:
                 $ref: '#/components/schemas/TaskLimits'
         '404':
           description: Could not find limitations
+  /submit:
+    post:
+      tags:
+        - Client Admin
+      summary: submit a task to the orion
+      operationId: submitTask
+      description: |
+        You can submit a task to the orion
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                executableShellScript:
+                  type: string
+                  description: name of the executable script
+                filename:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/BinaryFile'
+      responses:
+        '201':
+          description: task submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmittedTask'
+        '400':
+          description: task cannot be executed by orion. consult with orion task limitations
 components:
   schemas:
+    UploadingFile:
+      type: object
+      properties:
+        meta:
+          type: object
+        file:
+          $ref: '#/components/schemas/BinaryFile'
+    BinaryFile:
+      type: string
+      format: binary
+    SubmittedTask:
+      type: object
+      properties:
+        taskId:
+          type: string
+          format: uuid
+          description: unique id for the submitted task
+          example: 123e4567-e89b-12d3-a456-426614174000
+        status:
+          $ref: '#/components/schemas/SubmittedTaskStatus'
+          description: an enum for the submitted task status
+          example: inprogress
+    SubmittedTaskStatus:
+      type: string
+      enum:
+        - inprogress
+        - successful
+        - failed
     TaskLimits:
       type: object
       properties:
