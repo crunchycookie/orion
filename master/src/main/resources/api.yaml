@@ -1,69 +1,68 @@
-openapi: "3.0.0"
-info:
-  version: 1.0.0
-  title: Swagger Petstore
-  license:
-    name: MIT
+openapi: 3.0.0
+
 servers:
-  - url: http://petstore.swagger.io/v1
+  - url: http://{host}:{port}/orion/v0.1
+    variables:
+      host:
+        default: localhost
+        description: Server domain
+      port:
+        default: "8080"
+        description: Server port
+
+info:
+  description: This is the RESTful APIs of the ORION Distributed Computing Framework
+  version: "1.0.0"
+  contact:
+    email: tharindu.bandara.edu@gmail.com
+    name: Tharindu Bandara
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  title: ORION RESTful APIs
+tags:
+  - name: Client Admin
+    description: Secured for client admin calls
 paths:
-  /pets:
+  /task-limits:
     get:
-      summary: List all pets
-      operationId: listPets
       tags:
-        - pets
-      parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
+        - Client Admin
+      summary: provide resource limits of a worker
+      operationId: getTaskLimitations
+      description: |
+        You can obtain resource limitations of a worker such as RAM. Based on that, the submitting job can be planned.
       responses:
-        200:
-          description: An paged array of pets
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
+        '200':
+          description: task resources limits
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/TaskLimits'
+        '404':
+          description: Could not find limitations
 components:
   schemas:
-    Pet:
-      required:
-        - id
-        - name
+    TaskLimits:
+      type: object
       properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          type: string
-    Pets:
-      type: array
-      items:
-        $ref: "#/components/schemas/Pet"
-    Error:
-      required:
-        - code
-        - message
+        memory:
+          type: number
+          example: 2
+          description: Memory in GBs
+        additionalProperties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+          description: Additional properties may sent by the server.
+    Property:
+      type: object
       properties:
-        code:
-          type: integer
-          format: int32
-        message:
+        key:
           type: string
+          example: storage
+          description: Any key value of the property.
+        value:
+          type: string
+          example: 5
+          description: Value of the property.
