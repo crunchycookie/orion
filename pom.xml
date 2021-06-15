@@ -83,6 +83,37 @@
         <version>${annotations-api.version}</version>
         <scope>provided</scope>
       </dependency>
+      <!-- REST endpoint dependencies -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>${spring-boot-starter-web.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-jpa</artifactId>
+        <version>${spring-data-jpa.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openapitools</groupId>
+        <artifactId>jackson-databind-nullable</artifactId>
+        <version>${jackson-databind-nullable.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.springfox</groupId>
+        <artifactId>springfox-swagger2</artifactId>
+        <version>${springfox-swagger2.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${validation-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson-databind.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -128,12 +159,26 @@
             </execution>
           </executions>
         </plugin>
+
+        <!-- REST Plugins -->
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.openapitools</groupId>
+          <artifactId>openapi-generator-maven-plugin</artifactId>
+          <version>${openapi-generator-maven-plugin.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
 
   <properties>
-    <!--    <protobuf-java.version>3.11.4</protobuf-java.version>-->
+    <!--Comment the following property if you are not using an M1 mac.-->
+    <os.detected.classifier>osx-x86_64</os.detected.classifier>
+
     <annotations-api.version>6.0.53</annotations-api.version>
     <grpc-netty-shaded.version>1.38.0</grpc-netty-shaded.version>
     <grpc-protobuf.version>1.38.0</grpc-protobuf.version>
@@ -153,8 +198,13 @@
     <grpc-testing.version>1.38.0</grpc-testing.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
-
-    <!--Comment the following property if you are not using an M1 mac.-->
-    <os.detected.classifier>osx-x86_64</os.detected.classifier>
+    <jackson-databind.version>2.11.4</jackson-databind.version>
+    <validation-api.version>1.1.0.Final</validation-api.version>
+    <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
+    <jackson-databind-nullable.version>0.2.1</jackson-databind-nullable.version>
+    <spring-data-jpa.version>2.4.6</spring-data-jpa.version>
+    <spring-boot-starter-web.version>2.4.4</spring-boot-starter-web.version>
+    <spring-boot-maven-plugin.version>2.4.4</spring-boot-maven-plugin.version>
+    <openapi-generator-maven-plugin.version>5.1.0</openapi-generator-maven-plugin.version>
   </properties>
 </project>

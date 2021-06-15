@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MasterRESTEndpoint {
 
   public static void main(String[] args) {
+
     SpringApplication.run(MasterRESTEndpoint.class, args);
   }
 }
