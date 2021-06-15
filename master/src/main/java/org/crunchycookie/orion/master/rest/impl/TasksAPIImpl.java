@@ -18,6 +18,7 @@ package org.crunchycookie.orion.master.rest.impl;
 
 import java.util.UUID;
 import org.crunchycookie.orion.master.rest.api.TasksApiDelegate;
+import org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -30,5 +31,10 @@ public class TasksAPIImpl implements TasksApiDelegate {
   public ResponseEntity<Resource> downloadFiles(UUID taskId, String filename) {
     return ResponseEntity.ok(new InputStreamResource(
         this.getClass().getClassLoader().getResourceAsStream("test.txt")));
+  }
+
+  @Override
+  public ResponseEntity<SubmittedTaskStatus> monitorFiles(UUID taskId) {
+    return TasksApiDelegate.super.monitorFiles(taskId);
   }
 }

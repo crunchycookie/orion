@@ -104,6 +104,31 @@ paths:
                 format: binary
         '404':
           description: couldn't find the file
+  /tasks/{task-id}/monitor:
+    get:
+      tags:
+        - Client Admin
+      summary: monitor submitted task
+      operationId: monitorFiles
+      description: |
+        You can monitor the status of the submitted task
+      parameters:
+        - in: path
+          name: task-id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: unique id of the task
+      responses:
+        '200':
+          description: status of the task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmittedTaskStatus'
+        '404':
+          description: couldn't find the task
 components:
   schemas:
     BinaryFile:
