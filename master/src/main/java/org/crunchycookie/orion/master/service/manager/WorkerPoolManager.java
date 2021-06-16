@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
-import org.crunchycookie.orion.master.models.Worker;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
+import org.crunchycookie.orion.master.service.worker.WorkerNode;
 
 /**
  * This represents the Worker Pool Manager component. Followings are the responsibilities of this
@@ -47,7 +47,7 @@ public interface WorkerPoolManager {
    *
    * @return A free worker. Can be empty if no free workers are available.
    */
-  Optional<Worker> getFreeWorker();
+  Optional<WorkerNode> getFreeWorker();
 
   /**
    * Each worker has a unique id. This method queries and get the corresponding worker for the given
@@ -57,7 +57,7 @@ public interface WorkerPoolManager {
    * @return Worker node associated to the given id. Can be empty if no worker available for the
    * provided id.
    */
-  Optional<Worker> getWorker(String id);
+  Optional<WorkerNode> getWorker(String id);
 
   /**
    * Obtain current status of the submitted tasks.

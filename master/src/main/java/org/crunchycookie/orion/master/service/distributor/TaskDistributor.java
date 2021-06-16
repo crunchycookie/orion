@@ -18,6 +18,7 @@ package org.crunchycookie.orion.master.service.distributor;
 
 import java.util.List;
 import java.util.Optional;
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
 
@@ -39,5 +40,5 @@ public interface TaskDistributor {
    * @param submittedTask task.
    * @return Unique id for the created group of sub-tasks.
    */
-  void distribute(SubmittedTask submittedTask);
+  void distribute(SubmittedTask submittedTask) throws MasterException;
 }
