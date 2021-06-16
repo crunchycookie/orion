@@ -16,8 +16,11 @@
 
 package org.crunchycookie.orion.master.models;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 /**
  * Represents a task submitted from a client.
@@ -27,11 +30,30 @@ public class SubmittedTask {
   private UUID taskId;
   private List<TaskFile> taskFiles;
   private TaskFileMetadata executable;
+  private Map<ResourceParams, String> resourceRequirements;
 
   public SubmittedTask(UUID taskId, List<TaskFile> taskFiles, TaskFileMetadata executable) {
     this.taskId = taskId;
     this.taskFiles = taskFiles;
     this.executable = executable;
+    resourceRequirements = new HashMap<>();
+  }
+
+  public Map<ResourceParams, String> getResourceRequirements() {
+    return resourceRequirements;
+  }
+
+  public void setResourceRequirements(
+      Map<ResourceParams, String> resourceRequirements) {
+    this.resourceRequirements = resourceRequirements;
+  }
+
+  public String getResourceRequirement(String key) {
+    return resourceRequirements.get(key);
+  }
+
+  public void setResourceRequirement(ResourceParams key, String value) {
+    this.resourceRequirements.put(key, value);
   }
 
   public List<TaskFile> getTaskFiles() {

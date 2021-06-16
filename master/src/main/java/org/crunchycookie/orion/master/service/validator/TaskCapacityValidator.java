@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master.service.scheduler;
+package org.crunchycookie.orion.master.service.validator;
 
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
-import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
+import org.crunchycookie.orion.master.models.WorkerMetaData;
 
 /**
- * This class represents the task scheduler component. It handles task priority, task scheduling,
- * and persisting data for scheduled tasks.
+ * This class represents a validator capable of determining whether a task is capable to be executed
+ * with the current worker pool.
  */
-public interface TaskScheduler {
+public interface TaskCapacityValidator {
 
   /**
-   * Validates whether a worker can execute this task, get the priority value for the task, insert
-   * into the priority queue based on that, and finally persist task files in the central store.
+   * Analyze and provide whether the worker is capable of executing the submitted task. This method
+   * throws a {@link org.crunchycookie.orion.master.exception.MasterClientException} if worker pool
+   * does not have enough resources to execute the task.
    *
    * @param submittedTask
+   * @param workerCapacity
    * @return
    */
-  SubmittedTaskStatus schedule(SubmittedTask submittedTask) throws MasterException;
+  boolean validate(SubmittedTask submittedTask, WorkerMetaData workerCapacity)
+      throws MasterException;
 }

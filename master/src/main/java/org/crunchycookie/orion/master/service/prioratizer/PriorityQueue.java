@@ -16,19 +16,28 @@
 
 package org.crunchycookie.orion.master.service.prioratizer;
 
+import java.util.UUID;
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
-import org.crunchycookie.orion.master.models.SubmittedTask;
 
 /**
- * This class represents a prioritizer capable of rating tasks based on it's qualities.
+ * This class represents the queue where the priority of the task is stored until they get
+ * executed.
  */
-public interface TaskPrioritizer {
+public interface PriorityQueue {
 
   /**
-   * Analyze provided client task and predict a priority value.
+   * Insert the provided task with the given priority.
    *
-   * @param submittedTask Submitted task.
-   * @return Predicted {@link Priority} entity.
+   * @param taskId
+   * @param priority
    */
-  Priority getPriority(SubmittedTask submittedTask);
+  void insert(UUID taskId, Priority priority);
+
+  /**
+   * Obtain the next task having the highest priority.
+   *
+   * @return Unique Id of the task.
+   */
+  UUID next() throws MasterException;
 }

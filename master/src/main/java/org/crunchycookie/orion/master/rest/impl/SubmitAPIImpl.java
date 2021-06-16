@@ -19,6 +19,8 @@ package org.crunchycookie.orion.master.rest.impl;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import org.crunchycookie.orion.master.exception.MasterClientException;
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
@@ -26,6 +28,7 @@ import org.crunchycookie.orion.master.rest.api.SubmitApiDelegate;
 import org.crunchycookie.orion.master.rest.model.SubmittedTask;
 import org.crunchycookie.orion.master.utils.MasterUtils;
 import org.crunchycookie.orion.master.utils.RESTUtils;
+import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,7 +39,7 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
 
   @Override
   public ResponseEntity<SubmittedTask> submitTask(String executableShellScript,
-      List<MultipartFile> filename) {
+      List<String> resourceRequirements, List<MultipartFile> filename) {
 
     try {
       // Build parameters.
@@ -46,6 +49,7 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
           filename,
           taskId
       );
+      populateResourceRequirements(submittedTask, resourceRequirements);
 
       // Submit the task.
       TaskManager taskManager = MasterUtils.getTaskManager();
@@ -71,6 +75,22 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
       };
     } catch (Throwable t) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  private void populateResourceRequirements(
+      org.crunchycookie.orion.master.models.SubmittedTask submittedTask,
+      List<String> resourceRequirements) throws MasterException {
+
+    for (String resourceRequirement : resourceRequirements) {
+      String[] resourceRequirementSplitted = resourceRequirement.split("=");
+      ResourceParams requirement;
+      try {
+        requirement = ResourceParams.valueOf(resourceRequirementSplitted[0]);
+      } catch (IllegalArgumentException e) {
+        throw new MasterClientException("Provided resource requirement type is invalid");
+      }
+      submittedTask.setResourceRequirement(requirement, resourceRequirementSplitted[1]);
     }
   }
 

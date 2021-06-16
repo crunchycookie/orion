@@ -16,32 +16,25 @@
 
 package org.crunchycookie.orion.master.models;
 
+import java.util.Map;
+import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
+
 /**
  * This class represents metadata associated to the worker.
  */
 public class WorkerMetaData {
 
-  private long memoryUpperLimitInGB;
-  private long storageUpperLimitInGB;
+  private Map<ResourceParams, String> maxResourceCapacities;
 
-  public WorkerMetaData(long memoryUpperLimitInGB, long storageUpperLimitInGB) {
-    this.memoryUpperLimitInGB = memoryUpperLimitInGB;
-    this.storageUpperLimitInGB = storageUpperLimitInGB;
+  public WorkerMetaData() {
   }
 
-  public long getMemoryUpperLimitInGB() {
-    return memoryUpperLimitInGB;
+  public Map<ResourceParams, String> getMaxResourceCapacities() {
+    return maxResourceCapacities;
   }
 
-  public void setMemoryUpperLimitInGB(long memoryUpperLimitInGB) {
-    this.memoryUpperLimitInGB = memoryUpperLimitInGB;
-  }
-
-  public long getStorageUpperLimitInGB() {
-    return storageUpperLimitInGB;
-  }
-
-  public void setStorageUpperLimitInGB(long storageUpperLimitInGB) {
-    this.storageUpperLimitInGB = storageUpperLimitInGB;
+  public void setMaxResourceCapacities(
+      Map<ResourceParams, String> maxResourceCapacities) {
+    this.maxResourceCapacities = maxResourceCapacities;
   }
 }

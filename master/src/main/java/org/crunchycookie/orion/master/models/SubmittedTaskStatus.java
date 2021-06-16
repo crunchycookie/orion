@@ -16,13 +16,14 @@
 
 package org.crunchycookie.orion.master.models;
 
+import java.util.UUID;
+
 public class SubmittedTaskStatus {
 
-  private String taskId;
+  private UUID taskId;
   private TaskStatus status;
 
-  public SubmittedTaskStatus(String taskId,
-      TaskStatus status) {
+  public SubmittedTaskStatus(UUID taskId, TaskStatus status) {
     this.taskId = taskId;
     this.status = status;
   }
@@ -33,7 +34,7 @@ public class SubmittedTaskStatus {
     FAILED
   }
 
-  public String getTaskId() {
+  public UUID getTaskId() {
     return taskId;
   }
 

@@ -50,4 +50,9 @@ public class RESTUtils {
     }
     return taskFiles;
   }
+
+  public enum ResourceParams {
+    MEMORY,
+    STORAGE;
+  }
 }

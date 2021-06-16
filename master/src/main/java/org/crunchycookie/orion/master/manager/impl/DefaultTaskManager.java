@@ -16,6 +16,7 @@
 
 package org.crunchycookie.orion.master.manager.impl;
 
+import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskScheduler;
 import static org.crunchycookie.orion.master.utils.MasterUtils.handleClientExceptionScenario;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public class DefaultTaskManager implements TaskManager {
 
     UUID taskId = submittedTask.getTaskId();
     validateInputParams(submittedTask, taskId);
-    return MasterUtils.getTaskScheduler().schedule(submittedTask);
+    return getTaskScheduler().schedule(submittedTask);
   }
 
   @Override

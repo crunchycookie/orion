@@ -39,4 +39,11 @@ public interface CentralStore {
    * @return
    */
   SubmittedTask get(UUID taskId);
+
+  /**
+   * Remove the task.
+   *
+   * @param taskId
+   */
+  void remove(UUID taskId);
 }

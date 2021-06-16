@@ -58,6 +58,13 @@ paths:
                 executableShellScript:
                   type: string
                   description: name of the executable script
+                resourceRequirements:
+                  type: array
+                  items:
+                    type: string
+                    description: |
+                      <resource-type>=<upper-limit-in-GBs>. Currently supported resource types: ram, storage
+                    example: ram=2
                 filename:
                   type: array
                   items:
@@ -155,11 +162,7 @@ components:
     TaskLimits:
       type: object
       properties:
-        memory:
-          type: number
-          example: 2
-          description: Memory in GBs
-        additionalProperties:
+        limits:
           type: array
           items:
             $ref: '#/components/schemas/Property'
