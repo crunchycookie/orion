@@ -18,6 +18,7 @@ package org.crunchycookie.orion.master.service.distributor;
 
 import java.util.List;
 import java.util.Optional;
+import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
 
 /**
@@ -31,10 +32,12 @@ import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
 public interface TaskDistributor {
 
   /**
-   * Create a group for the submitted sub tasks and assign workers.
+   * Assign and dispatch the submitted task to an available worker, and update central store with
+   * the status. If no free worker is available, then ask the
+   * {@link org.crunchycookie.orion.master.service.scheduler.TaskScheduler} to re-schedule the task.
    *
-   * @param subTasks Set of sub tasks.
+   * @param submittedTask task.
    * @return Unique id for the created group of sub-tasks.
    */
-  Optional<String> distribute(List<Task> subTasks);
+  void distribute(SubmittedTask submittedTask);
 }

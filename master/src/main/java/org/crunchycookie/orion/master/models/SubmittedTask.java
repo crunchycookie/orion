@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 /**
@@ -27,16 +28,57 @@ import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
  */
 public class SubmittedTask {
 
+  // Unique Id for the task.
   private UUID taskId;
+
+  // Input files of the task. This also includes the executable file.
   private List<TaskFile> taskFiles;
+
+  // Identifier for the executable.
   private TaskFileMetadata executable;
+
+  // Details on minimum resources expected by the task. Ex: Min 2 GB ram is needed, etc.
   private Map<ResourceParams, String> resourceRequirements;
+
+  // Set of new files created after the execution.
+  private List<TaskFile> outputFiles;
+
+  // Unique ID of the worker node where this task is assigned.
+  private UUID workerId;
+
+  // Current status of this task.
+  private SubmittedTaskStatus status;
 
   public SubmittedTask(UUID taskId, List<TaskFile> taskFiles, TaskFileMetadata executable) {
     this.taskId = taskId;
     this.taskFiles = taskFiles;
     this.executable = executable;
     resourceRequirements = new HashMap<>();
+    status = new SubmittedTaskStatus(taskId, TaskStatus.PENDING);
+  }
+
+  public List<TaskFile> getOutputFiles() {
+    return outputFiles;
+  }
+
+  public void setOutputFiles(List<TaskFile> outputFiles) {
+    this.outputFiles = outputFiles;
+  }
+
+  public SubmittedTaskStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(SubmittedTaskStatus status) {
+    this.status = status;
+  }
+
+  public UUID getWorkerId() {
+    return workerId;
+  }
+
+  public void setWorkerId(UUID workerId) {
+    this.workerId = workerId;
   }
 
   public Map<ResourceParams, String> getResourceRequirements() {

@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.TaskFile;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 
@@ -29,6 +30,13 @@ import org.crunchycookie.orion.master.models.TaskFileMetadata;
  * to a worker.
  */
 public interface CentralStore {
+
+  /**
+   * Store the submitted task.
+   *
+   * @param submittedTask
+   */
+  void store(List<SubmittedTask> submittedTask) throws MasterException;
 
   /**
    * Store the submitted task.
@@ -44,6 +52,21 @@ public interface CentralStore {
    * @return
    */
   SubmittedTask get(UUID taskId) throws MasterException;
+
+  /**
+   * Get the submitted by its IDs.
+   *
+   * @param taskId
+   * @return
+   */
+  List<SubmittedTask> get(List<UUID> taskId) throws MasterException;
+
+  /**
+   * Get the submitted tasks by its status.
+   *
+   * @return
+   */
+  List<SubmittedTask> get(TaskStatus status) throws MasterException;
 
   /**
    * Get the task files by its ID. This can be used to obtain processed files.

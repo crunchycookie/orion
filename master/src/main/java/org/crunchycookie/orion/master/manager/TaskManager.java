@@ -70,4 +70,12 @@ public interface TaskManager {
    */
   List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException;
+
+  /**
+   * Fetch latest task status from the workers and update the central storage. If a task is
+   * completed, copy processed files to the central storage and mark the worker as free. Then fetch
+   * next task from the priority queue and ask task distributor to dispatch it to an available
+   * worker.
+   */
+  void sync() throws MasterException;
 }

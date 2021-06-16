@@ -16,7 +16,11 @@
 
 package org.crunchycookie.orion.master.service.manager;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import org.crunchycookie.orion.master.models.SubmittedTask;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.Worker;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 
@@ -54,6 +58,23 @@ public interface WorkerPoolManager {
    * provided id.
    */
   Optional<Worker> getWorker(String id);
+
+  /**
+   * Obtain current status of the submitted tasks.
+   *
+   * @param submittedTasks Tasks that have been submitted to worker earlier.
+   * @return Latest status.
+   */
+  List<SubmittedTaskStatus> getStatus(List<SubmittedTask> submittedTasks);
+
+  /**
+   * Obtain requested tasks from the workers. Obtained tasks include any new file created during
+   * the task execution.
+   *
+   * @param taskIds
+   * @return
+   */
+  List<SubmittedTask> getTasks(List<UUID> taskIds);
 
   /**
    * Provide meta information about the worker's capacity including memory and storage.

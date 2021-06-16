@@ -28,6 +28,7 @@ import org.crunchycookie.orion.master.manager.impl.DefaultTaskManager.DefaultTas
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.rest.model.Property;
 import org.crunchycookie.orion.master.rest.model.TaskLimits;
+import org.crunchycookie.orion.master.service.distributor.TaskDistributor;
 import org.crunchycookie.orion.master.service.manager.WorkerPoolManager;
 import org.crunchycookie.orion.master.service.prioratizer.TaskPrioritizer;
 import org.crunchycookie.orion.master.service.scheduler.TaskScheduler;
@@ -122,6 +123,18 @@ public class MasterUtils {
           "Failed to obtain the task prioratizer");
     }
     return centralStore.get();
+  }
+
+  public static TaskDistributor getTaskDistributor() throws MasterException {
+
+    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
+    Optional<TaskDistributor> taskDistributor = Optional.empty();
+
+    if (taskDistributor.isEmpty()) {
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Failed to obtain the task distributor");
+    }
+    return taskDistributor.get();
   }
 
   public static void handleClientExceptionScenario(String msg) throws MasterClientException {
