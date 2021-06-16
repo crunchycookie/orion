@@ -19,6 +19,8 @@ package org.crunchycookie.orion.master.service.worker.impl;
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.TaskFile;
@@ -36,6 +38,8 @@ public class GRPCWorkerNode implements WorkerNode {
   private final WorkerBlockingStub blockingStub;
   private final WorkerStub asyncStub;
 
+  private UUID id = UUID.randomUUID();
+  private UUID taskId;
   private WorkerNodeStatus status = WorkerNodeStatus.IDLE;
 
   public GRPCWorkerNode(Channel channel) {
@@ -43,8 +47,8 @@ public class GRPCWorkerNode implements WorkerNode {
     asyncStub = WorkerGrpc.newStub(channel);
   }
 
-  public GRPCWorkerNode(String host, int port) {
-    this(ManagedChannelBuilder.forAddress(host, port).usePlaintext());
+  public GRPCWorkerNode(String host, String port) {
+    this(ManagedChannelBuilder.forAddress(host, Integer.parseInt(port)).usePlaintext());
   }
 
   public GRPCWorkerNode(ManagedChannelBuilder<?> channelBuilder) {
@@ -58,13 +62,26 @@ public class GRPCWorkerNode implements WorkerNode {
 
     upload(submittedTask.getTaskFiles());
     execute(submittedTask.getExecutable());
-    updateStatus(WorkerNodeStatus.EXECUTING);
+
+    updateNodeStatus(submittedTask.getTaskId(), WorkerNodeStatus.EXECUTING);
   }
 
   @Override
   public WorkerNodeStatus getStatus() {
 
     return this.status;
+  }
+
+  @Override
+  public UUID getId() {
+
+    return this.id;
+  }
+
+  @Override
+  public Optional<UUID> getTaskId() {
+
+    return Optional.empty();
   }
 
   protected void upload(List<TaskFile> files) {
@@ -83,8 +100,9 @@ public class GRPCWorkerNode implements WorkerNode {
 
   }
 
-  private void updateStatus(WorkerNodeStatus status) {
+  private void updateNodeStatus(UUID taskId, WorkerNodeStatus status) {
 
+    this.taskId = taskId;
     this.status = status;
   }
 }

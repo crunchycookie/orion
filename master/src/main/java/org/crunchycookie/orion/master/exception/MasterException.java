@@ -22,6 +22,12 @@ public class MasterException extends Exception {
 
   private ErrorCodes errorCode;
 
+  public MasterException(ErrorCodes errorCode, String message, Throwable cause) {
+
+    super(message, cause);
+    this.errorCode = errorCode;
+  }
+
   public MasterException(ErrorCodes errorCode, String message) {
 
     super(message);

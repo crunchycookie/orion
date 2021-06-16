@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.master.service.worker;
 
+import java.util.Optional;
+import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 
@@ -38,6 +40,20 @@ public interface WorkerNode {
    * @return
    */
   WorkerNodeStatus getStatus();
+
+  /**
+   * Get the unique id of the node.
+   *
+   * @return
+   */
+  UUID getId();
+
+  /**
+   * Get the unique ID of the submitted task. returns empty if the node isn't running a task.
+   *
+   * @return
+   */
+  Optional<UUID> getTaskId();
 
   /**
    * Status about the node.

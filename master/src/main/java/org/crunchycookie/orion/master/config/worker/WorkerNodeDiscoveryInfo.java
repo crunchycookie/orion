@@ -14,21 +14,35 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master.rest;
+package org.crunchycookie.orion.master.config.worker;
 
-import org.crunchycookie.orion.master.config.OrionConfigs;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+public class WorkerNodeDiscoveryInfo {
 
-@SpringBootApplication
-public class MasterRESTEndpoint {
+  private String host;
+  private String port;
+  private String type;
 
-  public static OrionConfigs configs;
+  public String getHost() {
+    return host;
+  }
 
-  public static void main(String[] args) {
+  public void setHost(String host) {
+    this.host = host;
+  }
 
-    configs = new OrionConfigs(args[0]);
+  public String getPort() {
+    return port;
+  }
 
-    SpringApplication.run(MasterRESTEndpoint.class, args);
+  public void setPort(String port) {
+    this.port = port;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 }

@@ -19,6 +19,7 @@ package org.crunchycookie.orion.master.service.manager;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
@@ -43,6 +44,11 @@ import org.crunchycookie.orion.master.service.worker.WorkerNode;
 public interface WorkerPoolManager {
 
   /**
+   * Initialize the worker pool which includes worker node discovery and registration.
+   */
+  void init() throws MasterException;
+
+  /**
    * Query worker pool and provide a free worker.
    *
    * @return A free worker. Can be empty if no free workers are available.
@@ -57,7 +63,7 @@ public interface WorkerPoolManager {
    * @return Worker node associated to the given id. Can be empty if no worker available for the
    * provided id.
    */
-  Optional<WorkerNode> getWorker(String id);
+  Optional<WorkerNode> getWorker(UUID id);
 
   /**
    * Obtain current status of the submitted tasks.
