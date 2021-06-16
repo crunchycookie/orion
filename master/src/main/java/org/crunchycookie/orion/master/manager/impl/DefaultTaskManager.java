@@ -16,6 +16,7 @@
 
 package org.crunchycookie.orion.master.manager.impl;
 
+import static org.crunchycookie.orion.master.utils.MasterUtils.getCentralStore;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskScheduler;
 import static org.crunchycookie.orion.master.utils.MasterUtils.handleClientExceptionScenario;
 
@@ -59,8 +60,9 @@ public class DefaultTaskManager implements TaskManager {
   }
 
   @Override
-  public SubmittedTaskStatus getTaskStatus(String uniqueTaskId) throws MasterException {
-    return null;
+  public SubmittedTaskStatus getTaskStatus(UUID uniqueTaskId) throws MasterException {
+
+    return getCentralStore().getStatus(uniqueTaskId);
   }
 
   @Override
@@ -71,6 +73,7 @@ public class DefaultTaskManager implements TaskManager {
 
   private void validateInputParams(SubmittedTask submittedTask, UUID taskId)
       throws MasterClientException {
+
     if (taskId == null) {
       handleClientExceptionScenario("Submitted task must be associated to a valid task");
     }

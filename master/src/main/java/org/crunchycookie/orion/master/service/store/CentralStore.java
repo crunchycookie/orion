@@ -17,7 +17,9 @@
 package org.crunchycookie.orion.master.service.store;
 
 import java.util.UUID;
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 
 /**
  * This class represents the store where submitted task files are stored until they get dispatched
@@ -30,7 +32,7 @@ public interface CentralStore {
    *
    * @param submittedTask
    */
-  void store(SubmittedTask submittedTask);
+  void store(SubmittedTask submittedTask) throws MasterException;
 
   /**
    * Get the task by its ID.
@@ -38,12 +40,28 @@ public interface CentralStore {
    * @param taskId
    * @return
    */
-  SubmittedTask get(UUID taskId);
+  SubmittedTask get(UUID taskId) throws MasterException;
 
   /**
    * Remove the task.
    *
    * @param taskId
    */
-  void remove(UUID taskId);
+  void remove(UUID taskId) throws MasterException;
+
+  /**
+   * Get the task status by its ID.
+   *
+   * @param taskId
+   * @return
+   */
+  SubmittedTaskStatus getStatus(UUID taskId) throws MasterException;
+
+  /**
+   * Set the task status by its ID.
+   *
+   * @param taskId
+   * @return
+   */
+  void setStatus(UUID taskId, SubmittedTaskStatus status) throws MasterException;
 }

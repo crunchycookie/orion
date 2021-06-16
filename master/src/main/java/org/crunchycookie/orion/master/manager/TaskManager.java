@@ -17,6 +17,7 @@
 package org.crunchycookie.orion.master.manager;
 
 import java.util.List;
+import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
@@ -58,7 +59,7 @@ public interface TaskManager {
    * @param uniqueTaskId task Id.
    * @return Status of the submitted task.
    */
-  SubmittedTaskStatus getTaskStatus(String uniqueTaskId) throws MasterException;
+  SubmittedTaskStatus getTaskStatus(UUID uniqueTaskId) throws MasterException;
 
   /**
    * Upon completion, provide processed files to clients.
