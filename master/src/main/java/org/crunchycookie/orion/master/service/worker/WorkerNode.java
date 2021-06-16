@@ -16,6 +16,7 @@
 
 package org.crunchycookie.orion.master.service.worker;
 
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 
 /**
@@ -29,5 +30,22 @@ public interface WorkerNode {
    *
    * @param submittedTask
    */
-  void dispatch(SubmittedTask submittedTask);
+  void dispatch(SubmittedTask submittedTask) throws MasterException;
+
+  /**
+   * Get current status of the node.
+   *
+   * @return
+   */
+  WorkerNodeStatus getStatus();
+
+  /**
+   * Status about the node.
+   */
+  public enum WorkerNodeStatus {
+    IDLE,
+    EXECUTING,
+    COMPLETED,
+    DEAD
+  }
 }

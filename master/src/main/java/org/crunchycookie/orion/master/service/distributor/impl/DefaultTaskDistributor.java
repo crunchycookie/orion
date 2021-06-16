@@ -57,6 +57,10 @@ public class DefaultTaskDistributor implements TaskDistributor {
 
   private void dispatchTask(WorkerNode worker, SubmittedTask submittedTask) {
 
-    worker.dispatch(submittedTask);
+    try {
+      worker.dispatch(submittedTask);
+    } catch (MasterException e) {
+      e.printStackTrace();
+    }
   }
 }

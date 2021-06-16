@@ -18,7 +18,11 @@ package org.crunchycookie.orion.master.service.worker.impl;
 
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
+import java.util.List;
+import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
+import org.crunchycookie.orion.master.models.TaskFile;
+import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.service.worker.WorkerNode;
 import org.crunchycookie.orion.worker.WorkerGrpc;
 import org.crunchycookie.orion.worker.WorkerGrpc.WorkerBlockingStub;
@@ -31,6 +35,8 @@ public class GRPCWorkerNode implements WorkerNode {
 
   private final WorkerBlockingStub blockingStub;
   private final WorkerStub asyncStub;
+
+  private WorkerNodeStatus status = WorkerNodeStatus.IDLE;
 
   public GRPCWorkerNode(Channel channel) {
     blockingStub = WorkerGrpc.newBlockingStub(channel);
@@ -48,7 +54,37 @@ public class GRPCWorkerNode implements WorkerNode {
   }
 
   @Override
-  public void dispatch(SubmittedTask submittedTask) {
+  public void dispatch(SubmittedTask submittedTask) throws MasterException {
 
+    upload(submittedTask.getTaskFiles());
+    execute(submittedTask.getExecutable());
+    updateStatus(WorkerNodeStatus.EXECUTING);
+  }
+
+  @Override
+  public WorkerNodeStatus getStatus() {
+
+    return this.status;
+  }
+
+  protected void upload(List<TaskFile> files) {
+
+  }
+
+  protected void execute(TaskFileMetadata executable) {
+
+  }
+
+  protected void monitor() {
+
+  }
+
+  protected void download() {
+
+  }
+
+  private void updateStatus(WorkerNodeStatus status) {
+
+    this.status = status;
   }
 }
