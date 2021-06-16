@@ -29,6 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class RESTUtils {
 
+  public enum ResourceParams {
+    MEMORY,
+    STORAGE;
+  }
+
   public static ResponseEntity<TaskLimits> getInternalServerErrorResponse() {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
@@ -49,10 +54,5 @@ public class RESTUtils {
       );
     }
     return taskFiles;
-  }
-
-  public enum ResourceParams {
-    MEMORY,
-    STORAGE;
   }
 }

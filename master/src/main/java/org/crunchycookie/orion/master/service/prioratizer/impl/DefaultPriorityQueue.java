@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.master.service.prioratizer.impl;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes.INTERNAL_SERVER_ERROR;
+
 import java.util.Comparator;
 import java.util.UUID;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -64,7 +66,8 @@ public class DefaultPriorityQueue implements PriorityQueue {
     try {
       return this.priorityBlockingQueue.take().getTaskId();
     } catch (InterruptedException e) {
-      throw new MasterException("Obtaining an element from the priority queue was interrupted");
+      throw new MasterException(INTERNAL_SERVER_ERROR,
+          "Obtaining an element from the priority queue was interrupted");
     }
   }
 }

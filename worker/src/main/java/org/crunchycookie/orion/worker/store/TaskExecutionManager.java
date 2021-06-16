@@ -19,7 +19,6 @@
  */
 package org.crunchycookie.orion.worker.store;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;

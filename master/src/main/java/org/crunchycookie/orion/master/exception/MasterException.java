@@ -16,7 +16,17 @@
 
 package org.crunchycookie.orion.master.exception;
 
+import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
+
 public class MasterException extends Exception {
+
+  private ErrorCodes errorCode;
+
+  public MasterException(ErrorCodes errorCode, String message) {
+
+    super(message);
+    this.errorCode = errorCode;
+  }
 
   public MasterException(String message) {
     super(message);
@@ -24,5 +34,9 @@ public class MasterException extends Exception {
 
   public MasterException(String message, Throwable cause) {
     super(message, cause);
+  }
+
+  public ErrorCodes getErrorCode() {
+    return errorCode;
   }
 }

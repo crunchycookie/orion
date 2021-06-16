@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
@@ -56,7 +57,7 @@ public class MasterUtils {
     Optional<TaskManager> taskManager = Optional.of(DefaultTaskManagerSingleton.INSTANCE.get());
 
     if (taskManager.isEmpty()) {
-      throw new MasterException("Failed to obtain task manager");
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR, "Failed to obtain task manager");
     }
     return taskManager.get();
   }
@@ -68,7 +69,8 @@ public class MasterUtils {
         .of(DefaultTaskSchedulerSingleton.INSTANCE.get());
 
     if (TaskScheduler.isEmpty()) {
-      throw new MasterException("Failed to obtain task scheduler");
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Failed to obtain task scheduler");
     }
     return TaskScheduler.get();
   }
@@ -80,7 +82,8 @@ public class MasterUtils {
         .empty();
 
     if (workerPoolManager.isEmpty()) {
-      throw new MasterException("Failed to obtain worker pool manager");
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Failed to obtain worker pool manager");
     }
     return workerPoolManager.get();
   }
@@ -91,7 +94,8 @@ public class MasterUtils {
     Optional<TaskCapacityValidator> taskCapacityValidator = Optional.empty();
 
     if (taskCapacityValidator.isEmpty()) {
-      throw new MasterException("Failed to obtain task capacity validator");
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Failed to obtain task capacity validator");
     }
     return taskCapacityValidator.get();
   }
@@ -102,7 +106,8 @@ public class MasterUtils {
     Optional<TaskPrioritizer> taskPrioritizer = Optional.empty();
 
     if (taskPrioritizer.isEmpty()) {
-      throw new MasterException("Failed to obtain the task prioratizer");
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Failed to obtain the task prioratizer");
     }
     return taskPrioritizer.get();
   }
@@ -113,7 +118,8 @@ public class MasterUtils {
     Optional<CentralStore> centralStore = Optional.empty();
 
     if (centralStore.isEmpty()) {
-      throw new MasterException("Failed to obtain the task prioratizer");
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Failed to obtain the task prioratizer");
     }
     return centralStore.get();
   }

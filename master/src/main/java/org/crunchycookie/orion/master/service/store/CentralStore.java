@@ -16,10 +16,13 @@
 
 package org.crunchycookie.orion.master.service.store;
 
+import java.util.List;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
+import org.crunchycookie.orion.master.models.TaskFile;
+import org.crunchycookie.orion.master.models.TaskFileMetadata;
 
 /**
  * This class represents the store where submitted task files are stored until they get dispatched
@@ -35,12 +38,20 @@ public interface CentralStore {
   void store(SubmittedTask submittedTask) throws MasterException;
 
   /**
-   * Get the task by its ID.
+   * Get the submitted by its ID.
    *
    * @param taskId
    * @return
    */
   SubmittedTask get(UUID taskId) throws MasterException;
+
+  /**
+   * Get the task files by its ID. This can be used to obtain processed files.
+   *
+   * @param taskId
+   * @return Task files. Throws a client exception if the task is still in-progress or failed.
+   */
+  List<TaskFile> getFiles(UUID taskId, List<TaskFileMetadata> files) throws MasterException;
 
   /**
    * Remove the task.

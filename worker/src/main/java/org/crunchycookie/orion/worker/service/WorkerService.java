@@ -21,7 +21,6 @@ import static org.crunchycookie.orion.worker.utils.WorkerUtils.handleResponse;
 import static org.crunchycookie.orion.worker.utils.WorkerUtils.streamInChunks;
 
 import io.grpc.stub.StreamObserver;
-import java.io.File;
 import java.io.InputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

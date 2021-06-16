@@ -18,12 +18,6 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <artifactId>orion</artifactId>
-    <groupId>org.crunchycookie.orion</groupId>
-    <version>0.1-SNAPSHOT</version>
-  </parent>
-
   <artifactId>worker</artifactId>
 
   <build>
@@ -59,9 +53,7 @@
         <groupId>org.apache.maven.plugins</groupId>
       </plugin>
       <plugin>
-        <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
         <configuration>
           <excludes>
             <!--Exclude generated classes-->
@@ -71,6 +63,8 @@
             <exclude>org/crunchycookie/orion/worker/exception/**Exception</exclude>
           </excludes>
         </configuration>
+        <groupId>org.jacoco</groupId>
+        <version>${jacoco-maven-plugin.version}</version>
       </plugin>
     </plugins>
   </build>
@@ -131,6 +125,12 @@
   </dependencies>
 
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>orion</artifactId>
+    <groupId>org.crunchycookie.orion</groupId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
 
 
   <properties>

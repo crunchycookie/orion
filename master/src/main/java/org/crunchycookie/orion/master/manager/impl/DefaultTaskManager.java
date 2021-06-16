@@ -30,7 +30,6 @@ import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.TaskFile;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
-import org.crunchycookie.orion.master.utils.MasterUtils;
 
 public class DefaultTaskManager implements TaskManager {
 
@@ -66,9 +65,10 @@ public class DefaultTaskManager implements TaskManager {
   }
 
   @Override
-  public List<TaskFile> getFiles(String uniqueTaskId, List<TaskFileMetadata> fileInformation)
+  public List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException {
-    return null;
+
+    return getCentralStore().getFiles(uniqueTaskId, fileInformation);
   }
 
   private void validateInputParams(SubmittedTask submittedTask, UUID taskId)

@@ -16,6 +16,7 @@
 
 package org.crunchycookie.orion.master.models;
 
+import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
 import org.crunchycookie.orion.master.exception.MasterException;
 
 /**
@@ -27,7 +28,8 @@ public class Priority implements Comparable<Priority> {
 
   public Priority(Integer priority) throws MasterException {
     if (priority < 0 || priority > 100) {
-      throw new MasterException("Priority value must resides between 0 and 100");
+      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
+          "Priority value must resides between 0 and 100");
     }
     this.priority = priority;
   }

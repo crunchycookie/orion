@@ -1,149 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <groupId>org.crunchycookie.orion</groupId>
   <artifactId>orion</artifactId>
-  <packaging>pom</packaging>
-  <version>0.1-SNAPSHOT</version>
-
-  <modules>
-    <module>master</module>
-    <module>worker</module>
-  </modules>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.crunchycookie.orion</groupId>
-        <artifactId>worker</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-netty-shaded</artifactId>
-        <version>${grpc-netty-shaded.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-protobuf</artifactId>
-        <version>${grpc-protobuf.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-stub</artifactId>
-        <version>${grpc-stub.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-api</artifactId>
-        <version>${log4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-core</artifactId>
-        <version>${log4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons-io.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-testing</artifactId>
-        <version>${grpc-testing.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>${junit.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>${mockito-core.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons-lang3.version}</version>
-      </dependency>
-      <!-- necessary for Java 9+ -->
-      <dependency>
-        <groupId>org.apache.tomcat</groupId>
-        <artifactId>annotations-api</artifactId>
-        <version>${annotations-api.version}</version>
-        <scope>provided</scope>
-      </dependency>
-      <!-- REST endpoint dependencies -->
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
-        <version>${spring-boot-starter-web.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework.data</groupId>
-        <artifactId>spring-data-jpa</artifactId>
-        <version>${spring-data-jpa.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.openapitools</groupId>
-        <artifactId>jackson-databind-nullable</artifactId>
-        <version>${jackson-databind-nullable.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.springfox</groupId>
-        <artifactId>springfox-swagger2</artifactId>
-        <version>${springfox-swagger2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${validation-api.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson-databind.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <build>
     <pluginManagement>
       <plugins>
         <!-- compile proto file into java files. -->
         <plugin>
-          <groupId>com.github.os72</groupId>
           <artifactId>protoc-jar-maven-plugin</artifactId>
+          <groupId>com.github.os72</groupId>
           <version>${protoc-jar-maven-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven-compiler-plugin.version}</version>
           <configuration>
             <source>${maven.compiler.source}</source>
             <target>${maven.compiler.target}</target>
           </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
+          <version>${maven-compiler-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.xolstice.maven.plugins</groupId>
           <artifactId>protobuf-maven-plugin</artifactId>
+          <groupId>org.xolstice.maven.plugins</groupId>
           <version>${protobuf-maven-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${jacoco-maven-plugin.version}</version>
           <executions>
             <execution>
               <goals>
@@ -151,60 +36,175 @@
               </goals>
             </execution>
             <execution>
-              <id>report</id>
-              <phase>prepare-package</phase>
               <goals>
                 <goal>report</goal>
               </goals>
+              <id>report</id>
+              <phase>prepare-package</phase>
             </execution>
           </executions>
+          <groupId>org.jacoco</groupId>
+          <version>${jacoco-maven-plugin.version}</version>
         </plugin>
 
         <!-- REST Plugins -->
         <plugin>
-          <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
+          <groupId>org.springframework.boot</groupId>
           <version>${spring-boot-maven-plugin.version}</version>
         </plugin>
         <plugin>
-          <groupId>org.openapitools</groupId>
           <artifactId>openapi-generator-maven-plugin</artifactId>
+          <groupId>org.openapitools</groupId>
           <version>${openapi-generator-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
   </build>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <artifactId>worker</artifactId>
+        <groupId>org.crunchycookie.orion</groupId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpc-netty-shaded</artifactId>
+        <groupId>io.grpc</groupId>
+        <version>${grpc-netty-shaded.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpc-protobuf</artifactId>
+        <groupId>io.grpc</groupId>
+        <version>${grpc-protobuf.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpc-stub</artifactId>
+        <groupId>io.grpc</groupId>
+        <version>${grpc-stub.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>guava</artifactId>
+        <groupId>com.google.guava</groupId>
+        <version>${guava.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>log4j-api</artifactId>
+        <groupId>org.apache.logging.log4j</groupId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>log4j-core</artifactId>
+        <groupId>org.apache.logging.log4j</groupId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>commons-io</artifactId>
+        <groupId>commons-io</groupId>
+        <version>${commons-io.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>grpc-testing</artifactId>
+        <groupId>io.grpc</groupId>
+        <version>${grpc-testing.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>junit-jupiter-api</artifactId>
+        <groupId>org.junit.jupiter</groupId>
+        <version>${junit.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>mockito-core</artifactId>
+        <groupId>org.mockito</groupId>
+        <version>${mockito-core.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>commons-lang3</artifactId>
+        <groupId>org.apache.commons</groupId>
+        <version>${commons-lang3.version}</version>
+      </dependency>
+      <!-- necessary for Java 9+ -->
+      <dependency>
+        <artifactId>annotations-api</artifactId>
+        <groupId>org.apache.tomcat</groupId>
+        <scope>provided</scope>
+        <version>${annotations-api.version}</version>
+      </dependency>
+      <!-- REST endpoint dependencies -->
+      <dependency>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <version>${spring-boot-starter-web.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>spring-data-jpa</artifactId>
+        <groupId>org.springframework.data</groupId>
+        <version>${spring-data-jpa.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>jackson-databind-nullable</artifactId>
+        <groupId>org.openapitools</groupId>
+        <version>${jackson-databind-nullable.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>springfox-swagger2</artifactId>
+        <groupId>io.springfox</groupId>
+        <version>${springfox-swagger2.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>validation-api</artifactId>
+        <groupId>javax.validation</groupId>
+        <version>${validation-api.version}</version>
+      </dependency>
+      <dependency>
+        <artifactId>jackson-databind</artifactId>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <version>${jackson-databind.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <groupId>org.crunchycookie.orion</groupId>
+  <modelVersion>4.0.0</modelVersion>
+
+  <modules>
+    <module>master</module>
+    <module>worker</module>
+  </modules>
+
+  <packaging>pom</packaging>
 
   <properties>
     <!--Comment the following property if you are not using an M1 mac.-->
-    <os.detected.classifier>osx-x86_64</os.detected.classifier>
-
     <annotations-api.version>6.0.53</annotations-api.version>
+
+    <commons-io.version>2.9.0</commons-io.version>
+    <commons-lang3.version>3.12.0</commons-lang3.version>
     <grpc-netty-shaded.version>1.38.0</grpc-netty-shaded.version>
     <grpc-protobuf.version>1.38.0</grpc-protobuf.version>
     <grpc-stub.version>1.38.0</grpc-stub.version>
-    <protoc-gen-grpc-java.version>1.15.0</protoc-gen-grpc-java.version>
-    <protoc-jar-maven-plugin.version>3.11.4</protoc-jar-maven-plugin.version>
+    <grpc-testing.version>1.38.0</grpc-testing.version>
+    <guava.version>30.1.1-jre</guava.version>
+    <jackson-databind-nullable.version>0.2.1</jackson-databind-nullable.version>
+    <jackson-databind.version>2.11.4</jackson-databind.version>
+    <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+    <junit.version>5.7.2</junit.version>
+    <log4j.version>2.13.0</log4j.version>
     <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
     <maven.compiler.source>15</maven.compiler.source>
     <maven.compiler.target>15</maven.compiler.target>
-    <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
-    <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
-    <guava.version>30.1.1-jre</guava.version>
-    <log4j.version>2.13.0</log4j.version>
-    <commons-io.version>2.9.0</commons-io.version>
-    <junit.version>5.7.2</junit.version>
     <mockito-core.version>3.4.0</mockito-core.version>
-    <grpc-testing.version>1.38.0</grpc-testing.version>
-    <commons-lang3.version>3.12.0</commons-lang3.version>
-    <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
-    <jackson-databind.version>2.11.4</jackson-databind.version>
-    <validation-api.version>1.1.0.Final</validation-api.version>
-    <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
-    <jackson-databind-nullable.version>0.2.1</jackson-databind-nullable.version>
-    <spring-data-jpa.version>2.4.6</spring-data-jpa.version>
-    <spring-boot-starter-web.version>2.4.4</spring-boot-starter-web.version>
-    <spring-boot-maven-plugin.version>2.4.4</spring-boot-maven-plugin.version>
     <openapi-generator-maven-plugin.version>5.1.0</openapi-generator-maven-plugin.version>
+    <os-maven-plugin.version>1.6.2</os-maven-plugin.version>
+    <os.detected.classifier>osx-x86_64</os.detected.classifier>
+    <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+    <protoc-gen-grpc-java.version>1.15.0</protoc-gen-grpc-java.version>
+    <protoc-jar-maven-plugin.version>3.11.4</protoc-jar-maven-plugin.version>
+    <spring-boot-maven-plugin.version>2.4.4</spring-boot-maven-plugin.version>
+    <spring-boot-starter-web.version>2.4.4</spring-boot-starter-web.version>
+    <spring-data-jpa.version>2.4.6</spring-data-jpa.version>
+    <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
+    <validation-api.version>1.1.0.Final</validation-api.version>
   </properties>
+
+  <version>0.1-SNAPSHOT</version>
 </project>

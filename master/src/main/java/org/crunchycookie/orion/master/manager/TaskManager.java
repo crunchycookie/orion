@@ -68,6 +68,6 @@ public interface TaskManager {
    * @param fileInformation Metadata of the files requesting.
    * @return Requested files.
    */
-  List<TaskFile> getFiles(String uniqueTaskId, List<TaskFileMetadata> fileInformation)
+  List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException;
 }

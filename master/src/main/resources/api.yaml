@@ -109,6 +109,9 @@ paths:
               schema:
                 type: string
                 format: binary
+        '400':
+          description: |
+            cannot download the file. Either the task failed or still processing
         '404':
           description: couldn't find the file
   /tasks/{task-id}/monitor:

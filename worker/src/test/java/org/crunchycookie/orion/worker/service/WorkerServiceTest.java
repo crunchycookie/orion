@@ -71,13 +71,12 @@ import org.mockito.ArgumentCaptor;
 @RunWith(JUnit4.class)
 public class WorkerServiceTest {
 
-  private static final Logger LOG = LogManager.getLogger(WorkerServiceTest.class);
-
   /**
    * This rule manages automatic graceful shutdown for the registered channel at the end of test.
    */
   @ClassRule
   public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
+  private static final Logger LOG = LogManager.getLogger(WorkerServiceTest.class);
   private static WorkerServer server;
   private static ManagedChannel inProcessChannel;
   private final String TASK_ID = "hello-world";

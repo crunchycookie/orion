@@ -18,7 +18,11 @@ package org.crunchycookie.orion.master.rest.impl;
 
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskManager;
 
+import java.util.List;
 import java.util.UUID;
+import org.crunchycookie.orion.master.exception.MasterClientException;
+import org.crunchycookie.orion.master.models.TaskFile;
+import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.rest.api.TasksApiDelegate;
 import org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus;
 import org.springframework.core.io.InputStreamResource;
@@ -32,12 +36,34 @@ public class TasksAPIImpl implements TasksApiDelegate {
 
   @Override
   public ResponseEntity<Resource> downloadFiles(UUID taskId, String filename) {
-    return ResponseEntity.ok(new InputStreamResource(
-        this.getClass().getClassLoader().getResourceAsStream("test.txt")));
+
+    try {
+      TaskFileMetadata taskFileMetadata = new TaskFileMetadata(
+          filename.split("\\.")[0],
+          filename.split("\\.")[1],
+          taskId
+      );
+      List<TaskFile> taskFiles = getTaskManager().getFiles(taskId, List.of(taskFileMetadata));
+      return ResponseEntity.ok(new InputStreamResource(taskFiles.get(0).getFileDataStream()));
+    } catch (Throwable t) {
+      if (t instanceof MasterClientException) {
+        return switch (((MasterClientException) t).getErrorCode()) {
+          case ERROR_FILE_DOWNLOAD_STILL_IN_PROGRESS, ERROR_FILE_DOWNLOAD_FAILED -> ResponseEntity
+              .badRequest().build();
+          default -> getInternalServerErrorResponse();
+        };
+      }
+      return getInternalServerErrorResponse();
+    }
+  }
+
+  private ResponseEntity<Resource> getInternalServerErrorResponse() {
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 
   @Override
   public ResponseEntity<SubmittedTaskStatus> monitorFiles(UUID taskId) {
+
     try {
       org.crunchycookie.orion.master.models.SubmittedTaskStatus status = getTaskManager()
           .getTaskStatus(taskId);
