@@ -37,9 +37,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.crunchycookie.orion.master.exception.MasterException;
-import org.crunchycookie.orion.master.models.File;
-import org.crunchycookie.orion.master.models.TaskFileIterated;
-import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.IteratingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
@@ -154,7 +151,7 @@ public class GRPCWorkerClient {
 
     List<TaskFile> downloadedFiles = new ArrayList<>();
     for (TaskFileMetadata fileToDownload : filesToDownload) {
-       getDownloadedFile(fileToDownload).ifPresent(downloadedFiles::add);
+      getDownloadedFile(fileToDownload).ifPresent(downloadedFiles::add);
     }
     return downloadedFiles;
   }

@@ -16,11 +16,8 @@
 
 package org.crunchycookie.orion.master.service.distributor;
 
-import java.util.List;
-import java.util.Optional;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
-import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
 
 /**
  * This class represents the task distributor. It's responsibilities are,
@@ -34,8 +31,8 @@ public interface TaskDistributor {
 
   /**
    * Assign and dispatch the submitted task to an available worker, and update central store with
-   * the status. If no free worker is available, then ask the
-   * {@link org.crunchycookie.orion.master.service.scheduler.TaskScheduler} to re-schedule the task.
+   * the status. If no free worker is available, then ask the {@link org.crunchycookie.orion.master.service.scheduler.TaskScheduler}
+   * to re-schedule the task.
    *
    * @param submittedTask task.
    * @return Unique id for the created group of sub-tasks.

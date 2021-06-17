@@ -23,14 +23,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.crunchycookie.orion.master.exception.MasterException;
-import org.crunchycookie.orion.master.models.File;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
-import org.crunchycookie.orion.master.models.TaskFileIterated;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.service.worker.WorkerNode;
-import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
 
 /**
  * This class represents a worker node which communicates with the worker node via gRPC.

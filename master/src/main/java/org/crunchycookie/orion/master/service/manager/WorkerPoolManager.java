@@ -74,8 +74,8 @@ public interface WorkerPoolManager {
   List<SubmittedTaskStatus> getStatus(List<SubmittedTask> submittedTasks);
 
   /**
-   * Obtain requested tasks from the workers. Obtained tasks include any new file created during
-   * the task execution.
+   * Obtain requested tasks from the workers. Obtained tasks include any new file created during the
+   * task execution.
    *
    * @param taskIds
    * @return

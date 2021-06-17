@@ -62,7 +62,7 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
             .status(
                 org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.SUCCESSFUL
             ));
-        case IN_PROGRESS -> ResponseEntity.status(HttpStatus.ACCEPTED).body(new SubmittedTask()
+        case IN_PROGRESS, PENDING -> ResponseEntity.status(HttpStatus.ACCEPTED).body(new SubmittedTask()
             .taskId(taskId)
             .status(
                 org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.INPROGRESS

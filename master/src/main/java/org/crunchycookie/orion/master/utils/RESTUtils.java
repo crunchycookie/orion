@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
+import org.crunchycookie.orion.master.models.TaskFileStream;
+import org.crunchycookie.orion.master.models.file.StreamingTaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.rest.model.TaskLimits;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,13 +40,13 @@ public class RESTUtils {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 
-  public static List<TaskFileStream> getTaskFiles(UUID taskId, List<MultipartFile> files)
+  public static List<TaskFile> getTaskFiles(UUID taskId, List<MultipartFile> files)
       throws IOException {
 
-    List<TaskFileStream> taskFileStreams = new ArrayList<>();
+    List<TaskFile> taskFiles = new ArrayList<>();
     for (MultipartFile file : files) {
       String[] splittedFileName = file.getName().split("\\.");
-      taskFileStreams.add(new TaskFileStream(
+      taskFiles.add(new StreamingTaskFile(
           new TaskFileMetadata(
               splittedFileName[0],
               splittedFileName[1],
@@ -53,6 +55,6 @@ public class RESTUtils {
           file.getInputStream())
       );
     }
-    return taskFileStreams;
+    return taskFiles;
   }
 }

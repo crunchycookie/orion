@@ -28,6 +28,17 @@ import org.crunchycookie.orion.master.models.SubmittedTask;
 public interface WorkerNode {
 
   /**
+   * Status about the node.
+   */
+  public enum WorkerNodeStatus {
+    IDLE,
+    EXECUTING,
+    COMPLETED,
+    FAILED,
+    DEAD
+  }
+
+  /**
    * Deploy a task to the worker node and start execution.
    *
    * @param submittedTask
@@ -63,15 +74,4 @@ public interface WorkerNode {
    * @return
    */
   Optional<UUID> getTaskId();
-
-  /**
-   * Status about the node.
-   */
-  public enum WorkerNodeStatus {
-    IDLE,
-    EXECUTING,
-    COMPLETED,
-    FAILED,
-    DEAD
-  }
 }

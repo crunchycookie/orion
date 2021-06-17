@@ -21,8 +21,8 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskManager;
 import java.util.List;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterClientException;
-import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
+import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.rest.api.TasksApiDelegate;
 import org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus;
 import org.springframework.core.io.InputStreamResource;
@@ -43,8 +43,8 @@ public class TasksAPIImpl implements TasksApiDelegate {
           filename.split("\\.")[1],
           taskId
       );
-      List<TaskFileStream> taskFileStreams = getTaskManager().getFiles(taskId, List.of(taskFileMetadata));
-      return ResponseEntity.ok(new InputStreamResource(taskFileStreams.get(0).getFileDataStream()));
+      List<TaskFile> taskFileStreams = getTaskManager().getFiles(taskId, List.of(taskFileMetadata));
+      return ResponseEntity.ok(new InputStreamResource(taskFileStreams.get(0).next()));
     } catch (Throwable t) {
       if (t instanceof MasterClientException) {
         return switch (((MasterClientException) t).getErrorCode()) {
@@ -57,10 +57,6 @@ public class TasksAPIImpl implements TasksApiDelegate {
     }
   }
 
-  private ResponseEntity<Resource> getInternalServerErrorResponse() {
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-  }
-
   @Override
   public ResponseEntity<SubmittedTaskStatus> monitorFiles(UUID taskId) {
 
@@ -68,7 +64,7 @@ public class TasksAPIImpl implements TasksApiDelegate {
       org.crunchycookie.orion.master.models.SubmittedTaskStatus status = getTaskManager()
           .getTaskStatus(taskId);
       SubmittedTaskStatus responseStatus = switch (status.getStatus()) {
-        case IN_PROGRESS -> SubmittedTaskStatus.INPROGRESS;
+        case IN_PROGRESS, PENDING -> SubmittedTaskStatus.INPROGRESS;
         case SUCCESS -> SubmittedTaskStatus.SUCCESSFUL;
         case FAILED -> SubmittedTaskStatus.FAILED;
       };
@@ -76,5 +72,9 @@ public class TasksAPIImpl implements TasksApiDelegate {
     } catch (Throwable t) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  private ResponseEntity<Resource> getInternalServerErrorResponse() {
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 }

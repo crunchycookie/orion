@@ -31,9 +31,9 @@ import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
+import org.crunchycookie.orion.master.models.file.TaskFile;
 
 public class DefaultTaskManager implements TaskManager {
 
@@ -90,17 +90,6 @@ public class DefaultTaskManager implements TaskManager {
     );
   }
 
-  private List<SubmittedTask> getTasksFromWorkers(List<SubmittedTaskStatus> latestStatus,
-      TaskStatus status) throws MasterException {
-    List<SubmittedTask> successTasks = getWorkerPoolManager().getTasks(
-        latestStatus.stream()
-            .filter(st -> st.getStatus() == status)
-            .map(SubmittedTaskStatus::getTaskId)
-            .collect(Collectors.toList())
-    );
-    return successTasks;
-  }
-
   @Override
   public WorkerMetaData getTaskLimitations() throws MasterException {
     return null;
@@ -121,10 +110,21 @@ public class DefaultTaskManager implements TaskManager {
   }
 
   @Override
-  public List<TaskFileStream> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
+  public List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException {
 
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);
+  }
+
+  private List<SubmittedTask> getTasksFromWorkers(List<SubmittedTaskStatus> latestStatus,
+      TaskStatus status) throws MasterException {
+    List<SubmittedTask> successTasks = getWorkerPoolManager().getTasks(
+        latestStatus.stream()
+            .filter(st -> st.getStatus() == status)
+            .map(SubmittedTaskStatus::getTaskId)
+            .collect(Collectors.toList())
+    );
+    return successTasks;
   }
 
   private void validateInputParams(SubmittedTask submittedTask, UUID taskId)

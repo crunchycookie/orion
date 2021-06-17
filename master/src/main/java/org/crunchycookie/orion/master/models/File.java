@@ -21,11 +21,11 @@ public class File {
   // File is represented as meta+data_stream.
   private TaskFileMetadata metadata;
 
-  public TaskFileMetadata getMetadata() {
-    return metadata;
-  }
-
   public File(TaskFileMetadata metadata) {
     this.metadata = metadata;
+  }
+
+  public TaskFileMetadata getMetadata() {
+    return metadata;
   }
 }
