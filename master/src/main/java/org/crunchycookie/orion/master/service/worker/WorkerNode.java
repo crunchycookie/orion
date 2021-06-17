@@ -35,6 +35,15 @@ public interface WorkerNode {
   void dispatch(SubmittedTask submittedTask) throws MasterException;
 
   /**
+   * Obtain the submitted task from the worker node. In addition to the dispatched files, this will
+   * include all the output files created during task execution. An excemption is thrown if there is
+   * no task submitted.
+   *
+   * @throws MasterException
+   */
+  SubmittedTask obtain() throws MasterException;
+
+  /**
    * Get current status of the node.
    *
    * @return

@@ -17,6 +17,7 @@
 package org.crunchycookie.orion.master.service.manager.impl;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,13 +65,14 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public Optional<WorkerNode> getFreeWorker() {
 
-    return registeredNodes.stream().filter(n -> n.getStatus() == WorkerNodeStatus.IDLE).findFirst();
+    return getRegisteredNodes().stream().filter(n -> n.getStatus() == WorkerNodeStatus.IDLE)
+        .findFirst();
   }
 
   @Override
   public Optional<WorkerNode> getWorker(UUID id) {
 
-    return registeredNodes.stream().filter(n -> n.getId().equals(id)).findFirst();
+    return getRegisteredNodes().stream().filter(n -> n.getId().equals(id)).findFirst();
   }
 
   @Override
@@ -78,13 +80,11 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
 
     return submittedTasks.stream()
         .map(st -> {
-          Optional<WorkerNode> matchingNode = registeredNodes.stream()
-              .filter(n -> n.getTaskId().equals(st.getTaskId()))
-              .findFirst();
-          if (matchingNode.isPresent()) {
+          Optional<WorkerNode> executionNode = getExecutionNode(st);
+          if (executionNode.isPresent()) {
             return new SubmittedTaskStatus(
                 st.getTaskId(),
-                getTaskStatus(matchingNode.get().getStatus())
+                getTaskStatus(executionNode.get().getStatus())
             );
           }
           return null;
@@ -94,13 +94,57 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   }
 
   @Override
-  public List<SubmittedTask> getTasks(List<UUID> taskIds) {
-    return null;
+  public List<SubmittedTask> getTasks(List<UUID> taskIds) throws MasterException {
+
+    // Get the worker nodes executing the requested tasks.
+    List<WorkerNode> executionNodes = getExecutionNodes(taskIds);
+
+    // Tasks can only be obtained if the task is not under the execution currently.
+    return obtainNonExecutingTasks(executionNodes);
   }
 
   @Override
   public WorkerMetaData getWorkerInformation() {
-    return null;
+
+    return MasterRESTEndpoint.configs.getWorkerMetaData();
+  }
+
+  protected List<WorkerNode> getRegisteredNodes() {
+
+    return registeredNodes;
+  }
+
+  protected void registerNode(WorkerNode node) {
+
+    registeredNodes.add(node);
+  }
+
+  private List<SubmittedTask> obtainNonExecutingTasks(List<WorkerNode> executionNodes)
+      throws MasterException {
+
+    List<SubmittedTask> tasks = new ArrayList<>();
+    for (WorkerNode node : executionNodes) {
+      if (!node.getStatus().equals(WorkerNodeStatus.EXECUTING)) {
+        tasks.add(node.obtain());
+      }
+    }
+    return tasks;
+  }
+
+  private List<WorkerNode> getExecutionNodes(List<UUID> taskIds) {
+
+    List<WorkerNode> executionNodes = getRegisteredNodes().stream()
+        .filter(n -> taskIds.contains(n.getTaskId().get()))
+        .collect(Collectors.toList());
+    return executionNodes;
+  }
+
+  private Optional<WorkerNode> getExecutionNode(SubmittedTask st) {
+
+    Optional<WorkerNode> matchingNode = getRegisteredNodes().stream()
+        .filter(n -> n.getTaskId().equals(st.getTaskId()))
+        .findFirst();
+    return matchingNode;
   }
 
   private TaskStatus getTaskStatus(WorkerNodeStatus nodeStatus) {
@@ -125,7 +169,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
       } catch (Exception e) {
         throw new MasterException("Failed to initialize the worker node");
       }
-      registeredNodes.add(workerNode);
+      registerNode(workerNode);
     }
   }
 }

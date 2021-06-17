@@ -67,9 +67,15 @@ public class GRPCWorkerNode implements WorkerNode {
   }
 
   @Override
+  public SubmittedTask obtain() throws MasterException {
+
+    return download(taskId);
+  }
+
+  @Override
   public WorkerNodeStatus getStatus() {
 
-    return this.status;
+    return monitor();
   }
 
   @Override
@@ -92,12 +98,13 @@ public class GRPCWorkerNode implements WorkerNode {
 
   }
 
-  protected void monitor() {
+  protected WorkerNodeStatus monitor() {
 
+    return null;
   }
 
-  protected void download() {
-
+  protected SubmittedTask download(UUID taskId) {
+   return null;
   }
 
   private void updateNodeStatus(UUID taskId, WorkerNodeStatus status) {

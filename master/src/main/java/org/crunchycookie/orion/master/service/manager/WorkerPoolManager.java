@@ -80,7 +80,7 @@ public interface WorkerPoolManager {
    * @param taskIds
    * @return
    */
-  List<SubmittedTask> getTasks(List<UUID> taskIds);
+  List<SubmittedTask> getTasks(List<UUID> taskIds) throws MasterException;
 
   /**
    * Provide meta information about the worker's capacity including memory and storage.
