@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master.rest;
+package org.crunchycookie.orion.master;
 
 import org.crunchycookie.orion.master.config.OrionConfigs;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MasterRESTEndpoint {
+public class RESTfulEndpoint {
 
   public static OrionConfigs configs;
 
   public static void main(String[] args) {
 
+    // Load configurations.
     configs = new OrionConfigs(args[0]);
 
-    SpringApplication.run(MasterRESTEndpoint.class, args);
+    // Start web server.
+    SpringApplication.run(RESTfulEndpoint.class, args);
   }
 }

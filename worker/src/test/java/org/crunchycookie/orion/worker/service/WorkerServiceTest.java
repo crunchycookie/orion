@@ -55,7 +55,7 @@ import org.crunchycookie.orion.worker.WorkerOuterClass.FileUploadResponse;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Status;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Task;
-import org.crunchycookie.orion.worker.WorkerServer;
+import org.crunchycookie.orion.worker.GRPCEndpoint;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -77,7 +77,7 @@ public class WorkerServiceTest {
   @ClassRule
   public static final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
   private static final Logger LOG = LogManager.getLogger(WorkerServiceTest.class);
-  private static WorkerServer server;
+  private static GRPCEndpoint server;
   private static ManagedChannel inProcessChannel;
   private final String TASK_ID = "hello-world";
   private final String FILE_EXECUTABLE_NAME = "execute-task";
@@ -93,7 +93,7 @@ public class WorkerServiceTest {
     // Use directExecutor for both InProcessServerBuilder and InProcessChannelBuilder can reduce the
     // usage timeouts and latches in test. But we still add timeout and latches where they would be
     // needed if no directExecutor were used, just for demo purpose.
-    server = new WorkerServer(InProcessServerBuilder.forName(serverName).directExecutor(), 0);
+    server = new GRPCEndpoint(InProcessServerBuilder.forName(serverName).directExecutor(), 0);
     server.start();
     // Create a client channel and register for automatic graceful shutdown.
     inProcessChannel = grpcCleanup.register(

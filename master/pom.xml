@@ -95,7 +95,7 @@
       <plugin>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <mainClass>org.crunchycookie.orion.master.rest.MasterRESTEndpoint</mainClass>
+          <mainClass>org.crunchycookie.orion.master.RESTfulEndpoint</mainClass>
         </configuration>
         <executions>
           <execution>

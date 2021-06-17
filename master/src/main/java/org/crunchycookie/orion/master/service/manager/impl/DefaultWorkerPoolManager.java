@@ -29,7 +29,7 @@ import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
-import org.crunchycookie.orion.master.rest.MasterRESTEndpoint;
+import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.service.manager.WorkerPoolManager;
 import org.crunchycookie.orion.master.service.worker.WorkerNode;
 import org.crunchycookie.orion.master.service.worker.WorkerNode.WorkerNodeStatus;
@@ -106,7 +106,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public WorkerMetaData getWorkerInformation() {
 
-    return MasterRESTEndpoint.configs.getWorkerMetaData();
+    return RESTfulEndpoint.configs.getWorkerMetaData();
   }
 
   protected List<WorkerNode> getRegisteredNodes() {
@@ -159,7 +159,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
 
   private void discoverAndRegisterWorkerNodes() throws MasterException {
 
-    registeredWorkerNodesInfo = MasterRESTEndpoint.configs.getWorkerNodes();
+    registeredWorkerNodesInfo = RESTfulEndpoint.configs.getWorkerNodes();
     for (WorkerNodeDiscoveryInfo nodeInfo : registeredWorkerNodesInfo) {
       WorkerNode workerNode;
       try {
