@@ -53,4 +53,18 @@ public class TaskFileMetadata {
   public void setTaskId(UUID taskId) {
     this.taskId = taskId;
   }
+
+  @Override
+  public String toString() {
+    return taskId + "-" + fileName + "-" + fileType;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+
+    if (obj instanceof TaskFileMetadata) {
+      return this.toString().equals(obj.toString());
+    }
+    return super.equals(obj);
+  }
 }

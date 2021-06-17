@@ -51,6 +51,7 @@ public class SubmittedTask {
   private SubmittedTaskStatus status;
 
   public SubmittedTask(UUID taskId, List<TaskFile> taskFiles, TaskFileMetadata executable) {
+
     this.taskId = taskId;
     this.taskFiles = taskFiles;
     this.executable = executable;
