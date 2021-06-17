@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.file.TaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 /**
@@ -92,7 +93,7 @@ public class SubmittedTask {
     this.resourceRequirements = resourceRequirements;
   }
 
-  public String getResourceRequirement(String key) {
+  public String getResourceRequirement(ResourceParams key) {
     return resourceRequirements.get(key);
   }
 

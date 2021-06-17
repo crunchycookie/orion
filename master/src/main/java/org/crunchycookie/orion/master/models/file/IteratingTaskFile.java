@@ -19,7 +19,6 @@ package org.crunchycookie.orion.master.models.file;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
 
 public class IteratingTaskFile implements TaskFile {

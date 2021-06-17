@@ -17,7 +17,6 @@
 package org.crunchycookie.orion.master.models.file;
 
 import java.io.InputStream;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
 
 public interface TaskFile {
 

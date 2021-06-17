@@ -31,7 +31,7 @@ import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 

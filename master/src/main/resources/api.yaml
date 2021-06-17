@@ -58,6 +58,11 @@ paths:
                 executableShellScript:
                   type: string
                   description: name of the executable script
+                outputFiles:
+                  type: array
+                  description: names of the output files required after execution
+                  items:
+                    type: string
                 resourceRequirements:
                   type: array
                   items:

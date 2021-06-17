@@ -18,7 +18,6 @@ package org.crunchycookie.orion.master.models.file;
 
 import java.io.InputStream;
 import java.util.PriorityQueue;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
 
 public class StreamingTaskFile implements TaskFile {
 

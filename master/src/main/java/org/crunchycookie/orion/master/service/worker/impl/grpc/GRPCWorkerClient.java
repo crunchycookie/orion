@@ -37,7 +37,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.crunchycookie.orion.master.exception.MasterException;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.IteratingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.service.worker.WorkerNode.WorkerNodeStatus;

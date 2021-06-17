@@ -21,7 +21,7 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskManager;
 import java.util.List;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterClientException;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.rest.api.TasksApiDelegate;
 import org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus;

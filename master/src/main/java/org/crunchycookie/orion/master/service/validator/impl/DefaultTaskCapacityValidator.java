@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master.service.prioratizer;
+package org.crunchycookie.orion.master.service.validator.impl;
 
 import org.crunchycookie.orion.master.exception.MasterException;
-import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.models.SubmittedTask;
+import org.crunchycookie.orion.master.models.WorkerMetaData;
+import org.crunchycookie.orion.master.service.validator.TaskCapacityValidator;
+import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
-/**
- * This class represents a prioritizer capable of rating tasks based on it's qualities.
- */
-public interface TaskPrioritizer {
+public class DefaultTaskCapacityValidator implements TaskCapacityValidator {
 
-  /**
-   * Analyze provided client task and predict a priority value.
-   *
-   * @param submittedTask Submitted task.
-   * @return Predicted {@link Priority} entity.
-   */
-  Priority getPriority(SubmittedTask submittedTask) throws MasterException;
+  @Override
+  public boolean validate(SubmittedTask submittedTask, WorkerMetaData workerCapacity)
+      throws MasterException {
+
+    // Valid if memory limits are met.
+    return Integer.parseInt(submittedTask.getResourceRequirement(ResourceParams.MEMORY)) <= Integer
+        .parseInt(workerCapacity.getMaxResourceCapacities().get(ResourceParams.MEMORY));
+  }
 }

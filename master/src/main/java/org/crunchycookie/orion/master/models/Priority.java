@@ -24,21 +24,24 @@ import org.crunchycookie.orion.master.exception.MasterException;
  */
 public class Priority implements Comparable<Priority> {
 
-  private Integer priority = 0;
+  public final static double PRIORITY_HIGHEST = 100.0;
+  public final static double PRIORITY_LOWEST = 0.0;
 
-  public Priority(Integer priority) throws MasterException {
-    if (priority < 0 || priority > 100) {
+  private Double priority = 0d;
+
+  public Priority(Double priority) throws MasterException {
+    if (priority < PRIORITY_LOWEST || priority > PRIORITY_HIGHEST) {
       throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
           "Priority value must resides between 0 and 100");
     }
     this.priority = priority;
   }
 
-  public Integer getPriority() {
+  public Double getPriority() {
     return priority;
   }
 
-  public void setPriority(Integer priority) {
+  public void setPriority(Double priority) {
     this.priority = priority;
   }
 

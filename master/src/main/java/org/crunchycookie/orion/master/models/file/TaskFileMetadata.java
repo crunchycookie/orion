@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master.models;
+package org.crunchycookie.orion.master.models.file;
 
 import java.util.UUID;
 

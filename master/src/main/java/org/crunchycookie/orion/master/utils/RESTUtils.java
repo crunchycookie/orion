@@ -20,8 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
-import org.crunchycookie.orion.master.models.TaskFileStream;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.StreamingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.rest.model.TaskLimits;
@@ -33,6 +32,7 @@ public class RESTUtils {
 
   public enum ResourceParams {
     MEMORY,
+    DEADLINE, // Time as a resource.
     STORAGE;
   }
 

@@ -39,7 +39,7 @@ import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.TaskFileMetadata;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.StreamingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.service.store.CentralStore;
@@ -92,8 +92,8 @@ public class LocalStorageCentralStore implements CentralStore {
       properties.put("META.status", submittedTask.getStatus().getStatus().toString());
 
       // Persist resource limits.
-      properties.put("RESOURCE.LIMITS.MEMORY", submittedTask.getResourceRequirement("MEMORY"));
-      properties.put("RESOURCE.LIMITS.STORAGE", submittedTask.getResourceRequirement("STORAGE"));
+      properties.put("RESOURCE.LIMITS.MEMORY", submittedTask.getResourceRequirement(ResourceParams.MEMORY));
+      properties.put("RESOURCE.LIMITS.STORAGE", submittedTask.getResourceRequirement(ResourceParams.STORAGE));
 
       // Persist meta file.
       properties
