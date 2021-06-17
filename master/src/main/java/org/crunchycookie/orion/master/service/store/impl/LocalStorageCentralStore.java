@@ -39,9 +39,9 @@ import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.StreamingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.service.store.CentralStore;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
@@ -49,12 +49,33 @@ public class LocalStorageCentralStore implements CentralStore {
 
   private final String workspace;
 
-  public LocalStorageCentralStore() {
+  public enum LocalStorageCentralStoreSingleton {
+    INSTANCE;
+
+    private CentralStore centralStore;
+
+    LocalStorageCentralStoreSingleton() {
+      centralStore = new LocalStorageCentralStore();
+    }
+
+    public CentralStore get() {
+      return centralStore;
+    }
+  }
+
+  public static CentralStore getInstant() {
+
+    return LocalStorageCentralStoreSingleton.INSTANCE.get();
+  }
+
+  private LocalStorageCentralStore() {
 
     String workspaceFromConfigs = RESTfulEndpoint.configs
         .getConfig("LocalStorageCentralStore.workspace");
-    workspace = workspaceFromConfigs.endsWith(File.separator) ? workspaceFromConfigs
-        : workspaceFromConfigs + File.separator;
+    workspace = workspaceFromConfigs.endsWith(File.separator) ?
+        workspaceFromConfigs + "orion-workspace"
+        : workspaceFromConfigs + File.separator + "orion-workspace";
+    File new File(workspace + File.separator + "orion-workspace")
   }
 
   @Override

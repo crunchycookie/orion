@@ -57,6 +57,11 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
     }
   }
 
+  public static WorkerPoolManager getInstant() {
+
+    return DefaultWorkerPoolManagerSingleton.INSTANCE.get();
+  }
+
   @Override
   public void init() throws MasterException {
 

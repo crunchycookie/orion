@@ -23,6 +23,7 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolMana
 
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
+import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
@@ -46,6 +47,11 @@ public class DefaultTaskScheduler implements TaskScheduler {
     public TaskScheduler get() {
       return taskScheduler;
     }
+  }
+
+  public static TaskScheduler getInstant() {
+
+    return DefaultTaskSchedulerSingleton.INSTANCE.get();
   }
 
   @Override

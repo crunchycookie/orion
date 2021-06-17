@@ -24,6 +24,28 @@ import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 public class DefaultTaskCapacityValidator implements TaskCapacityValidator {
 
+  private DefaultTaskCapacityValidator() {
+  }
+
+  public enum DefaultTaskCapacityValidatorSingleton {
+    INSTANCE;
+
+    private TaskCapacityValidator taskCapacityValidator;
+
+    DefaultTaskCapacityValidatorSingleton() {
+      taskCapacityValidator = new DefaultTaskCapacityValidator();
+    }
+
+    public TaskCapacityValidator get() {
+      return taskCapacityValidator;
+    }
+  }
+
+  public static TaskCapacityValidator getInstant() {
+
+    return DefaultTaskCapacityValidatorSingleton.INSTANCE.get();
+  }
+
   @Override
   public boolean validate(SubmittedTask submittedTask, WorkerMetaData workerCapacity)
       throws MasterException {

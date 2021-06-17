@@ -28,6 +28,28 @@ import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
  */
 public class DefaultTaskPrioritizer implements TaskPrioritizer {
 
+  private DefaultTaskPrioritizer() {
+  }
+
+  public enum DefaultTaskPrioritizerSingleton {
+    INSTANCE;
+
+    private TaskPrioritizer taskPrioritizer;
+
+    DefaultTaskPrioritizerSingleton() {
+      taskPrioritizer = new DefaultTaskPrioritizer();
+    }
+
+    public TaskPrioritizer get() {
+      return taskPrioritizer;
+    }
+  }
+
+  public static TaskPrioritizer getInstant() {
+
+    return DefaultTaskPrioritizerSingleton.INSTANCE.get();
+  }
+
   @Override
   public Priority getPriority(SubmittedTask submittedTask) throws MasterException {
 

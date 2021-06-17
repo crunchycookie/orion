@@ -30,6 +30,28 @@ import org.crunchycookie.orion.master.service.worker.WorkerNode;
 
 public class DefaultTaskDistributor implements TaskDistributor {
 
+  private DefaultTaskDistributor() {
+  }
+
+  public enum DefaultTaskDistributorSingleton {
+    INSTANCE;
+
+    private TaskDistributor taskDistributor;
+
+    DefaultTaskDistributorSingleton() {
+      taskDistributor = new DefaultTaskDistributor();
+    }
+
+    public TaskDistributor get() {
+      return taskDistributor;
+    }
+  }
+
+  public static TaskDistributor getInstant() {
+
+    return DefaultTaskDistributorSingleton.INSTANCE.get();
+  }
+
   @Override
   public void distribute(SubmittedTask submittedTask) throws MasterException {
 

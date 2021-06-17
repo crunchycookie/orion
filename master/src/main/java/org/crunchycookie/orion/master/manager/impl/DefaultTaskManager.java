@@ -23,22 +23,30 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolMana
 import static org.crunchycookie.orion.master.utils.MasterUtils.handleClientExceptionScenario;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.models.file.TaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
+import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
+@Configuration
+@EnableScheduling
 public class DefaultTaskManager implements TaskManager {
 
-  private DefaultTaskManager() {
-  }
+//  private DefaultTaskManager() {
+//  }
 
   public enum DefaultTaskManagerSingleton {
     INSTANCE;
@@ -49,7 +57,13 @@ public class DefaultTaskManager implements TaskManager {
     }
   }
 
+  public static TaskManager getInstant() {
+
+    return DefaultTaskManagerSingleton.INSTANCE.get();
+  }
+
   @Override
+  @Scheduled(fixedDelay = 1000, initialDelay = 1000)
   public void sync() throws MasterException {
 
     // Obtain all in-progress tasks.
@@ -92,7 +106,15 @@ public class DefaultTaskManager implements TaskManager {
 
   @Override
   public WorkerMetaData getTaskLimitations() throws MasterException {
-    return null;
+
+    WorkerMetaData workerMetaData = new WorkerMetaData();
+    workerMetaData.setMaxResourceCapacities(
+        Map.of(
+            ResourceParams.MEMORY, RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.MEMORY"),
+            ResourceParams.STORAGE, RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.STORAGE")
+        )
+    );
+    return workerMetaData;
   }
 
   @Override

@@ -28,9 +28,14 @@ public class RESTfulEndpoint {
   public static void main(String[] args) {
 
     // Load configurations.
-    configs = new OrionConfigs(args[0]);
+    initConfigs(args[0]);
 
     // Start web server. Please refer org.crunchycookie.orion.master.rest.impl for services.
     SpringApplication.run(RESTfulEndpoint.class, args);
+  }
+
+  public static void initConfigs(String configFilePath) {
+
+    configs = new OrionConfigs(configFilePath);
   }
 }

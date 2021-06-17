@@ -16,15 +16,15 @@
 
 package org.crunchycookie.orion.master.utils;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
+import org.apache.commons.lang3.StringUtils;
+import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
-import org.crunchycookie.orion.master.manager.impl.DefaultTaskManager.DefaultTaskManagerSingleton;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.rest.model.Property;
@@ -33,7 +33,6 @@ import org.crunchycookie.orion.master.service.distributor.TaskDistributor;
 import org.crunchycookie.orion.master.service.manager.WorkerPoolManager;
 import org.crunchycookie.orion.master.service.prioratizer.TaskPrioritizer;
 import org.crunchycookie.orion.master.service.scheduler.TaskScheduler;
-import org.crunchycookie.orion.master.service.scheduler.impl.DefaultTaskScheduler.DefaultTaskSchedulerSingleton;
 import org.crunchycookie.orion.master.service.store.CentralStore;
 import org.crunchycookie.orion.master.service.validator.TaskCapacityValidator;
 import org.crunchycookie.orion.master.service.worker.WorkerNode.WorkerNodeStatus;
@@ -56,87 +55,44 @@ public class MasterUtils {
 
   public static TaskManager getTaskManager() throws MasterException {
 
-    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
-    Optional<TaskManager> taskManager = Optional.of(DefaultTaskManagerSingleton.INSTANCE.get());
-
-    if (taskManager.isEmpty()) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR, "Failed to obtain task manager");
-    }
-    return taskManager.get();
+    return getInstance("TaskManager",
+        "org.crunchycookie.orion.master.manager.impl.DefaultTaskManager");
   }
 
   public static TaskScheduler getTaskScheduler() throws MasterException {
 
-    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
-    Optional<TaskScheduler> TaskScheduler = Optional
-        .of(DefaultTaskSchedulerSingleton.INSTANCE.get());
-
-    if (TaskScheduler.isEmpty()) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
-          "Failed to obtain task scheduler");
-    }
-    return TaskScheduler.get();
+    return getInstance("TaskScheduler",
+        "org.crunchycookie.orion.master.manager.impl.DefaultTaskScheduler");
   }
 
   public static WorkerPoolManager getWorkerPoolManager() throws MasterException {
 
-    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
-    Optional<WorkerPoolManager> workerPoolManager = Optional
-        .empty();
-
-    if (workerPoolManager.isEmpty()) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
-          "Failed to obtain worker pool manager");
-    }
-    return workerPoolManager.get();
+    return getInstance("WorkerPoolManager",
+        "org.crunchycookie.orion.master.manager.impl.DefaultWorkerPoolManager");
   }
 
   public static TaskCapacityValidator getTaskCapacityValidator() throws MasterException {
 
-    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
-    Optional<TaskCapacityValidator> taskCapacityValidator = Optional.empty();
-
-    if (taskCapacityValidator.isEmpty()) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
-          "Failed to obtain task capacity validator");
-    }
-    return taskCapacityValidator.get();
+    return getInstance("TaskCapacityValidator",
+        "org.crunchycookie.orion.master.manager.impl.DefaultTaskCapacityValidator");
   }
 
   public static TaskPrioritizer getTaskPrioratizer() throws MasterException {
 
-    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
-    Optional<TaskPrioritizer> taskPrioritizer = Optional.empty();
-
-    if (taskPrioritizer.isEmpty()) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
-          "Failed to obtain the task prioratizer");
-    }
-    return taskPrioritizer.get();
+    return getInstance("TaskPrioritizer",
+        "org.crunchycookie.orion.master.manager.impl.DefaultTaskPrioritizer");
   }
 
   public static CentralStore getCentralStore() throws MasterException {
 
-    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
-    Optional<CentralStore> centralStore = Optional.empty();
-
-    if (centralStore.isEmpty()) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
-          "Failed to obtain the task prioratizer");
-    }
-    return centralStore.get();
+    return getInstance("CentralStore",
+        "org.crunchycookie.orion.master.manager.impl.LocalStorageCentralStore");
   }
 
   public static TaskDistributor getTaskDistributor() throws MasterException {
 
-    // Need to insert a pluggable mechanism. Until then, the default is hardcoded.
-    Optional<TaskDistributor> taskDistributor = Optional.empty();
-
-    if (taskDistributor.isEmpty()) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
-          "Failed to obtain the task distributor");
-    }
-    return taskDistributor.get();
+    return getInstance("TaskDistributor",
+        "org.crunchycookie.orion.master.manager.impl.DefaultTaskDistributor");
   }
 
   public static void handleClientExceptionScenario(String msg) throws MasterClientException {
@@ -151,5 +107,21 @@ public class MasterUtils {
       case DEAD, FAILED -> TaskStatus.FAILED;
       case IDLE -> TaskStatus.PENDING;
     };
+  }
+
+  public static <T> T getInstance(String serviceName, String defaultClassName)
+      throws MasterException {
+
+    String clazzName = RESTfulEndpoint.configs.getConfig(serviceName);
+    if (StringUtils.isBlank(clazzName)) {
+      clazzName = defaultClassName;
+    }
+    try {
+      Class<?> clazz = Class.forName(clazzName);
+      Method method = clazz.getMethod("getInstant");
+      return (T) method.invoke(null, null);
+    } catch (Exception e) {
+      throw new MasterException("Error while initiating");
+    }
   }
 }
