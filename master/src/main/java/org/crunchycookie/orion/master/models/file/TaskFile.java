@@ -14,23 +14,31 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master;
+package org.crunchycookie.orion.master.models.file;
 
-import org.crunchycookie.orion.master.config.OrionConfigs;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.io.InputStream;
+import org.crunchycookie.orion.master.models.TaskFileMetadata;
 
-@SpringBootApplication
-public class RESTfulEndpoint {
+public interface TaskFile {
 
-  public static OrionConfigs configs;
+  /**
+   * Get metadata.
+   *
+   * @return
+   */
+  TaskFileMetadata getMeta();
 
-  public static void main(String[] args) {
+  /**
+   * Get the next byte chunk. Once read, this stream becomes unavailable.
+   *
+   * @return
+   */
+  InputStream next();
 
-    // Load configurations.
-    configs = new OrionConfigs(args[0]);
-
-    // Start web server. Please refer org.crunchycookie.orion.master.rest.impl for services.
-    SpringApplication.run(RESTfulEndpoint.class, args);
-  }
+  /**
+   * Check for next byte availability.
+   *
+   * @return
+   */
+  boolean hasNext();
 }

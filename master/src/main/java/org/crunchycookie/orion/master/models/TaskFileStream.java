@@ -18,33 +18,16 @@ package org.crunchycookie.orion.master.models;
 
 import java.io.InputStream;
 
-public class TaskFile {
+public class TaskFileStream extends File {
 
-  private TaskFileMetadata metadata;
   private InputStream fileDataStream;
 
-  public TaskFile(TaskFileMetadata metadata, InputStream fileDataStream) {
-    this.metadata = metadata;
+  public TaskFileStream(TaskFileMetadata metadata, InputStream fileDataStream) {
+    super(metadata);
     this.fileDataStream = fileDataStream;
-  }
-
-  public TaskFile(TaskFileMetadata metadata) {
-    this.metadata = metadata;
-  }
-
-  public TaskFileMetadata getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(TaskFileMetadata metadata) {
-    this.metadata = metadata;
   }
 
   public InputStream getFileDataStream() {
     return fileDataStream;
-  }
-
-  public void setFileDataStream(InputStream fileDataStream) {
-    this.fileDataStream = fileDataStream;
   }
 }

@@ -22,7 +22,7 @@ import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.TaskFile;
+import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 
 /**
@@ -74,7 +74,7 @@ public interface CentralStore {
    * @param taskId
    * @return Task files. Throws a client exception if the task is still in-progress or failed.
    */
-  List<TaskFile> getFiles(UUID taskId, List<TaskFileMetadata> files) throws MasterException;
+  List<TaskFileStream> getFiles(UUID taskId, List<TaskFileMetadata> files) throws MasterException;
 
   /**
    * Remove the task.

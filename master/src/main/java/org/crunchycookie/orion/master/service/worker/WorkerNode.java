@@ -71,6 +71,7 @@ public interface WorkerNode {
     IDLE,
     EXECUTING,
     COMPLETED,
+    FAILED,
     DEAD
   }
 }

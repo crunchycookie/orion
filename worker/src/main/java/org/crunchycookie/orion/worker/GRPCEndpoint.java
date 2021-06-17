@@ -32,10 +32,12 @@ public class GRPCEndpoint {
   private final Server server;
 
   public GRPCEndpoint(int port) {
+
     this(ServerBuilder.forPort(port), port);
   }
 
   public GRPCEndpoint(ServerBuilder<?> serverBuilder, int port) {
+
     this.port = port;
     server = serverBuilder.addService(new WorkerService()).build();
   }

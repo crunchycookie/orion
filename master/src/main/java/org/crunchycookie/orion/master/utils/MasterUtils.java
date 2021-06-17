@@ -25,6 +25,7 @@ import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.manager.impl.DefaultTaskManager.DefaultTaskManagerSingleton;
+import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.rest.model.Property;
 import org.crunchycookie.orion.master.rest.model.TaskLimits;
@@ -35,6 +36,7 @@ import org.crunchycookie.orion.master.service.scheduler.TaskScheduler;
 import org.crunchycookie.orion.master.service.scheduler.impl.DefaultTaskScheduler.DefaultTaskSchedulerSingleton;
 import org.crunchycookie.orion.master.service.store.CentralStore;
 import org.crunchycookie.orion.master.service.validator.TaskCapacityValidator;
+import org.crunchycookie.orion.master.service.worker.WorkerNode.WorkerNodeStatus;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 public class MasterUtils {
@@ -139,5 +141,15 @@ public class MasterUtils {
 
   public static void handleClientExceptionScenario(String msg) throws MasterClientException {
     throw new MasterClientException(msg);
+  }
+
+  public static TaskStatus getTaskStatus(WorkerNodeStatus nodeStatus) {
+
+    return switch (nodeStatus) {
+      case EXECUTING -> TaskStatus.IN_PROGRESS;
+      case COMPLETED -> TaskStatus.SUCCESS;
+      case DEAD, FAILED -> TaskStatus.FAILED;
+      case IDLE -> TaskStatus.PENDING;
+    };
   }
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
+import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 /**
@@ -102,8 +103,8 @@ public class SubmittedTask {
     return taskFiles;
   }
 
-  public void setTaskFiles(List<TaskFile> taskFiles) {
-    this.taskFiles = taskFiles;
+  public void setTaskFiles(List<TaskFile> taskFileStreams) {
+    this.taskFiles = taskFileStreams;
   }
 
   public TaskFileMetadata getExecutable() {

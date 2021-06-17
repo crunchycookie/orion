@@ -21,7 +21,7 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskManager;
 import java.util.List;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterClientException;
-import org.crunchycookie.orion.master.models.TaskFile;
+import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.rest.api.TasksApiDelegate;
 import org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus;
@@ -43,8 +43,8 @@ public class TasksAPIImpl implements TasksApiDelegate {
           filename.split("\\.")[1],
           taskId
       );
-      List<TaskFile> taskFiles = getTaskManager().getFiles(taskId, List.of(taskFileMetadata));
-      return ResponseEntity.ok(new InputStreamResource(taskFiles.get(0).getFileDataStream()));
+      List<TaskFileStream> taskFileStreams = getTaskManager().getFiles(taskId, List.of(taskFileMetadata));
+      return ResponseEntity.ok(new InputStreamResource(taskFileStreams.get(0).getFileDataStream()));
     } catch (Throwable t) {
       if (t instanceof MasterClientException) {
         return switch (((MasterClientException) t).getErrorCode()) {

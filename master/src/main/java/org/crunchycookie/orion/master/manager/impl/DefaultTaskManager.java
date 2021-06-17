@@ -31,7 +31,7 @@ import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.TaskFile;
+import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 
@@ -121,7 +121,7 @@ public class DefaultTaskManager implements TaskManager {
   }
 
   @Override
-  public List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
+  public List<TaskFileStream> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException {
 
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);

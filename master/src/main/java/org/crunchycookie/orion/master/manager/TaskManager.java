@@ -21,7 +21,7 @@ import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
-import org.crunchycookie.orion.master.models.TaskFile;
+import org.crunchycookie.orion.master.models.TaskFileStream;
 import org.crunchycookie.orion.master.models.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 
@@ -68,7 +68,7 @@ public interface TaskManager {
    * @param fileInformation Metadata of the files requesting.
    * @return Requested files.
    */
-  List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
+  List<TaskFileStream> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException;
 
   /**

@@ -28,7 +28,8 @@ public class MasterConstants {
 
     INTERNAL_SERVER_ERROR("00000", "Unexpected error occurred"),
     ERROR_FILE_DOWNLOAD_STILL_IN_PROGRESS("00001", "Task is still in-progress"),
-    ERROR_FILE_DOWNLOAD_FAILED("00002", "Task is still in-progress");
+    ERROR_FILE_DOWNLOAD_FAILED("00002", "Task is still in-progress"),
+    ERROR_COM_WORKER_METHOD_INVOCATION_FAILED("00003", "Communication with a worker node failed");
 
     private String code;
     private String message;

@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master;
+package org.crunchycookie.orion.master.models;
 
-import org.crunchycookie.orion.master.config.OrionConfigs;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+public class File {
 
-@SpringBootApplication
-public class RESTfulEndpoint {
+  // File is represented as meta+data_stream.
+  private TaskFileMetadata metadata;
 
-  public static OrionConfigs configs;
+  public TaskFileMetadata getMetadata() {
+    return metadata;
+  }
 
-  public static void main(String[] args) {
-
-    // Load configurations.
-    configs = new OrionConfigs(args[0]);
-
-    // Start web server. Please refer org.crunchycookie.orion.master.rest.impl for services.
-    SpringApplication.run(RESTfulEndpoint.class, args);
+  public File(TaskFileMetadata metadata) {
+    this.metadata = metadata;
   }
 }

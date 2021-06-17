@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.master.service.manager.impl;
 
+import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskStatus;
+
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
@@ -145,16 +147,6 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
         .filter(n -> n.getTaskId().equals(st.getTaskId()))
         .findFirst();
     return matchingNode;
-  }
-
-  private TaskStatus getTaskStatus(WorkerNodeStatus nodeStatus) {
-
-    return switch (nodeStatus) {
-      case EXECUTING -> TaskStatus.IN_PROGRESS;
-      case COMPLETED -> TaskStatus.SUCCESS;
-      case DEAD -> TaskStatus.FAILED;
-      case IDLE -> TaskStatus.PENDING;
-    };
   }
 
   private void discoverAndRegisterWorkerNodes() throws MasterException {

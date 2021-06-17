@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package org.crunchycookie.orion.master;
+package org.crunchycookie.orion.master.models;
 
-import org.crunchycookie.orion.master.config.OrionConfigs;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.util.Iterator;
+import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
 
-@SpringBootApplication
-public class RESTfulEndpoint {
+public class TaskFileIterated extends File {
 
-  public static OrionConfigs configs;
+  private Iterator<Result> iterator;
 
-  public static void main(String[] args) {
+  public TaskFileIterated(TaskFileMetadata metadata, Iterator<Result> iterator) {
+    super(metadata);
+    this.iterator = iterator;
+  }
 
-    // Load configurations.
-    configs = new OrionConfigs(args[0]);
-
-    // Start web server. Please refer org.crunchycookie.orion.master.rest.impl for services.
-    SpringApplication.run(RESTfulEndpoint.class, args);
+  public Iterator<Result> getIterator() {
+    return iterator;
   }
 }
