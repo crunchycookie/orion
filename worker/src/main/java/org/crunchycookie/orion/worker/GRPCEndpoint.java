@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.worker;
 
+import static org.crunchycookie.orion.worker.WorkerService.logMessage;
+
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
@@ -47,7 +49,7 @@ public class GRPCEndpoint {
    */
   public void start() throws IOException {
     server.start();
-    LOG.info("Worker Server started, listening on " + port);
+    logMessage("Worker Server started, listening on " + port);
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       // Use stderr here since the logger may have been reset by its JVM shutdown hook.
       LOG.error("*** shutting down Worker server since JVM is shutting down");
@@ -69,7 +71,7 @@ public class GRPCEndpoint {
   /**
    * Await termination on the main thread since the grpc library uses daemon threads.
    */
-  private void blockUntilShutdown() throws InterruptedException {
+  public void blockUntilShutdown() throws InterruptedException {
     if (server != null) {
       server.awaitTermination();
     }

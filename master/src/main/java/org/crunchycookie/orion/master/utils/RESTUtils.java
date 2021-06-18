@@ -45,7 +45,7 @@ public class RESTUtils {
 
     List<TaskFile> taskFiles = new ArrayList<>();
     for (MultipartFile file : files) {
-      String[] splittedFileName = file.getName().split("\\.");
+      String[] splittedFileName = file.getOriginalFilename().split("\\.");
       taskFiles.add(new StreamingTaskFile(
           new TaskFileMetadata(
               splittedFileName[0],

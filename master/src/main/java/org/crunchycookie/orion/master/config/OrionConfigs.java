@@ -91,7 +91,7 @@ public class OrionConfigs {
 
   private void populateWorkerCapacity(Properties orionConfigs) {
     WorkerMetaData workerMeta = new WorkerMetaData();
-    String capacityPrefix = "WorkerNode\\.capacity\\.";
+    String capacityPrefix = "WorkerNode.capacity.";
     workerMeta.setMaxResourceCapacities(Arrays.stream(ResourceParams.values())
         .map(param -> {
           String value = orionConfigs.getProperty(capacityPrefix + param);

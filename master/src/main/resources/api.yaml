@@ -59,17 +59,13 @@ paths:
                   type: string
                   description: name of the executable script
                 outputFiles:
-                  type: array
+                  type: string
                   description: names of the output files required after execution
-                  items:
-                    type: string
                 resourceRequirements:
-                  type: array
-                  items:
-                    type: string
-                    description: |
-                      <resource-type>=<upper-limit-in-GBs>. Currently supported resource types: ram, storage
-                    example: ram=2
+                  type: string
+                  description: |
+                    <resource-type>=<upper-limit-in-GBs>. Currently supported resource types: ram, storage
+                  example: ram=2
                 filename:
                   type: array
                   items:

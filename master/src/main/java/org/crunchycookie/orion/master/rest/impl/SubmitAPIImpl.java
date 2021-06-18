@@ -17,6 +17,7 @@
 package org.crunchycookie.orion.master.rest.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,9 +25,9 @@ import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
-import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.IteratingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.rest.api.SubmitApiDelegate;
 import org.crunchycookie.orion.master.rest.model.SubmittedTask;
 import org.crunchycookie.orion.master.utils.MasterUtils;
@@ -42,7 +43,7 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
 
   @Override
   public ResponseEntity<SubmittedTask> submitTask(String executableShellScript,
-      List<String> outputFiles, List<String> resourceRequirements, List<MultipartFile> filename) {
+      String outputFiles, String resourceRequirements, List<MultipartFile> filename) {
 
     try {
       // Build parameters.
@@ -83,9 +84,10 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
     }
   }
 
-  private void populateOutputFiles(List<String> outputFiles, UUID taskId,
+  private void populateOutputFiles(String outputFiles, UUID taskId,
       org.crunchycookie.orion.master.models.SubmittedTask submittedTask) {
-    List<TaskFile> outputTaskFiles = outputFiles.stream()
+
+    List<TaskFile> outputTaskFiles = Arrays.stream(outputFiles.split(","))
         .map(s -> {
           TaskFileMetadata meta = new TaskFileMetadata(
               s.split("\\.")[0],
@@ -103,8 +105,10 @@ public class SubmitAPIImpl implements SubmitApiDelegate {
 
   private void populateResourceRequirements(
       org.crunchycookie.orion.master.models.SubmittedTask submittedTask,
-      List<String> resourceRequirements) throws MasterException {
+      String requirements) throws MasterException {
 
+    List<String> resourceRequirements = Arrays.stream(requirements.split(","))
+        .collect(Collectors.toList());
     for (String resourceRequirement : resourceRequirements) {
       String[] resourceRequirementSplitted = resourceRequirement.split("=");
       ResourceParams requirement;

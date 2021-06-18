@@ -17,16 +17,17 @@
 package org.crunchycookie.orion.master.models.file;
 
 import java.io.InputStream;
-import java.util.PriorityQueue;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StreamingTaskFile implements TaskFile {
 
-  private final PriorityQueue<InputStream> queue = new PriorityQueue<>();
+  private final List<InputStream> list = new ArrayList<>();
   TaskFileMetadata meta;
 
   public StreamingTaskFile(TaskFileMetadata meta, InputStream fileStream) {
     this.meta = meta;
-    queue.add(fileStream);
+    list.add(fileStream);
   }
 
   @Override
@@ -36,7 +37,7 @@ public class StreamingTaskFile implements TaskFile {
 
   @Override
   public InputStream next() {
-    return queue.remove();
+    return list.remove(0);
   }
 
   @Override

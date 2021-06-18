@@ -114,6 +114,12 @@
         <version>${junit.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.junit.vintage</groupId>
+        <artifactId>junit-vintage-engine</artifactId>
+        <scope>test</scope>
+        <version>${junit.version}</version>
+      </dependency>
+      <dependency>
         <artifactId>mockito-core</artifactId>
         <groupId>org.mockito</groupId>
         <version>${mockito-core.version}</version>

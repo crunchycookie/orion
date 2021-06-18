@@ -17,6 +17,7 @@
 package org.crunchycookie.orion.master.service.prioratizer.impl;
 
 import java.time.Instant;
+import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.models.SubmittedTask;
@@ -56,10 +57,15 @@ public class DefaultTaskPrioritizer implements TaskPrioritizer {
     // Deadline is in UTC.
     Instant deadline = Instant.parse(submittedTask.getResourceRequirement(ResourceParams.DEADLINE));
 
-    // Convert deadline to millis and derive priority value.
-    double now = Instant.now().toEpochMilli();
-    double priorityValue = ((Instant.MAX.toEpochMilli() - deadline.toEpochMilli()) * 100.0)
-        / (Instant.MAX.toEpochMilli() - now);
-    return new Priority(priorityValue);
+    Instant now = Instant.now();
+
+    if (deadline.isBefore(now)) {
+      throw new MasterClientException("Invalid deadline");
+    }
+
+    // Lowest value means highest priority.
+    return new Priority(Long.valueOf((
+        deadline.toEpochMilli() - Instant.parse("2020-01-01T20:34:11Z").toEpochMilli()
+    )).doubleValue());
   }
 }

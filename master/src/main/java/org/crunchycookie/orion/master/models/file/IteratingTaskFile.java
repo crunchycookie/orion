@@ -38,11 +38,14 @@ public class IteratingTaskFile implements TaskFile {
 
   @Override
   public InputStream next() {
+    if (iterator == null) {
+      return null;
+    }
     return new ByteArrayInputStream(iterator.next().getOutputFile().getContent().toByteArray());
   }
 
   @Override
   public boolean hasNext() {
-    return iterator.hasNext();
+    return iterator != null && iterator.hasNext();
   }
 }

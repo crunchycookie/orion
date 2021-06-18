@@ -19,6 +19,8 @@ package org.crunchycookie.orion.master;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.util.List;
+import org.crunchycookie.orion.master.manager.impl.DefaultTaskManager;
+import org.crunchycookie.orion.master.rest.impl.SubmitAPIImpl;
 import org.crunchycookie.orion.master.rest.impl.TaskLimitsAPIImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,7 +45,13 @@ public class RESTfulEndpointTest {
   private TestRestTemplate restTemplate;
 
   @Autowired
+  private DefaultTaskManager defaultTaskManager;
+
+  @Autowired
   private TaskLimitsAPIImpl taskLimitsAPIImpl;
+
+  @Autowired
+  private SubmitAPIImpl submitAPIImpl;
 
   @BeforeAll
   public static void setup() {
@@ -51,7 +59,7 @@ public class RESTfulEndpointTest {
   }
 
   @Test
-  public void testTaskLimits() throws Exception {
+  public void taskLimitsTest() {
 
     // Call API and obtain response.
     String taskLimitsAPI = URL_PREFIX + port + URL_PATH_API_TASK_LIMITS;

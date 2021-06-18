@@ -20,20 +20,13 @@ import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
 import org.crunchycookie.orion.master.exception.MasterException;
 
 /**
- * This class represent a priority value. Priority is rated between 0-100 in the ascending order.
+ * This class represent a priority value.
  */
 public class Priority implements Comparable<Priority> {
-
-  public final static double PRIORITY_HIGHEST = 100.0;
-  public final static double PRIORITY_LOWEST = 0.0;
 
   private Double priority = 0d;
 
   public Priority(Double priority) throws MasterException {
-    if (priority < PRIORITY_LOWEST || priority > PRIORITY_HIGHEST) {
-      throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR,
-          "Priority value must resides between 0 and 100");
-    }
     this.priority = priority;
   }
 

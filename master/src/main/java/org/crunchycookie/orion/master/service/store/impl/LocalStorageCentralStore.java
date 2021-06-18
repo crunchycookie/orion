@@ -104,12 +104,12 @@ public class LocalStorageCentralStore implements CentralStore {
 
       // Create input files folder.
       File inputFilesFolder = forceCreate(
-          taskFolderPath.getAbsolutePath() + File.separator + "inputs");
+          submittedTask.getTaskId() + File.separator + "inputs");
       storeFiles(submittedTask.getTaskFiles(), inputFilesFolder);
 
       // Create output files folder.
       File outputsFilesFolder = forceCreate(
-          taskFolderPath.getAbsolutePath() + File.separator + "outputs");
+          submittedTask.getTaskId() + File.separator + "outputs");
       storeFiles(submittedTask.getOutputFiles(), outputsFilesFolder);
 
       // Persist metadata.
@@ -117,7 +117,7 @@ public class LocalStorageCentralStore implements CentralStore {
 
       // Persist meta.
       properties.put("META.task-id", submittedTask.getTaskId().toString());
-      properties.put("META.worker-id", submittedTask.getWorkerId().toString());
+      properties.put("META.worker-id", getString(submittedTask.getWorkerId()));
       properties.put("META.executable-file", submittedTask.getExecutable().toString());
       properties.put("META.status", submittedTask.getStatus().getStatus().toString());
 
@@ -134,6 +134,11 @@ public class LocalStorageCentralStore implements CentralStore {
       // TODO: 2021-06-17 Add error code
       throw new MasterException("Failed to create file IOs", e);
     }
+  }
+
+  private String getString(UUID id) {
+
+    return id == null ? "" : id.toString();
   }
 
   @Override

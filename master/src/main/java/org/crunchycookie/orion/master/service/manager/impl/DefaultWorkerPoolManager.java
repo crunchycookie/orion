@@ -40,7 +40,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   List<WorkerNodeDiscoveryInfo> registeredWorkerNodesInfo;
   List<WorkerNode> registeredNodes = new ArrayList<>();
 
-  private DefaultWorkerPoolManager() {
+  public DefaultWorkerPoolManager() {
   }
 
   public enum DefaultWorkerPoolManagerSingleton {
