@@ -73,9 +73,18 @@ public class LocalStorageCentralStore implements CentralStore {
     String workspaceFromConfigs = RESTfulEndpoint.configs
         .getConfig("LocalStorageCentralStore.workspace");
     workspace = workspaceFromConfigs.endsWith(File.separator) ?
-        workspaceFromConfigs + "orion-workspace"
-        : workspaceFromConfigs + File.separator + "orion-workspace";
-    File new File(workspace + File.separator + "orion-workspace")
+        workspaceFromConfigs + "orion-workspace" + File.separator
+        : workspaceFromConfigs + File.separator + "orion-workspace" + File.separator;
+
+    // Create an isolated directory for the storage.
+    File isolatedWorkspace = new File(workspace);
+    try {
+      if (!isolatedWorkspace.exists()) {
+        FileUtils.forceMkdir(isolatedWorkspace);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Failed during initialization");
+    }
   }
 
   @Override
@@ -113,8 +122,10 @@ public class LocalStorageCentralStore implements CentralStore {
       properties.put("META.status", submittedTask.getStatus().getStatus().toString());
 
       // Persist resource limits.
-      properties.put("RESOURCE.LIMITS.MEMORY", submittedTask.getResourceRequirement(ResourceParams.MEMORY));
-      properties.put("RESOURCE.LIMITS.STORAGE", submittedTask.getResourceRequirement(ResourceParams.STORAGE));
+      properties.put("RESOURCE.LIMITS.MEMORY",
+          submittedTask.getResourceRequirement(ResourceParams.MEMORY));
+      properties.put("RESOURCE.LIMITS.STORAGE",
+          submittedTask.getResourceRequirement(ResourceParams.STORAGE));
 
       // Persist meta file.
       properties

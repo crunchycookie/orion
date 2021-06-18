@@ -38,7 +38,7 @@ import org.crunchycookie.orion.master.service.worker.WorkerNode.WorkerNodeStatus
 public class DefaultWorkerPoolManager implements WorkerPoolManager {
 
   List<WorkerNodeDiscoveryInfo> registeredWorkerNodesInfo;
-  List<WorkerNode> registeredNodes;
+  List<WorkerNode> registeredNodes = new ArrayList<>();
 
   private DefaultWorkerPoolManager() {
   }

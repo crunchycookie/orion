@@ -22,10 +22,14 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskScheduler;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolManager;
 import static org.crunchycookie.orion.master.utils.MasterUtils.handleClientExceptionScenario;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
@@ -36,6 +40,7 @@ import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
+import org.crunchycookie.orion.master.utils.MasterUtils;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -45,8 +50,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class DefaultTaskManager implements TaskManager {
 
-//  private DefaultTaskManager() {
-//  }
+  private static final Logger LOG = LogManager.getLogger(DefaultTaskManager.class);
 
   public enum DefaultTaskManagerSingleton {
     INSTANCE;
@@ -63,8 +67,10 @@ public class DefaultTaskManager implements TaskManager {
   }
 
   @Override
-  @Scheduled(fixedDelay = 1000, initialDelay = 1000)
+  @Scheduled(fixedDelay = 2000, initialDelay = 1000)
   public void sync() throws MasterException {
+
+    Instant syncStart = Instant.now();
 
     // Obtain all in-progress tasks.
     List<SubmittedTask> inProgressTasks = getCentralStore().get(TaskStatus.IN_PROGRESS);
@@ -99,9 +105,16 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     // Obtain next scheduled task and ask task distributor to distribute it.
-    getTaskDistributor().distribute(
-        getCentralStore().get(getTaskScheduler().next())
-    );
+    if (getTaskScheduler().next().isPresent()) {
+      getTaskDistributor().distribute(getCentralStore().get(
+          getTaskScheduler().next().get()
+      ));
+    }
+
+    Instant syncCompletion = Instant.now();
+    if (MasterUtils.isDebugEnabled(LOG)) {
+      LOG.info("Synced in " + ChronoUnit.MILLIS.between(syncStart, syncCompletion) / 1000);
+    }
   }
 
   @Override

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
@@ -123,5 +124,9 @@ public class MasterUtils {
     } catch (Exception e) {
       throw new MasterException("Error while initiating");
     }
+  }
+
+  public static boolean isDebugEnabled(Logger LOG) {
+    return Boolean.parseBoolean(RESTfulEndpoint.configs.getConfig("Log.debug"));
   }
 }

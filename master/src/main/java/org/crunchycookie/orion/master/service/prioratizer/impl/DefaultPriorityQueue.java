@@ -16,22 +16,21 @@
 
 package org.crunchycookie.orion.master.service.prioratizer.impl;
 
-import static org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes.INTERNAL_SERVER_ERROR;
-
 import java.util.Comparator;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.PriorityBlockingQueue;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.service.prioratizer.PriorityQueue;
 
 public class DefaultPriorityQueue implements PriorityQueue {
 
-  private final PriorityBlockingQueue<PrioratizedTask> priorityBlockingQueue;
+  private final java.util.PriorityQueue<PrioratizedTask> priorityQueue;
 
   public DefaultPriorityQueue() {
     int MAX_NUMBER_OF_TASKS = 100;
-    priorityBlockingQueue = new PriorityBlockingQueue<>(
+    priorityQueue = new java.util.PriorityQueue<>(
         MAX_NUMBER_OF_TASKS,
         Comparator.comparing(PrioratizedTask::getPriority)
     );
@@ -58,16 +57,15 @@ public class DefaultPriorityQueue implements PriorityQueue {
 
   @Override
   public void insert(UUID taskId, Priority priority) {
-    this.priorityBlockingQueue.add(new PrioratizedTask(taskId, priority));
+    this.priorityQueue.add(new PrioratizedTask(taskId, priority));
   }
 
   @Override
-  public UUID next() throws MasterException {
+  public Optional<UUID> next() throws MasterException {
     try {
-      return this.priorityBlockingQueue.take().getTaskId();
-    } catch (InterruptedException e) {
-      throw new MasterException(INTERNAL_SERVER_ERROR,
-          "Obtaining an element from the priority queue was interrupted");
+      return Optional.of(this.priorityQueue.remove().getTaskId());
+    } catch (NoSuchElementException e) {
+      return Optional.empty();
     }
   }
 }

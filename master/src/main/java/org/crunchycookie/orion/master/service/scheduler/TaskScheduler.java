@@ -16,6 +16,7 @@
 
 package org.crunchycookie.orion.master.service.scheduler;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
@@ -41,5 +42,5 @@ public interface TaskScheduler {
    *
    * @return
    */
-  UUID next() throws MasterException;
+  Optional<UUID> next() throws MasterException;
 }

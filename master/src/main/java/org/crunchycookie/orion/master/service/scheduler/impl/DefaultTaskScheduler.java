@@ -21,6 +21,7 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskCapacityVa
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskPrioratizer;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolManager;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
@@ -55,7 +56,7 @@ public class DefaultTaskScheduler implements TaskScheduler {
   }
 
   @Override
-  public UUID next() throws MasterException {
+  public Optional<UUID> next() throws MasterException {
 
     return priorityQueue.next();
   }

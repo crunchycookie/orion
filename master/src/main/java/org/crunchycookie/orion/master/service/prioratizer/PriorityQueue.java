@@ -16,6 +16,7 @@
 
 package org.crunchycookie.orion.master.service.prioratizer;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
@@ -39,5 +40,5 @@ public interface PriorityQueue {
    *
    * @return Unique Id of the task.
    */
-  UUID next() throws MasterException;
+  Optional<UUID> next() throws MasterException;
 }
