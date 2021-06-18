@@ -16,51 +16,56 @@
 
 package org.crunchycookie.orion.master;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.crunchycookie.orion.master.config.OrionConfigs;
 import org.crunchycookie.orion.master.rest.impl.TaskLimitsAPIImpl;
-import org.crunchycookie.orion.master.rest.model.Property;
-import org.crunchycookie.orion.master.service.worker.WorkerNode;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class RESTfulEndpointTest {
 
-  private static OrionConfigs configs;
+  private static final String URL_PREFIX = "http://localhost:";
+  private static final String URL_PATH_PREFIX = "/orion/v0.1/";
+  private static final String URL_PATH_API_TASK_LIMITS = URL_PATH_PREFIX + "task-limits";
 
-  @Mock
-  WorkerNode workerNode;
+  @LocalServerPort
+  private int port;
 
-  @InjectMocks
-  TaskLimitsAPIImpl taskLimitsAPIImpl;
+  @Autowired
+  private TestRestTemplate restTemplate;
 
-  @BeforeClass
+  @Autowired
+  private TaskLimitsAPIImpl taskLimitsAPIImpl;
+
+  @BeforeAll
   public static void setup() {
     RESTfulEndpoint.initConfigs("orion-master.properties");
   }
 
   @Test
-  public void testGetTaskLimitations() {
+  public void testTaskLimits() throws Exception {
 
-    List<Property> limits = taskLimitsAPIImpl.getTaskLimitations().getBody().getLimits();
-    Assert.assertEquals(RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.MEMORY"),
-        limits.stream()
-            .filter(p -> p.getKey().equals("MEMORY"))
-            .map(Property::getValue)
-            .collect(Collectors.toList())
-            .get(0));
-    Assert.assertEquals(RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.STORAGE"),
-        limits.stream()
-            .filter(p -> p.getKey().equals("STORAGE"))
-            .map(Property::getValue)
-            .collect(Collectors.toList())
-            .get(0));
+    // Call API and obtain response.
+    String taskLimitsAPI = URL_PREFIX + port + URL_PATH_API_TASK_LIMITS;
+    String responseBody = this.restTemplate.getForObject(
+        taskLimitsAPI,
+        String.class
+    );
+
+    // Assert response.
+    JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
+    responseJson.getAsJsonArray("limits").iterator().forEachRemaining(jsonElement ->
+        Assertions.assertTrue(List.of("MEMORY", "STORAGE")
+            .contains(jsonElement.getAsJsonObject().get("key").getAsString())
+        )
+    );
   }
 }
