@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
@@ -152,6 +153,10 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
   public OperationStatus getStatus(FileMetaData executableFile)
       throws WorkerServerException {
 
+    if (StringUtils.isBlank(executableFile.getTaskId())) {
+      // TODO: 2021-06-20 check ledger and obtain status of all the executing tasks.
+    }
+
     Process executableTask = getTaskFromLedger(executableFile);
     if (executableTask == null || !executableTask.isAlive()) {
       return OperationStatus.IDLE;
@@ -204,6 +209,11 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
   }
 
   private Process getTaskFromLedger(FileMetaData executableFile) {
+    return tasksLedger.get(getUniqueTaskId(executableFile));
+  }
+
+  private Process getTaskFromLedger() {
+
     return tasksLedger.get(getUniqueTaskId(executableFile));
   }
 

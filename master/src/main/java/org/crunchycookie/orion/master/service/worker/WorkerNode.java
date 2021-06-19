@@ -50,16 +50,18 @@ public interface WorkerNode {
    * include all the output files created during task execution. An excemption is thrown if there is
    * no task submitted.
    *
+   * @param submittedTask The task which was submitted to this node.
+   * @return The task obtained from the worker node. This has output files from the execution, etc.
    * @throws MasterException
    */
-  SubmittedTask obtain() throws MasterException;
+  SubmittedTask obtain(SubmittedTask submittedTask) throws MasterException;
 
   /**
-   * Get current status of the node.
+   * Get the current status of the submitted task in node.
    *
    * @return
    */
-  WorkerNodeStatus getStatus();
+  WorkerNodeStatus getStatus(SubmittedTask submittedTask);
 
   /**
    * Get the unique id of the node.
@@ -67,11 +69,4 @@ public interface WorkerNode {
    * @return
    */
   String getId();
-
-  /**
-   * Get the unique ID of the submitted task. returns empty if the node isn't running a task.
-   *
-   * @return
-   */
-  Optional<UUID> getTaskId();
 }

@@ -19,14 +19,12 @@ package org.crunchycookie.orion.master.service.worker.impl.grpc;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskStatus;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
-import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.TaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.service.worker.WorkerNode;
 
 /**
@@ -35,10 +33,10 @@ import org.crunchycookie.orion.master.service.worker.WorkerNode;
 public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
 
   private String id;
-  private UUID taskId;
-  private TaskFileMetadata executable;
-  private List<TaskFileMetadata> inputFiles;
-  private List<TaskFileMetadata> outputFiles;
+//  private UUID taskId;
+//  private TaskFileMetadata executable;
+//  private List<TaskFileMetadata> inputFiles;
+//  private List<TaskFileMetadata> outputFiles;
 
   public GRPCWorkerNode(String host, String port) {
 
@@ -55,36 +53,35 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
 
     upload(submittedTask.getTaskFiles());
     execute(submittedTask.getExecutable());
-
-    updateNodeStatus(submittedTask);
   }
 
   @Override
-  public SubmittedTask obtain() throws MasterException {
+  public SubmittedTask obtain(SubmittedTask submittedTask) throws MasterException {
 
     // Downloading files may change the status in the worker, thus obtaining it first.
-    WorkerNodeStatus status = getStatus();
+    WorkerNodeStatus status = getStatus(submittedTask);
 
-    SubmittedTask submittedTask = new SubmittedTask(taskId, download(inputFiles), executable);
-    submittedTask.setOutputFiles(download(outputFiles));
-    submittedTask.setStatus(new SubmittedTaskStatus(taskId, getTaskStatus(status)));
+    // Download files from the worker.
+    List<TaskFile> downloadedInputFiles = download(submittedTask.getTaskFiles().stream()
+        .map(TaskFile::getMeta).collect(Collectors.toList()));
+    List<TaskFile> downloadedOutputFiles = download(submittedTask.getOutputFiles().stream()
+        .map(TaskFile::getMeta).collect(Collectors.toList()));
 
-    // Mark node for a new task.
-    cleanupNode();
+    // Update the task.
+    submittedTask.setTaskFiles(downloadedInputFiles);
+    submittedTask.setOutputFiles(downloadedOutputFiles);
+    submittedTask.setStatus(new SubmittedTaskStatus(
+        submittedTask.getTaskId(),
+        getTaskStatus(status)
+    ));
 
     return submittedTask;
   }
 
-  private void cleanupNode() {
-    taskId = null;
-    inputFiles = null;
-    executable = null;
-    outputFiles = null;
-  }
-
   @Override
-  public WorkerNodeStatus getStatus() {
+  public WorkerNodeStatus getStatus(SubmittedTask submittedTask) {
 
+    TaskFileMetadata executable = submittedTask.getExecutable();
     TaskFileMetadata taskToCheckStatus = executable != null ? executable : new TaskFileMetadata(
         "",
         "",
@@ -99,19 +96,19 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
     return this.id;
   }
 
-  @Override
-  public Optional<UUID> getTaskId() {
+//  @Override
+//  public Optional<UUID> getTaskId() {
+//
+//    return taskId != null ? Optional.of(taskId) : Optional.empty();
+//  }
 
-    return taskId != null ? Optional.of(taskId) : Optional.empty();
-  }
-
-  private void updateNodeStatus(SubmittedTask submittedTask) {
-
-    this.taskId = submittedTask.getTaskId();
-    this.executable = submittedTask.getExecutable();
-    this.outputFiles = submittedTask.getOutputFiles().stream().map(TaskFile::getMeta).collect(
-        Collectors.toList());
-    this.inputFiles = submittedTask.getTaskFiles().stream().map(TaskFile::getMeta).collect(
-        Collectors.toList());
-  }
+//  private void updateNodeStatus(SubmittedTask submittedTask) {
+//
+//    this.taskId = submittedTask.getTaskId();
+//    this.executable = submittedTask.getExecutable();
+//    this.outputFiles = submittedTask.getOutputFiles().stream().map(TaskFile::getMeta).collect(
+//        Collectors.toList());
+//    this.inputFiles = submittedTask.getTaskFiles().stream().map(TaskFile::getMeta).collect(
+//        Collectors.toList());
+//  }
 }

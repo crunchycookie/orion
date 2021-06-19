@@ -73,15 +73,19 @@ public class DefaultTaskManager implements TaskManager {
 
     Instant syncStart = Instant.now();
 
-    // Obtain all in-progress tasks.
-    List<SubmittedTask> inProgressTasks = getCentralStore().get(TaskStatus.IN_PROGRESS);
+    // Obtain all in-progress tasks from the central store.
+    List<SubmittedTask> tasksMarkedAsInProgress = getCentralStore().get(TaskStatus.IN_PROGRESS);
 
-    // Get the current status of those tasks.
-    List<SubmittedTaskStatus> latestStatus = getWorkerPoolManager().getStatus(inProgressTasks);
+    // Get the current status of those tasks from worker pool.
+    List<SubmittedTaskStatus> latestStatus = getWorkerPoolManager()
+        .getStatus(tasksMarkedAsInProgress);
 
-    // Figure out what are the current success tasks, and obtain them from the worker nodes.
-    List<SubmittedTask> successTasks = getTasksFromWorkerNodes(inProgressTasks, latestStatus,
+    // Filter successful status, and obtain their corresponding tasks.
+    List<SubmittedTask> successfulTasks = getFilteredTasks(tasksMarkedAsInProgress, latestStatus,
         TaskStatus.SUCCESS);
+
+    // Retrieve them from the worker pool.
+    List<SubmittedTask> successTasks = getTasksFromWorkerPool(successfulTasks);
 
     /*
      Store success tasks in the central store. This will replace the existing entry thus now
@@ -93,7 +97,7 @@ public class DefaultTaskManager implements TaskManager {
      Get the list of failed tasks. The returned SubmittedTask object will only include the task id
      since the worker failed thus being unable to obtain files.
      */
-    List<SubmittedTask> failedTasks = getTasksFromWorkerNodes(inProgressTasks, latestStatus,
+    List<SubmittedTask> failedTasks = getTasksFromWorkerPool(tasksMarkedAsInProgress, latestStatus,
         TaskStatus.FAILED);
 
     // Now lets update the failed tasks from the proper objects in the central store.
@@ -118,6 +122,23 @@ public class DefaultTaskManager implements TaskManager {
     if (MasterUtils.isDebugEnabled(LOG)) {
       LOG.info("Synced in " + ChronoUnit.MILLIS.between(syncStart, syncCompletion) / 1000);
     }
+  }
+
+  private List<SubmittedTask> getFilteredTasks(List<SubmittedTask> tasksMarkedAsInProgress,
+      List<SubmittedTaskStatus> latestStatus, TaskStatus requiredStatus) {
+
+    // Filter required status.
+    List<SubmittedTaskStatus> filteredStatus = latestStatus.stream()
+        .filter(status -> status.getStatus().equals(requiredStatus))
+        .collect(Collectors.toList());
+
+    // Match and obtain corresponding tasks for them.
+    List<SubmittedTask> filteredTasks = tasksMarkedAsInProgress.stream()
+        .filter(t -> filteredStatus.stream().anyMatch(
+            status -> status.getTaskId().equals(t.getTaskId())
+        )).collect(Collectors.toList());
+
+    return filteredTasks;
   }
 
   @Override
@@ -157,19 +178,10 @@ public class DefaultTaskManager implements TaskManager {
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);
   }
 
-  private List<SubmittedTask> getTasksFromWorkerNodes(
-      List<SubmittedTask> tasksPreviouslyMarkedAsInProgress,
-      List<SubmittedTaskStatus> latestStatus, TaskStatus requiredStatus) throws MasterException {
+  private List<SubmittedTask> getTasksFromWorkerPool(List<SubmittedTask> tasks)
+      throws MasterException {
 
-    return getWorkerPoolManager().getTasks(
-        tasksPreviouslyMarkedAsInProgress.stream()
-            .filter(task -> {
-              Optional<SubmittedTaskStatus> currentStatus = getLatestStatusOfTheTask(latestStatus,
-                  task);
-              return currentStatus.isPresent() && currentStatus.get().getStatus()
-                  .equals(requiredStatus);
-            })
-            .collect(Collectors.toList()));
+    return getWorkerPoolManager().getTasks(tasks);
   }
 
   private Optional<SubmittedTaskStatus> getLatestStatusOfTheTask(

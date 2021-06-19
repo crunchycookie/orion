@@ -56,16 +56,6 @@ public interface WorkerPoolManager {
   Optional<WorkerNode> getFreeWorker();
 
   /**
-   * Each worker has a unique id. This method queries and get the corresponding worker for the given
-   * unique id.
-   *
-   * @param id Unique id of the worker.
-   * @return Worker node associated to the given id. Can be empty if no worker available for the
-   * provided id.
-   */
-  Optional<WorkerNode> getWorker(UUID id);
-
-  /**
    * Obtain current status of the submitted tasks.
    *
    * @param submittedTasks Tasks that have been submitted to worker earlier.
@@ -77,7 +67,6 @@ public interface WorkerPoolManager {
    * Obtain requested tasks from the workers. Obtained tasks include any new file created during the
    * task execution.
    *
-   * @param taskIds
    * @return
    */
   List<SubmittedTask> getTasks(List<SubmittedTask> tasks) throws MasterException;

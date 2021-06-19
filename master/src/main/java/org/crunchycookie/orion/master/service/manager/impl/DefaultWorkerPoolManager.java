@@ -74,14 +74,9 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public Optional<WorkerNode> getFreeWorker() {
 
+    // TODO: 2021-06-20 Change such that node.getStatus(null) will get the node status.
     return getRegisteredNodes().stream().filter(n -> n.getStatus() == WorkerNodeStatus.IDLE)
         .findFirst();
-  }
-
-  @Override
-  public Optional<WorkerNode> getWorker(UUID id) {
-
-    return getRegisteredNodes().stream().filter(n -> n.getId().equals(id)).findFirst();
   }
 
   @Override
@@ -93,7 +88,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
           if (executionNode.isPresent()) {
             return new SubmittedTaskStatus(
                 st.getTaskId(),
-                getTaskStatus(executionNode.get().getStatus())
+                getTaskStatus(executionNode.get().getStatus(st))
             );
           }
           return null;
@@ -109,7 +104,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
     List<WorkerNode> executionNodes = getExecutionNodes(requestedTasks);
 
     // Tasks can only be obtained if the task is not under the execution currently.
-    return obtainNonExecutingTasks(executionNodes);
+    return obtainNonExecutingTasks(requestedTasks, executionNodes);
   }
 
   @Override
@@ -128,16 +123,25 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
     registeredNodes.add(node);
   }
 
-  private List<SubmittedTask> obtainNonExecutingTasks(List<WorkerNode> executionNodes)
-      throws MasterException {
+  private List<SubmittedTask> obtainNonExecutingTasks(List<SubmittedTask> requestedTasks,
+      List<WorkerNode> executionNodes) throws MasterException {
 
     List<SubmittedTask> tasks = new ArrayList<>();
     for (WorkerNode node : executionNodes) {
-      if (!node.getStatus().equals(WorkerNodeStatus.EXECUTING)) {
-        tasks.add(node.obtain());
+      Optional<SubmittedTask> taskSubmittedToNode = getTaskSubmittedToNode(requestedTasks, node);
+      if (taskSubmittedToNode.isPresent()) {
+        if (!node.getStatus(taskSubmittedToNode.get()).equals(WorkerNodeStatus.EXECUTING)) {
+          tasks.add(node.obtain(taskSubmittedToNode.get()));
+        }
       }
     }
     return tasks;
+  }
+
+  private Optional<SubmittedTask> getTaskSubmittedToNode(List<SubmittedTask> requestedTasks, WorkerNode node) {
+    return requestedTasks.stream()
+        .filter(t -> t.getWorkerId().equals(node.getId()))
+        .findFirst();
   }
 
   private List<WorkerNode> getExecutionNodes(List<SubmittedTask> submittedTasks) {
