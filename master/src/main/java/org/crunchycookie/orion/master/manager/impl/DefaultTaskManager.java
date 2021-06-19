@@ -105,7 +105,7 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     // Obtain next scheduled task and ask task distributor to distribute it.
-    if (getTaskScheduler().next().isPresent()) {
+    if (getTaskScheduler().hasNext()) {
       getTaskDistributor().distribute(getCentralStore().get(
           getTaskScheduler().next().get()
       ));

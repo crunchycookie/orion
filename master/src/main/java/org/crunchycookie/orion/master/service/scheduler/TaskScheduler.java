@@ -43,4 +43,11 @@ public interface TaskScheduler {
    * @return
    */
   Optional<UUID> next() throws MasterException;
+
+  /**
+   * Provides whether a scheduled task exists.
+   *
+   * @return
+   */
+  boolean hasNext() throws MasterException;
 }

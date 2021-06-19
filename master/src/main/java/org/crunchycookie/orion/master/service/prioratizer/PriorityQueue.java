@@ -41,4 +41,11 @@ public interface PriorityQueue {
    * @return Unique Id of the task.
    */
   Optional<UUID> next() throws MasterException;
+
+  /**
+   * Check whether a next task exists.
+   *
+   * @return Unique Id of the task.
+   */
+  boolean hasNext() throws MasterException;
 }

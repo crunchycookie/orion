@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.Vector;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
 import org.crunchycookie.orion.master.exception.MasterException;
@@ -100,16 +101,16 @@ public class LocalStorageCentralStore implements CentralStore {
 
     try {
       // Create task folder.
-      File taskFolderPath = forceCreate(submittedTask.getTaskId().toString());
+      File taskFolderPath = forceCreate(submittedTask.getTaskId().toString(), true);
 
       // Create input files folder.
       File inputFilesFolder = forceCreate(
-          submittedTask.getTaskId() + File.separator + "inputs");
+          submittedTask.getTaskId() + File.separator + "inputs", true);
       storeFiles(submittedTask.getTaskFiles(), inputFilesFolder);
 
       // Create output files folder.
       File outputsFilesFolder = forceCreate(
-          submittedTask.getTaskId() + File.separator + "outputs");
+          submittedTask.getTaskId() + File.separator + "outputs", true);
       storeFiles(submittedTask.getOutputFiles(), outputsFilesFolder);
 
       // Persist metadata.
@@ -146,14 +147,14 @@ public class LocalStorageCentralStore implements CentralStore {
 
     try {
       // Get task folder.
-      File taskFolder = getFile(taskId.toString());
+      File taskFolder = getFile(taskId.toString(), true);
 
       // Get input files.
-      File inputFilesFolder = getFile(taskFolder + File.separator + "inputs");
+      File inputFilesFolder = getFile(taskFolder + File.separator + "inputs", false);
       List<TaskFile> inputs = getInputFiles(taskId, inputFilesFolder);
 
       // Get output files.
-      File outputFilesFolder = getFile(taskFolder + File.separator + "outputs");
+      File outputFilesFolder = getFile(taskFolder + File.separator + "outputs", false);
       List<TaskFile> outputs = getInputFiles(taskId, outputFilesFolder);
 
       // Get meta.
@@ -161,7 +162,7 @@ public class LocalStorageCentralStore implements CentralStore {
       properties.load(new FileInputStream(taskFolder + File.separator + "meta.properties"));
 
       // Get worker id.
-      UUID worker = UUID.fromString((String) properties.get("META.worker-id"));
+      UUID worker = getWorkerId((String) properties.get("META.worker-id"));
 
       // Get status.
       TaskStatus status = TaskStatus.valueOf((String) properties.get("META.status"));
@@ -195,6 +196,10 @@ public class LocalStorageCentralStore implements CentralStore {
     } catch (IOException e) {
       throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR, "Failed to get data", e);
     }
+  }
+
+  private UUID getWorkerId(String workerId) {
+    return StringUtils.isBlank(workerId) ? null : UUID.fromString(workerId);
   }
 
   @Override
@@ -235,7 +240,7 @@ public class LocalStorageCentralStore implements CentralStore {
   @Override
   public void remove(UUID taskId) throws MasterException {
 
-    File taskFolder = getFile(taskId.toString());
+    File taskFolder = getFile(taskId.toString(), true);
     taskFolder.delete();
   }
 
@@ -287,6 +292,7 @@ public class LocalStorageCentralStore implements CentralStore {
 
     List<TaskFile> inputFiles = new ArrayList<>();
     Files.walk(inputFilesFolder.toPath())
+        .filter(Files::isRegularFile)
         .forEach(f -> {
           TaskFileMetadata meta = new TaskFileMetadata(
               f.getFileName().toString().split("\\.")[0],
@@ -322,9 +328,9 @@ public class LocalStorageCentralStore implements CentralStore {
     }
   }
 
-  private File forceCreate(String path) throws IOException {
+  private File forceCreate(String path, Boolean isWorkspacePrefixed) throws IOException {
 
-    File file = getFile(path);
+    File file = getFile(path, isWorkspacePrefixed);
     if (file.exists()) {
       file.delete();
     }
@@ -332,7 +338,10 @@ public class LocalStorageCentralStore implements CentralStore {
     return file;
   }
 
-  private File getFile(String path) {
-    return new File(workspace + path);
+  private File getFile(String path, Boolean isWorkspacePrefixed) {
+    if (isWorkspacePrefixed) {
+      return new File(workspace + path);
+    }
+    return new File(path);
   }
 }

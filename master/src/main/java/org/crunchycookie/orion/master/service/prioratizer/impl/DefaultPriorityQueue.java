@@ -68,4 +68,9 @@ public class DefaultPriorityQueue implements PriorityQueue {
       return Optional.empty();
     }
   }
+
+  @Override
+  public boolean hasNext() throws MasterException {
+    return !this.priorityQueue.isEmpty();
+  }
 }

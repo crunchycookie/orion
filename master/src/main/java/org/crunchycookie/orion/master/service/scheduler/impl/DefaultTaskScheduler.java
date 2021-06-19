@@ -63,6 +63,11 @@ public class DefaultTaskScheduler implements TaskScheduler {
   }
 
   @Override
+  public boolean hasNext() throws MasterException {
+    return priorityQueue.hasNext();
+  }
+
+  @Override
   public SubmittedTaskStatus schedule(SubmittedTask submittedTask) throws MasterException {
 
     // Validate submitted job against the worker's capacity.
