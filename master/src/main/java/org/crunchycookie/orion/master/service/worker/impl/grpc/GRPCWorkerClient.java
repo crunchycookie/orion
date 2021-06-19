@@ -37,9 +37,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.crunchycookie.orion.master.exception.MasterException;
-import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.IteratingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.service.worker.WorkerNode.WorkerNodeStatus;
 import org.crunchycookie.orion.worker.WorkerGrpc;
 import org.crunchycookie.orion.worker.WorkerGrpc.WorkerBlockingStub;
@@ -136,15 +136,17 @@ public class GRPCWorkerClient {
     FileMetaData executableMeta = FileMetaData.newBuilder()
         .setName(executable.getFileName())
         .setType(executable.getFileType())
-        .setTaskId(executable.getTaskId().toString())
+        .setTaskId(executable.getTaskId() != null ? executable.getTaskId().toString() : "")
         .build();
     Task task = Task.newBuilder()
         .setExecutableShellScriptMetadata(executableMeta)
         .build();
-
-    Result result = blockingStub.monitor(task);
-
-    return getWorkerNodeStatus(result.getTaskStatus());
+    try {
+      Result result = blockingStub.monitor(task);
+      return getWorkerNodeStatus(result.getTaskStatus());
+    } catch (StatusRuntimeException e) {
+      return getWorkerNodeStatus(Status.FAILED);
+    }
   }
 
   protected List<TaskFile> download(List<TaskFileMetadata> filesToDownload) throws MasterException {
@@ -189,6 +191,7 @@ public class GRPCWorkerClient {
   private WorkerNodeStatus getWorkerNodeStatus(Status status) {
     return switch (status) {
       case IN_PROGRESS -> WorkerNodeStatus.EXECUTING;
+      case NOT_EXECUTING -> WorkerNodeStatus.IDLE;
       default -> WorkerNodeStatus.FAILED;
     };
   }
@@ -284,23 +287,31 @@ public class GRPCWorkerClient {
   }
 
   private void setTheFile(StreamObserver<FileUploadRequest> requestObserver,
-      InputStream fileDataStream, CountDownLatch finishLatch) throws InterruptedException {
+      InputStream fis, CountDownLatch finishLatch) throws InterruptedException {
 
     // Then we set the actual executable file.
-    try (InputStream executableStream = fileDataStream) {
-      byte[] buffer = new byte[1024 * 1024];
-      try (BufferedInputStream bis = new BufferedInputStream(executableStream)) {
-        int lengthOfReadBytes;
-        do {
-          lengthOfReadBytes = bis.read(buffer);
-          if (lengthOfReadBytes > 0) {
-            setTheChunk(requestObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes),
-                finishLatch);
-          }
-        } while (lengthOfReadBytes > 0);
-      }
+    byte[] buffer = new byte[1024 * 1024];
+    BufferedInputStream bis = new BufferedInputStream(fis);
+    try {
+      int lengthOfReadBytes;
+      do {
+        lengthOfReadBytes = bis.read(buffer);
+        if (lengthOfReadBytes > 0) {
+          setTheChunk(requestObserver, Arrays.copyOfRange(buffer, 0, lengthOfReadBytes),
+              finishLatch);
+        }
+      } while (bis.available() > 0 && lengthOfReadBytes > 0);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Failed while setting the file");
+    } finally {
+      try {
+        if (bis != null && fis != null) {
+          fis.close();
+          bis.close();
+        }
+      } catch (IOException ioe) {
+        System.out.println("Error in InputStream close(): " + ioe);
+      }
     }
   }
 

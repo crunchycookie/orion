@@ -60,7 +60,8 @@ public class DefaultTaskPrioritizer implements TaskPrioritizer {
     Instant now = Instant.now();
 
     if (deadline.isBefore(now)) {
-      throw new MasterClientException("Invalid deadline");
+      // TODO: 2021-06-19 Handle expired tasks. Catch this exception at the top level and update the status to failed or expired in the central storage.
+      throw new MasterClientException("Task is expired");
     }
 
     // Lowest value means highest priority.

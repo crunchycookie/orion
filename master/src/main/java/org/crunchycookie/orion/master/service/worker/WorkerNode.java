@@ -66,7 +66,7 @@ public interface WorkerNode {
    *
    * @return
    */
-  UUID getId();
+  String getId();
 
   /**
    * Get the unique ID of the submitted task. returns empty if the node isn't running a task.

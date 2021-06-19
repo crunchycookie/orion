@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -75,11 +76,12 @@ public class DefaultTaskManager implements TaskManager {
     // Obtain all in-progress tasks.
     List<SubmittedTask> inProgressTasks = getCentralStore().get(TaskStatus.IN_PROGRESS);
 
-    // Get current status of in-progress tasks.
+    // Get the current status of those tasks.
     List<SubmittedTaskStatus> latestStatus = getWorkerPoolManager().getStatus(inProgressTasks);
 
-    // Get the list of success tasks.
-    List<SubmittedTask> successTasks = getTasksFromWorkers(latestStatus, TaskStatus.SUCCESS);
+    // Figure out what are the current success tasks, and obtain them from the worker nodes.
+    List<SubmittedTask> successTasks = getTasksFromWorkerNodes(inProgressTasks, latestStatus,
+        TaskStatus.SUCCESS);
 
     /*
      Store success tasks in the central store. This will replace the existing entry thus now
@@ -88,10 +90,11 @@ public class DefaultTaskManager implements TaskManager {
     getCentralStore().store(successTasks);
 
     /*
-     Get the list of failed tasks. The returned object will only include the task id since the
-     worker failed thus being unable to obtain files.
+     Get the list of failed tasks. The returned SubmittedTask object will only include the task id
+     since the worker failed thus being unable to obtain files.
      */
-    List<SubmittedTask> failedTasks = getTasksFromWorkers(latestStatus, TaskStatus.FAILED);
+    List<SubmittedTask> failedTasks = getTasksFromWorkerNodes(inProgressTasks, latestStatus,
+        TaskStatus.FAILED);
 
     // Now lets update the failed tasks from the proper objects in the central store.
     failedTasks = getCentralStore().get(failedTasks.stream()
@@ -124,7 +127,10 @@ public class DefaultTaskManager implements TaskManager {
     workerMetaData.setMaxResourceCapacities(
         Map.of(
             ResourceParams.MEMORY, RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.MEMORY"),
-            ResourceParams.STORAGE, RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.STORAGE")
+            ResourceParams.STORAGE,
+            RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.STORAGE"),
+            ResourceParams.DEADLINE,
+            RESTfulEndpoint.configs.getConfig("WorkerNode.capacity.DEADLINE")
         )
     );
     return workerMetaData;
@@ -151,15 +157,26 @@ public class DefaultTaskManager implements TaskManager {
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);
   }
 
-  private List<SubmittedTask> getTasksFromWorkers(List<SubmittedTaskStatus> latestStatus,
-      TaskStatus status) throws MasterException {
-    List<SubmittedTask> successTasks = getWorkerPoolManager().getTasks(
-        latestStatus.stream()
-            .filter(st -> st.getStatus() == status)
-            .map(SubmittedTaskStatus::getTaskId)
-            .collect(Collectors.toList())
-    );
-    return successTasks;
+  private List<SubmittedTask> getTasksFromWorkerNodes(
+      List<SubmittedTask> tasksPreviouslyMarkedAsInProgress,
+      List<SubmittedTaskStatus> latestStatus, TaskStatus requiredStatus) throws MasterException {
+
+    return getWorkerPoolManager().getTasks(
+        tasksPreviouslyMarkedAsInProgress.stream()
+            .filter(task -> {
+              Optional<SubmittedTaskStatus> currentStatus = getLatestStatusOfTheTask(latestStatus,
+                  task);
+              return currentStatus.isPresent() && currentStatus.get().getStatus()
+                  .equals(requiredStatus);
+            })
+            .collect(Collectors.toList()));
+  }
+
+  private Optional<SubmittedTaskStatus> getLatestStatusOfTheTask(
+      List<SubmittedTaskStatus> latestStatus,
+      SubmittedTask task) {
+    return latestStatus.stream()
+        .filter(sts -> sts.getTaskId().equals(task.getTaskId())).findFirst();
   }
 
   private void validateInputParams(SubmittedTask submittedTask, UUID taskId)

@@ -34,7 +34,7 @@ import org.crunchycookie.orion.master.service.worker.WorkerNode;
  */
 public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
 
-  private UUID id;
+  private String id;
   private UUID taskId;
   private TaskFileMetadata executable;
   private List<TaskFileMetadata> inputFiles;
@@ -43,7 +43,11 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   public GRPCWorkerNode(String host, String port) {
 
     super(host, port);
-    id = UUID.randomUUID();
+    id = getWorkerUniqueId(host, port);
+  }
+
+  private String getWorkerUniqueId(String host, String port) {
+    return host + "###" + port;
   }
 
   @Override
@@ -51,6 +55,7 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
 
     upload(submittedTask.getTaskFiles());
     execute(submittedTask.getExecutable());
+
     updateNodeStatus(submittedTask);
   }
 
@@ -64,17 +69,32 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
     submittedTask.setOutputFiles(download(outputFiles));
     submittedTask.setStatus(new SubmittedTaskStatus(taskId, getTaskStatus(status)));
 
+    // Mark node for a new task.
+    cleanupNode();
+
     return submittedTask;
+  }
+
+  private void cleanupNode() {
+    taskId = null;
+    inputFiles = null;
+    executable = null;
+    outputFiles = null;
   }
 
   @Override
   public WorkerNodeStatus getStatus() {
 
-    return monitor(executable);
+    TaskFileMetadata taskToCheckStatus = executable != null ? executable : new TaskFileMetadata(
+        "",
+        "",
+        null
+    );
+    return monitor(taskToCheckStatus);
   }
 
   @Override
-  public UUID getId() {
+  public String getId() {
 
     return this.id;
   }
@@ -82,7 +102,7 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public Optional<UUID> getTaskId() {
 
-    return Optional.empty();
+    return taskId != null ? Optional.of(taskId) : Optional.empty();
   }
 
   private void updateNodeStatus(SubmittedTask submittedTask) {

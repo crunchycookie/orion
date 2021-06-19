@@ -42,6 +42,6 @@ public class StreamingTaskFile implements TaskFile {
 
   @Override
   public boolean hasNext() {
-    return false;
+    return list.size() > 0;
   }
 }

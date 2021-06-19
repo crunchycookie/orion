@@ -46,7 +46,7 @@ public interface WorkerPoolManager {
   /**
    * Initialize the worker pool which includes worker node discovery and registration.
    */
-  void init() throws MasterException;
+  void init() throws ExceptionInInitializerError;
 
   /**
    * Query worker pool and provide a free worker.
@@ -80,7 +80,7 @@ public interface WorkerPoolManager {
    * @param taskIds
    * @return
    */
-  List<SubmittedTask> getTasks(List<UUID> taskIds) throws MasterException;
+  List<SubmittedTask> getTasks(List<SubmittedTask> tasks) throws MasterException;
 
   /**
    * Provide meta information about the worker's capacity including memory and storage.

@@ -77,14 +77,14 @@ public class OrionConfigs {
   }
 
   private void populateWorkernodes(Properties orionConfigs) {
-    for (int i = 0; ; i++) {
-      if (!orionConfigs.containsKey("WorkerNode\\." + i + "\\.host")) {
+    for (int i = 1; ; i++) {
+      if (!orionConfigs.containsKey("WorkerNode." + i + ".host")) {
         break;
       }
       WorkerNodeDiscoveryInfo nodeInfo = new WorkerNodeDiscoveryInfo();
-      nodeInfo.setHost(orionConfigs.getProperty("WorkerNode\\." + i + "\\.host"));
-      nodeInfo.setType(orionConfigs.getProperty("WorkerNode\\." + i + "\\.port"));
-      nodeInfo.setType(orionConfigs.getProperty("WorkerNode\\." + i + "\\.type"));
+      nodeInfo.setHost(orionConfigs.getProperty("WorkerNode." + i + ".host"));
+      nodeInfo.setPort(orionConfigs.getProperty("WorkerNode." + i + ".port"));
+      nodeInfo.setType(orionConfigs.getProperty("WorkerNode." + i + ".type"));
       this.workerNodes.add(nodeInfo);
     }
   }

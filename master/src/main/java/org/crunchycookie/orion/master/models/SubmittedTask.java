@@ -46,7 +46,7 @@ public class SubmittedTask {
   private List<TaskFile> outputFiles;
 
   // Unique ID of the worker node where this task is assigned.
-  private UUID workerId;
+  private String workerId;
 
   // Current status of this task.
   private SubmittedTaskStatus status;
@@ -76,11 +76,11 @@ public class SubmittedTask {
     this.status = status;
   }
 
-  public UUID getWorkerId() {
+  public String getWorkerId() {
     return workerId;
   }
 
-  public void setWorkerId(UUID workerId) {
+  public void setWorkerId(String workerId) {
     this.workerId = workerId;
   }
 

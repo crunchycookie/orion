@@ -67,9 +67,7 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
       /*
       Files are stored in, <JAR-location>/tasks/<task-id>/<file-name>.
        */
-      String storeWorkspaceFolder = PrimaryStorageBasedTaskExecutionManager.class
-          .getProtectionDomain()
-          .getCodeSource().getLocation().toURI().getPath();
+      String storeWorkspaceFolder = getWorkspaceFolder();
 
       // Create tasks folder.
       String tasksFolderPath = createFolder(storeWorkspaceFolder, TASKS_FOLDER);
@@ -91,6 +89,24 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     } catch (IOException | URISyntaxException e) {
       throw new WorkerServerException("Unable to create the directories", e);
     }
+  }
+
+  private String getWorkspaceFolder() throws URISyntaxException {
+
+    String locationOfTheCodeSource = PrimaryStorageBasedTaskExecutionManager.class
+        .getProtectionDomain()
+        .getCodeSource().getLocation().toURI().getPath();
+    if (locationOfTheCodeSource.endsWith(File.separator)) {
+      // Remove ending file separator.
+      locationOfTheCodeSource = locationOfTheCodeSource
+          .substring(0, locationOfTheCodeSource.length() - 1);
+    }
+    // Remove jar name.
+    if (locationOfTheCodeSource.endsWith(".jar")) {
+      locationOfTheCodeSource = locationOfTheCodeSource
+          .substring(0, locationOfTheCodeSource.lastIndexOf(File.separator));
+    }
+    return locationOfTheCodeSource;
   }
 
   @Override
@@ -223,9 +239,7 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     /*
       Files are stored in, <JAR-location>/tasks/<task-id>/<file-name>.
     */
-    String storeWorkspaceFolder = PrimaryStorageBasedTaskExecutionManager.class
-        .getProtectionDomain()
-        .getCodeSource().getLocation().toURI().getPath();
+    String storeWorkspaceFolder = getWorkspaceFolder();
 
     // Build file path.
     String filePath = storeWorkspaceFolder
@@ -240,7 +254,6 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
   }
 
   private String getUniqueTaskId(FileMetaData executableFile) {
-    return executableFile.getTaskId() + "-" + executableFile.getName() + "-" + executableFile
-        .getType();
+    return executableFile.getTaskId();
   }
 }

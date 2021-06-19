@@ -101,12 +101,10 @@ public class MasterUtils {
   }
 
   public static TaskStatus getTaskStatus(WorkerNodeStatus nodeStatus) {
-
     return switch (nodeStatus) {
       case EXECUTING -> TaskStatus.IN_PROGRESS;
-      case COMPLETED -> TaskStatus.SUCCESS;
+      case COMPLETED, IDLE -> TaskStatus.SUCCESS;
       case DEAD, FAILED -> TaskStatus.FAILED;
-      case IDLE -> TaskStatus.PENDING;
     };
   }
 

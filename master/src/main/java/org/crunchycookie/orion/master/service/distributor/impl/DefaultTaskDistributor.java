@@ -68,19 +68,21 @@ public class DefaultTaskDistributor implements TaskDistributor {
     dispatchTask(availableWorker.get(), submittedTask);
 
     // Update the store.
-    submittedTask.setStatus(
-        new SubmittedTaskStatus(
-            submittedTask.getTaskId(),
-            TaskStatus.IN_PROGRESS
-        )
-    );
-    getCentralStore().store(submittedTask);
+    SubmittedTask existingTask = getCentralStore().get(submittedTask.getTaskId());
+    existingTask.setStatus(new SubmittedTaskStatus(
+        submittedTask.getTaskId(),
+        TaskStatus.IN_PROGRESS
+    ));
+    existingTask.setWorkerId(submittedTask.getWorkerId());
+
+    getCentralStore().store(existingTask);
   }
 
   private void dispatchTask(WorkerNode worker, SubmittedTask submittedTask) {
 
     try {
       worker.dispatch(submittedTask);
+      submittedTask.setWorkerId(worker.getId());
     } catch (MasterException e) {
       e.printStackTrace();
     }

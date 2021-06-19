@@ -24,6 +24,8 @@ public class TaskFileMetadata {
   private String fileType;
   private UUID taskId;
 
+  private static final String SEPARATOR = "####";
+
   public TaskFileMetadata(String fileName, String fileType, UUID taskId) {
     this.fileName = fileName;
     this.fileType = fileType;
@@ -54,9 +56,18 @@ public class TaskFileMetadata {
     this.taskId = taskId;
   }
 
+  public static TaskFileMetadata parseString(String metaString) {
+
+    return new TaskFileMetadata(
+        metaString.split(SEPARATOR)[1],
+        metaString.split(SEPARATOR)[2],
+        UUID.fromString(metaString.split(SEPARATOR)[0])
+    );
+  }
+
   @Override
   public String toString() {
-    return taskId + "-" + fileName + "-" + fileType;
+    return taskId + SEPARATOR + fileName + SEPARATOR + fileType;
   }
 
   @Override

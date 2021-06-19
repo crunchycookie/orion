@@ -48,6 +48,7 @@ import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 public class LocalStorageCentralStore implements CentralStore {
 
+  public static final String TASK_FOLDER_BACKUP_SUFFIX = "__backup";
   private final String workspace;
 
   public enum LocalStorageCentralStoreSingleton {
@@ -100,17 +101,23 @@ public class LocalStorageCentralStore implements CentralStore {
   public void store(SubmittedTask submittedTask) throws MasterException {
 
     try {
-      // Create task folder.
-      File taskFolderPath = forceCreate(submittedTask.getTaskId().toString(), true);
+      /*
+      Create task folder. Need to backup before delete if an existing one found. This is to
+      support scenarios where one reads from the existing folder, do some modifications and
+      store it back. At that point if we delete the existing directory initially this operation
+      will fail.
+      */
+      String tempTaskFolderName = submittedTask.getTaskId().toString() + TASK_FOLDER_BACKUP_SUFFIX;
+      File tempTaskFolder = forceCreate(tempTaskFolderName, true);
 
       // Create input files folder.
       File inputFilesFolder = forceCreate(
-          submittedTask.getTaskId() + File.separator + "inputs", true);
+          tempTaskFolderName + File.separator + "inputs", true);
       storeFiles(submittedTask.getTaskFiles(), inputFilesFolder);
 
       // Create output files folder.
       File outputsFilesFolder = forceCreate(
-          submittedTask.getTaskId() + File.separator + "outputs", true);
+          tempTaskFolderName + File.separator + "outputs", true);
       storeFiles(submittedTask.getOutputFiles(), outputsFilesFolder);
 
       // Persist metadata.
@@ -127,19 +134,30 @@ public class LocalStorageCentralStore implements CentralStore {
           submittedTask.getResourceRequirement(ResourceParams.MEMORY));
       properties.put("RESOURCE.LIMITS.STORAGE",
           submittedTask.getResourceRequirement(ResourceParams.STORAGE));
+      properties.put("RESOURCE.LIMITS.DEADLINE",
+          submittedTask.getResourceRequirement(ResourceParams.DEADLINE));
 
       // Persist meta file.
       properties
-          .store(new FileOutputStream(taskFolderPath + File.separator + "meta.properties"), null);
+          .store(new FileOutputStream(tempTaskFolder + File.separator + "meta.properties"), null);
+
+      // Clear backup folder and copy to the original.
+      String tempTaskFolderPath = tempTaskFolder.getAbsolutePath();
+      File taskFolder = new File(
+          tempTaskFolderPath.substring(0, tempTaskFolderPath.lastIndexOf(TASK_FOLDER_BACKUP_SUFFIX))
+      );
+      forceCreateFile(taskFolder);
+      FileUtils.copyDirectory(tempTaskFolder, taskFolder);
+      FileUtils.deleteDirectory(tempTaskFolder);
     } catch (IOException e) {
       // TODO: 2021-06-17 Add error code
       throw new MasterException("Failed to create file IOs", e);
     }
   }
 
-  private String getString(UUID id) {
+  private String getString(String id) {
 
-    return id == null ? "" : id.toString();
+    return id == null ? "" : id;
   }
 
   @Override
@@ -162,22 +180,20 @@ public class LocalStorageCentralStore implements CentralStore {
       properties.load(new FileInputStream(taskFolder + File.separator + "meta.properties"));
 
       // Get worker id.
-      UUID worker = getWorkerId((String) properties.get("META.worker-id"));
+      String worker = getWorkerId((String) properties.get("META.worker-id"));
 
       // Get status.
       TaskStatus status = TaskStatus.valueOf((String) properties.get("META.status"));
 
       // Get executable.
       String executableFile = (String) properties.get("META.executable-file");
-      TaskFileMetadata executable = new TaskFileMetadata(
-          executableFile.split("-")[1],
-          executableFile.split("-")[2],
-          UUID.fromString(executableFile.split("-")[0])
-      );
+      TaskFileMetadata executable = TaskFileMetadata.parseString(executableFile);
 
       // Get resource limits.
       Map<ResourceParams, String> resourceLimits = new HashMap<>();
       resourceLimits.put(ResourceParams.MEMORY, (String) properties.get("RESOURCE.LIMITS.MEMORY"));
+      resourceLimits
+          .put(ResourceParams.DEADLINE, (String) properties.get("RESOURCE.LIMITS.DEADLINE"));
       resourceLimits
           .put(ResourceParams.STORAGE, (String) properties.get("RESOURCE.LIMITS.STORAGE"));
 
@@ -198,8 +214,8 @@ public class LocalStorageCentralStore implements CentralStore {
     }
   }
 
-  private UUID getWorkerId(String workerId) {
-    return StringUtils.isBlank(workerId) ? null : UUID.fromString(workerId);
+  private String getWorkerId(String workerId) {
+    return StringUtils.isBlank(workerId) ? null : workerId;
   }
 
   @Override
@@ -264,6 +280,14 @@ public class LocalStorageCentralStore implements CentralStore {
     try {
       File workspace = new File(this.workspace);
       for (File taskFolder : workspace.listFiles()) {
+        // Validate folder is corresponding to a valid task ID.
+        try {
+          UUID.fromString(taskFolder.getName());
+        } catch (IllegalArgumentException e) {
+          // Skip the folder.
+          continue;
+        }
+
         // Load properties file.
         Properties properties = new Properties();
         properties.load(
@@ -317,7 +341,7 @@ public class LocalStorageCentralStore implements CentralStore {
     for (TaskFile taskFile : taskFiles) {
       TaskFileMetadata meta = taskFile.getMeta();
 
-      Vector<InputStream> inputStreams = new Vector<InputStream>();
+      Vector<InputStream> inputStreams = new Vector<>();
       while (taskFile.hasNext()) {
         inputStreams.add(taskFile.next());
       }
@@ -328,14 +352,19 @@ public class LocalStorageCentralStore implements CentralStore {
     }
   }
 
-  private File forceCreate(String path, Boolean isWorkspacePrefixed) throws IOException {
+  private File forceCreate(String path, Boolean isWorkspacePrefixed)
+      throws IOException {
 
     File file = getFile(path, isWorkspacePrefixed);
+    forceCreateFile(file);
+    return file;
+  }
+
+  private void forceCreateFile(File file) throws IOException {
     if (file.exists()) {
-      file.delete();
+      FileUtils.deleteDirectory(file);
     }
     FileUtils.forceMkdir(file);
-    return file;
   }
 
   private File getFile(String path, Boolean isWorkspacePrefixed) {

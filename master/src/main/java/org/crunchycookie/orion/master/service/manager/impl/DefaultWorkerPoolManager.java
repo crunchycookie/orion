@@ -48,8 +48,11 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
 
     private WorkerPoolManager workerPoolManager;
 
-    DefaultWorkerPoolManagerSingleton() {
-      workerPoolManager = new DefaultWorkerPoolManager();
+    DefaultWorkerPoolManagerSingleton() throws ExceptionInInitializerError {
+
+      WorkerPoolManager manager = new DefaultWorkerPoolManager();
+      manager.init();
+      workerPoolManager = manager;
     }
 
     public WorkerPoolManager get() {
@@ -63,7 +66,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   }
 
   @Override
-  public void init() throws MasterException {
+  public void init() throws ExceptionInInitializerError {
 
     discoverAndRegisterWorkerNodes();
   }
@@ -100,10 +103,10 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   }
 
   @Override
-  public List<SubmittedTask> getTasks(List<UUID> taskIds) throws MasterException {
+  public List<SubmittedTask> getTasks(List<SubmittedTask> requestedTasks) throws MasterException {
 
     // Get the worker nodes executing the requested tasks.
-    List<WorkerNode> executionNodes = getExecutionNodes(taskIds);
+    List<WorkerNode> executionNodes = getExecutionNodes(requestedTasks);
 
     // Tasks can only be obtained if the task is not under the execution currently.
     return obtainNonExecutingTasks(executionNodes);
@@ -137,23 +140,26 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
     return tasks;
   }
 
-  private List<WorkerNode> getExecutionNodes(List<UUID> taskIds) {
+  private List<WorkerNode> getExecutionNodes(List<SubmittedTask> submittedTasks) {
 
-    List<WorkerNode> executionNodes = getRegisteredNodes().stream()
-        .filter(n -> taskIds.contains(n.getTaskId().get()))
+    return getRegisteredNodes()
+        .stream()
+        .filter(n -> submittedTasks
+            .stream()
+            .anyMatch(st -> st.getWorkerId().equals(n.getId()))
+        )
         .collect(Collectors.toList());
-    return executionNodes;
   }
 
   private Optional<WorkerNode> getExecutionNode(SubmittedTask st) {
 
     Optional<WorkerNode> matchingNode = getRegisteredNodes().stream()
-        .filter(n -> n.getTaskId().equals(st.getTaskId()))
+        .filter(n -> n.getId().equals(st.getWorkerId()))
         .findFirst();
     return matchingNode;
   }
 
-  private void discoverAndRegisterWorkerNodes() throws MasterException {
+  private void discoverAndRegisterWorkerNodes() throws ExceptionInInitializerError {
 
     registeredWorkerNodesInfo = RESTfulEndpoint.configs.getWorkerNodes();
     for (WorkerNodeDiscoveryInfo nodeInfo : registeredWorkerNodesInfo) {
@@ -163,7 +169,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
         Constructor<?> cons = c.getConstructor(String.class, String.class);
         workerNode = (WorkerNode) cons.newInstance(nodeInfo.getHost(), nodeInfo.getPort());
       } catch (Exception e) {
-        throw new MasterException("Failed to initialize the worker node");
+        throw new ExceptionInInitializerError("Failed to initialize the worker node");
       }
       registerNode(workerNode);
     }
