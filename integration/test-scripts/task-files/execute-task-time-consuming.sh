@@ -13,10 +13,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 echo "Executing the task..."
-echo "Executing the heavy task for 5 seconds"
-sleep 5
+echo "Executing the heavy task..."
+sleep 500
 echo "Task execution completed. Writing the output."
 cat in.txt > out.txt 2>&1
 echo "Done executing the task."

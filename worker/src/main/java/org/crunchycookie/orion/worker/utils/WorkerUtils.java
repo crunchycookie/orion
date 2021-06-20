@@ -76,8 +76,11 @@ public class WorkerUtils {
    * Set the Result in the stream.
    */
   public static void handleResponse(StreamObserver<Result> responseObserver,
-      Status responseStatus) {
+      Status responseStatus, Throwable t) {
     responseObserver.onNext(Result.newBuilder().setTaskStatus(responseStatus).build());
+    if (t != null) {
+      responseObserver.onError(t);
+    }
     responseObserver.onCompleted();
   }
 

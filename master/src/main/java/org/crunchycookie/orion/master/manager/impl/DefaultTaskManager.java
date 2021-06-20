@@ -98,6 +98,12 @@ public class DefaultTaskManager implements TaskManager {
     // status as failed. Then re-schedule those failed tasks.
     filterAndRescheduleFailedTasks(tasksMarkedAsInProgress, latestStatus);
 
+    // Some tasks are still in-progress thus did not count as success nor failed. Since we read them
+    // we will store it back as in-progress thus in the next sync they will be checked again.
+    List<SubmittedTask> stillInProgressTasks = getFilteredTasks(tasksMarkedAsInProgress,
+        latestStatus, TaskStatus.IN_PROGRESS);
+    getCentralStore().store(stillInProgressTasks);
+
     // Obtain next scheduled task and ask task distributor to distribute it.
     if (getTaskScheduler().hasNext()) {
       getTaskDistributor().distribute(getCentralStore().get(
@@ -172,6 +178,11 @@ public class DefaultTaskManager implements TaskManager {
 
     // Re-schedule failed tasks.
     for (SubmittedTask failedTask : failedTasks) {
+      // Mark failed tasks as fresh new tasks and re-schedule.
+      failedTask.setStatus(new SubmittedTaskStatus(
+          failedTask.getTaskId(),
+          TaskStatus.PENDING
+      ));
       this.submit(failedTask);
     }
   }

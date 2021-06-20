@@ -62,8 +62,8 @@ public class DefaultTaskDistributor implements TaskDistributor {
   @Override
   public void distribute(SubmittedTask submittedTask) throws MasterException {
 
-    logger
-        .info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Distributing the task"));
+    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(),
+        "Distributing the task"));
 
     // Check for an available free worker.
     Optional<WorkerNode> availableWorker = getWorkerPoolManager().getFreeWorker();
@@ -75,7 +75,13 @@ public class DefaultTaskDistributor implements TaskDistributor {
     }
 
     // Dispatch the task to the worker.
-    dispatchTask(availableWorker.get(), submittedTask);
+    boolean dispatchedStatus = dispatchTask(availableWorker.get(), submittedTask);
+
+    if (!dispatchedStatus) {
+      // Re schedule the task because the available worker failed to execute this task.
+      getTaskScheduler().schedule(submittedTask);
+      return;
+    }
 
     // Update the store.
     SubmittedTask existingTask = getCentralStore().get(submittedTask.getTaskId());
@@ -84,7 +90,6 @@ public class DefaultTaskDistributor implements TaskDistributor {
         TaskStatus.IN_PROGRESS
     ));
     existingTask.setWorkerId(submittedTask.getWorkerId());
-
     getCentralStore().store(existingTask);
   }
 
@@ -92,13 +97,16 @@ public class DefaultTaskDistributor implements TaskDistributor {
     return COMPONENT_ID_TASK_DISTRIBUTOR;
   }
 
-  private void dispatchTask(WorkerNode worker, SubmittedTask submittedTask) {
+  private boolean dispatchTask(WorkerNode worker, SubmittedTask submittedTask) {
 
     try {
       worker.dispatch(submittedTask);
       submittedTask.setWorkerId(worker.getId());
+      return true;
     } catch (MasterException e) {
+      // TODO: 2021-06-21 need to re-schedule or else task will be faltly identified.
       e.printStackTrace();
     }
+    return false;
   }
 }

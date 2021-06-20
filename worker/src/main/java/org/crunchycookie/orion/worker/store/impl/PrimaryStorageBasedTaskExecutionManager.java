@@ -200,8 +200,14 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     ProcessBuilder pb = new ProcessBuilder(command)
         .directory(new File(getFileDirectory(executableFile)))
         .redirectOutput(new File(getFileDirectory(executableFile) + "/log.txt"))
-        .redirectError(new File(getFileDirectory(executableFile) + "/error-log.txt"));
+        .redirectError(new File(getFileDirectory(executableFile) + "/error-log.txt"))
+        .inheritIO();
     Process executableProcess = pb.start();
+//    try {
+//      executableProcess.waitFor();
+//    } catch (Exception e) {
+//      //
+//    }
     return executableProcess;
   }
 

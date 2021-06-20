@@ -83,10 +83,10 @@ public class WorkerService extends WorkerImplBase {
       OperationStatus status = WorkerUtils.getTaskExecutionManager().execute(
           request.getExecutableShellScriptMetadata()
       );
-      handleResponse(responseObserver, getResponseStatus(status));
+      handleResponse(responseObserver, getResponseStatus(status), null);
     } catch (Throwable t) {
       LOG.error("Failed executing the task", t);
-      handleResponse(responseObserver, Status.FAILED);
+      handleResponse(responseObserver, Status.FAILED, t);
     }
   }
 
@@ -103,10 +103,10 @@ public class WorkerService extends WorkerImplBase {
       OperationStatus status = WorkerUtils.getTaskExecutionManager().getStatus(
           request.getExecutableShellScriptMetadata()
       );
-      handleResponse(responseObserver, getResponseStatus(status));
+      handleResponse(responseObserver, getResponseStatus(status), null);
     } catch (Throwable t) {
       LOG.error("Failed monitoring the task", t);
-      handleResponse(responseObserver, Status.FAILED);
+      handleResponse(responseObserver, Status.FAILED, t);
     }
   }
 
@@ -134,10 +134,10 @@ public class WorkerService extends WorkerImplBase {
       // Stream input source over the gRPC connection.
       streamInChunks(responseObserver, fileInputStream);
       // Set the result as the last element, and conclude streaming.
-      handleResponse(responseObserver, Status.SUCCESS);
+      handleResponse(responseObserver, Status.SUCCESS, null);
     } catch (Throwable t) {
       LOG.error("Failed getting the file", t);
-      handleResponse(responseObserver, Status.FAILED);
+      handleResponse(responseObserver, Status.FAILED, t);
     }
   }
 }

@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 # Copyright 2021 crunchycookie
 #
@@ -14,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-echo "Executing the task..."
-sleep 500
-cat in.txt > out.txt 2>&1
-echo "Done executing the task."
+echo "Started"
+bash execute-task-time-consuming.sh &
+echo "Exited"
