@@ -17,6 +17,7 @@
 package org.crunchycookie.orion.master.models.file;
 
 import java.io.InputStream;
+import org.crunchycookie.orion.master.exception.MasterException;
 
 public interface TaskFile {
 
@@ -40,4 +41,12 @@ public interface TaskFile {
    * @return
    */
   boolean hasNext();
+
+  /**
+   * Make the task file invalidated. This will close any opened file streams etc. Once invoked,
+   * this object cannot be used to read the actual file, but metadata will be kept.
+   *
+   * @return
+   */
+  void invalidate() throws MasterException;
 }

@@ -16,9 +16,11 @@
 
 package org.crunchycookie.orion.master.models.file;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import org.crunchycookie.orion.master.exception.MasterException;
 
 public class StreamingTaskFile implements TaskFile {
 
@@ -43,5 +45,16 @@ public class StreamingTaskFile implements TaskFile {
   @Override
   public boolean hasNext() {
     return list.size() > 0;
+  }
+
+  @Override
+  public void invalidate() throws MasterException {
+    for (InputStream is : list) {
+      try {
+        is.close();
+      } catch (IOException e) {
+        throw new MasterException("Failed to close the file stream", e);
+      }
+    }
   }
 }

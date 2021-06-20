@@ -17,8 +17,11 @@
 package org.crunchycookie.orion.master.models.file;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import org.crunchycookie.orion.master.exception.MasterException;
+import org.crunchycookie.orion.worker.WorkerOuterClass.File;
 import org.crunchycookie.orion.worker.WorkerOuterClass.Result;
 
 public class IteratingTaskFile implements TaskFile {
@@ -47,5 +50,13 @@ public class IteratingTaskFile implements TaskFile {
   @Override
   public boolean hasNext() {
     return iterator != null && iterator.hasNext();
+  }
+
+  @Override
+  public void invalidate() throws MasterException {
+
+    while (iterator.hasNext()) {
+      iterator.remove();
+    }
   }
 }

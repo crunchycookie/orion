@@ -137,7 +137,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SubmittedTaskStatus'
+                $ref: '#/components/schemas/MonitorResult'
         '404':
           description: couldn't find the task
 components:
@@ -157,12 +157,20 @@ components:
           $ref: '#/components/schemas/SubmittedTaskStatus'
           description: an enum for the submitted task status
           example: inprogress
+    MonitorResult:
+      type: object
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/SubmittedTaskStatus'
     SubmittedTaskStatus:
       type: string
       enum:
-        - inprogress
-        - successful
-        - failed
+          - inprogress
+          - successful
+          - failed
     TaskLimits:
       type: object
       properties:

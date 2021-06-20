@@ -24,6 +24,7 @@ import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.rest.api.TasksApiDelegate;
+import org.crunchycookie.orion.master.rest.model.MonitorResult;
 import org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -58,7 +59,7 @@ public class TasksAPIImpl implements TasksApiDelegate {
   }
 
   @Override
-  public ResponseEntity<SubmittedTaskStatus> monitorFiles(UUID taskId) {
+  public ResponseEntity<MonitorResult> monitorFiles(UUID taskId) {
 
     try {
       org.crunchycookie.orion.master.models.SubmittedTaskStatus status = getTaskManager()
@@ -68,7 +69,10 @@ public class TasksAPIImpl implements TasksApiDelegate {
         case SUCCESS -> SubmittedTaskStatus.SUCCESSFUL;
         case FAILED -> SubmittedTaskStatus.FAILED;
       };
-      return ResponseEntity.ok(responseStatus);
+      MonitorResult monitorResult = new MonitorResult();
+      monitorResult.setTaskId(taskId);
+      monitorResult.setStatus(responseStatus);
+      return ResponseEntity.ok(monitorResult);
     } catch (Throwable t) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

@@ -33,10 +33,6 @@ import org.crunchycookie.orion.master.service.worker.WorkerNode;
 public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
 
   private String id;
-//  private UUID taskId;
-//  private TaskFileMetadata executable;
-//  private List<TaskFileMetadata> inputFiles;
-//  private List<TaskFileMetadata> outputFiles;
 
   public GRPCWorkerNode(String host, String port) {
 
@@ -95,20 +91,4 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   private String getWorkerUniqueId(String host, String port) {
     return host + "###" + port;
   }
-
-//  @Override
-//  public Optional<UUID> getTaskId() {
-//
-//    return taskId != null ? Optional.of(taskId) : Optional.empty();
-//  }
-
-//  private void updateNodeStatus(SubmittedTask submittedTask) {
-//
-//    this.taskId = submittedTask.getTaskId();
-//    this.executable = submittedTask.getExecutable();
-//    this.outputFiles = submittedTask.getOutputFiles().stream().map(TaskFile::getMeta).collect(
-//        Collectors.toList());
-//    this.inputFiles = submittedTask.getTaskFiles().stream().map(TaskFile::getMeta).collect(
-//        Collectors.toList());
-//  }
 }

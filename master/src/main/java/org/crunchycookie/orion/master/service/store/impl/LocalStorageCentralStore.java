@@ -164,11 +164,11 @@ public class LocalStorageCentralStore implements CentralStore {
 
       // Get input files.
       File inputFilesFolder = getFile(taskFolder + File.separator + "inputs", false);
-      List<TaskFile> inputs = getInputFiles(taskId, inputFilesFolder);
+      List<TaskFile> inputs = getFiles(taskId, inputFilesFolder);
 
       // Get output files.
       File outputFilesFolder = getFile(taskFolder + File.separator + "outputs", false);
-      List<TaskFile> outputs = getInputFiles(taskId, outputFilesFolder);
+      List<TaskFile> outputs = getFiles(taskId, outputFilesFolder);
 
       // Get meta.
       Properties properties = new Properties();
@@ -230,18 +230,43 @@ public class LocalStorageCentralStore implements CentralStore {
   }
 
   @Override
-  public List<TaskFile> getFiles(UUID taskId, List<TaskFileMetadata> files)
+  public List<TaskFile> getFiles(UUID taskId, List<TaskFileMetadata> requestedFiles)
       throws MasterException {
 
     SubmittedTask submittedTask = get(taskId);
     List<TaskFile> taskFiles = new ArrayList<>();
-    for (TaskFileMetadata taskFileMetadata : files) {
-      findTaskFile(submittedTask.getTaskFiles(), taskFiles, taskFileMetadata).ifPresentOrElse(
-          taskFiles::add,
-          () -> findTaskFile(submittedTask.getOutputFiles(), taskFiles, taskFileMetadata)
-      );
+    for (TaskFileMetadata requestedFile : requestedFiles) {
+      // Search in input files.
+      search(submittedTask.getTaskFiles(), requestedFile, taskFiles);
+      // Search in output files.
+      search(submittedTask.getOutputFiles(), requestedFile, taskFiles);
     }
     return taskFiles;
+  }
+
+  private void search(List<TaskFile> files, TaskFileMetadata requestedFile,
+      List<TaskFile> taskRepository) {
+
+    files.stream()
+        .filter(file -> {
+          boolean isMatch = requestedFile.equals(file.getMeta());
+          if (!isMatch) {
+            // Invalidate file as this will not be used hereafter. Otherwise existing file can be
+            // corrupted.
+            invalidateFile(file);
+          }
+          return isMatch;
+        })
+        .findFirst()
+        .ifPresent(taskRepository::add);
+  }
+
+  private void invalidateFile(TaskFile file) {
+    try {
+      file.invalidate();
+    } catch (MasterException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -312,7 +337,7 @@ public class LocalStorageCentralStore implements CentralStore {
     return files.stream().filter(f -> f.getMeta().equals(taskFileMetadata)).findFirst();
   }
 
-  private List<TaskFile> getInputFiles(UUID taskId, File inputFilesFolder) throws IOException {
+  private List<TaskFile> getFiles(UUID taskId, File inputFilesFolder) throws IOException {
 
     List<TaskFile> inputFiles = new ArrayList<>();
     Files.walk(inputFilesFolder.toPath())
