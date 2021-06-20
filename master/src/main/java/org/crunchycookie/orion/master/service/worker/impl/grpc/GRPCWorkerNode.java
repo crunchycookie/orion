@@ -77,13 +77,13 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public WorkerNodeStatus getStatus(SubmittedTask submittedTask) {
 
-    TaskFileMetadata executable = submittedTask.getExecutable();
-    TaskFileMetadata taskToCheckStatus = executable != null ? executable : new TaskFileMetadata(
-        "",
-        "",
-        null
-    );
-    return monitor(taskToCheckStatus);
+    TaskFileMetadata executable = submittedTask == null || submittedTask.getExecutable() == null ?
+        new TaskFileMetadata(
+            "",
+            "",
+            null
+        ) : submittedTask.getExecutable();
+    return monitor(executable);
   }
 
   @Override

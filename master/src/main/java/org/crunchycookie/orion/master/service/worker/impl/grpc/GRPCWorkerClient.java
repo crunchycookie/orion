@@ -173,19 +173,22 @@ public class GRPCWorkerClient {
       throw new MasterException(ERROR_COM_WORKER_METHOD_INVOCATION_FAILED,
           "Failed to download the file due to rpc failure", e);
     }
-    Status transferStatus = responseItr.next().getTaskStatus();
-    if (transferStatus.equals(Status.SUCCESS)) {
-      FileMetaData downloadedFileMeta = responseItr.next().getOutputFileMetaData();
-      return Optional.of(new IteratingTaskFile(
-          new TaskFileMetadata(
-              downloadedFileMeta.getName(),
-              downloadedFileMeta.getType(),
-              UUID.fromString(downloadedFileMeta.getTaskId())
-          ),
-          responseItr
-      ));
+    FileMetaData receivedFileMeta = responseItr.next().getOutputFileMetaData();
+    TaskFileMetadata receivedTaskFileMeta = new TaskFileMetadata(
+        receivedFileMeta.getName(),
+        receivedFileMeta.getType(),
+        UUID.fromString(receivedFileMeta.getTaskId())
+    );
+    if (!receivedTaskFileMeta.getTaskId().equals(meta.getTaskId())) {
+      throw new MasterException("Requested file and received file do not match");
     }
-    return Optional.empty();
+
+    return Optional.of(
+        new IteratingTaskFile(
+            receivedTaskFileMeta,
+            responseItr
+        )
+    );
   }
 
   private WorkerNodeStatus getWorkerNodeStatus(Status status) {
