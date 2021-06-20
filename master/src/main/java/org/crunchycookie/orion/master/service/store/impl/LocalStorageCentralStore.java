@@ -106,8 +106,10 @@ public class LocalStorageCentralStore implements CentralStore {
 
   @Override
   public void store(SubmittedTask submittedTask) throws MasterException {
-
-    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Storing the task"));
+    
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Storing the task"));
+    }
     try {
       /*
       Create task folder. Need to backup before delete if an existing one found. This is to
@@ -165,8 +167,10 @@ public class LocalStorageCentralStore implements CentralStore {
 
   @Override
   public SubmittedTask get(UUID taskId) throws MasterException {
-
-    logger.info(getLogMessage(getComponentId(), taskId, "Getting the task by ID"));
+    
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), taskId, "Getting the task by ID"));
+    }
     try {
       // Get task folder.
       File taskFolder = getFile(taskId.toString(), true);
@@ -242,7 +246,9 @@ public class LocalStorageCentralStore implements CentralStore {
   public List<TaskFile> getFiles(UUID taskId, List<TaskFileMetadata> requestedFiles)
       throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), taskId, "Getting files"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), taskId, "Getting files"));
+    }
     SubmittedTask submittedTask = get(taskId);
     List<TaskFile> taskFiles = new ArrayList<>();
     for (TaskFileMetadata requestedFile : requestedFiles) {
@@ -264,14 +270,18 @@ public class LocalStorageCentralStore implements CentralStore {
   @Override
   public SubmittedTaskStatus getStatus(UUID taskId) throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), taskId, "Getting status"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), taskId, "Getting status"));
+    }
     return get(taskId).getStatus();
   }
 
   @Override
   public void setStatus(UUID taskId, SubmittedTaskStatus status) throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), taskId, "Setting the status"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), taskId, "Setting the status"));
+    }
 
     SubmittedTask submittedTask = get(taskId);
     submittedTask.setStatus(status);

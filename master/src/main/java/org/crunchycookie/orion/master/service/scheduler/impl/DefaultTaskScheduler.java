@@ -64,21 +64,26 @@ public class DefaultTaskScheduler implements TaskScheduler {
   @Override
   public Optional<UUID> next() throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), null, "Getting next task"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), null, "Getting next task"));
+    }
     return priorityQueue.next();
   }
 
   @Override
   public boolean hasNext() throws MasterException {
-    logger.info(getLogMessage(getComponentId(), null, "Checking next task"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), null, "Checking next task"));
+    }
     return priorityQueue.hasNext();
   }
 
   @Override
   public SubmittedTaskStatus schedule(SubmittedTask submittedTask) throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Scheduling task"));
-
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Scheduling task"));
+    }
     // Validate submitted job against the worker's capacity.
     getTaskCapacityValidator().validate(
         submittedTask,
@@ -104,8 +109,10 @@ public class DefaultTaskScheduler implements TaskScheduler {
 
   private void insertToTheQueue(SubmittedTask submittedTask, Priority priority) {
 
-    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(),
-        "Inserting task into the queue"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(),
+          "Inserting task into the queue"));
+    }
     priorityQueue.insert(submittedTask.getTaskId(), priority);
   }
 }

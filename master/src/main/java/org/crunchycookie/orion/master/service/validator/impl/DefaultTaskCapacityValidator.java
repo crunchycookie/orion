@@ -58,7 +58,9 @@ public class DefaultTaskCapacityValidator implements TaskCapacityValidator {
   public boolean validate(SubmittedTask submittedTask, WorkerMetaData workerCapacity)
       throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Validating task"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Validating task"));
+    }
     // Valid if memory limits are met.
     return Integer.parseInt(submittedTask.getResourceRequirement(ResourceParams.MEMORY)) <= Integer
         .parseInt(workerCapacity.getMaxResourceCapacities().get(ResourceParams.MEMORY));

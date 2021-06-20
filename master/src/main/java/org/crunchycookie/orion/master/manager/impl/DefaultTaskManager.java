@@ -113,14 +113,17 @@ public class DefaultTaskManager implements TaskManager {
 
     Instant syncCompletion = Instant.now();
     if (MasterUtils.isDebugEnabled(logger)) {
-      logger.info("Synced in " + ChronoUnit.MILLIS.between(syncStart, syncCompletion) / 1000);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Synced in " + ChronoUnit.MILLIS.between(syncStart, syncCompletion) / 1000);
+      }
     }
   }
 
   @Override
   public WorkerMetaData getTaskLimitations() throws MasterException {
-
-    logger.info(getLogMessage(getComponentId(), null, "Querying task limitations"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), null, "Querying task limitations"));
+    }
     WorkerMetaData workerMetaData = new WorkerMetaData();
     workerMetaData.setMaxResourceCapacities(
         Map.of(
@@ -140,22 +143,28 @@ public class DefaultTaskManager implements TaskManager {
     UUID taskId = submittedTask.getTaskId();
     validateInputParams(submittedTask, taskId);
 
-    logger.info(getLogMessage(getComponentId(), taskId, "Task Submitted."));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), taskId, "Task Submitted."));
+    }
     return getTaskScheduler().schedule(submittedTask);
   }
 
   @Override
   public SubmittedTaskStatus getTaskStatus(UUID uniqueTaskId) throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), uniqueTaskId, "Querying task status"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), uniqueTaskId, "Querying task status"));
+    }
     return getCentralStore().getStatus(uniqueTaskId);
   }
 
   @Override
   public List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException {
-
-    logger.info(getLogMessage(getComponentId(), uniqueTaskId, "Obtaining files"));
+    
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), uniqueTaskId, "Obtaining files"));
+    }
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);
   }
 

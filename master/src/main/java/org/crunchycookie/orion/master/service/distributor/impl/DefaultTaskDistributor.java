@@ -61,9 +61,11 @@ public class DefaultTaskDistributor implements TaskDistributor {
 
   @Override
   public void distribute(SubmittedTask submittedTask) throws MasterException {
-
-    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(),
-        "Distributing the task"));
+    
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(),
+          "Distributing the task"));
+    }
 
     // Check for an available free worker.
     Optional<WorkerNode> availableWorker = getWorkerPoolManager().getFreeWorker();

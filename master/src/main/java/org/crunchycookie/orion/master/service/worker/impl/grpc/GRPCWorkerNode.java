@@ -50,8 +50,10 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public void dispatch(SubmittedTask submittedTask) throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Dispatching the task",
-        "WorkerNode: " + getId()));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Dispatching the task",
+          "WorkerNode: " + getId()));
+    }
     upload(submittedTask.getTaskFiles());
     execute(submittedTask.getExecutable());
   }
@@ -59,8 +61,10 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public SubmittedTask obtain(SubmittedTask submittedTask) throws MasterException {
 
-    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Obtaining the task", "WorkerNode: " + getId()));
-
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Obtaining the task",
+          "WorkerNode: " + getId()));
+    }
     // Downloading files may change the status in the worker, thus obtaining it first.
     WorkerNodeStatus status = getStatus(submittedTask);
 
@@ -84,10 +88,11 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public WorkerNodeStatus getStatus(SubmittedTask submittedTask) {
 
-    logger.info(
-        getLogMessage(getComponentId(), submittedTask == null ? null : submittedTask.getTaskId(),
-            "Getting the worker node status", "WorkerNode: " + getId()));
-
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          getLogMessage(getComponentId(), submittedTask == null ? null : submittedTask.getTaskId(),
+              "Getting the worker node status", "WorkerNode: " + getId()));
+    }
     TaskFileMetadata executable = submittedTask == null || submittedTask.getExecutable() == null ?
         new TaskFileMetadata(
             "",

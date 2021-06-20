@@ -75,14 +75,17 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public void init() throws ExceptionInInitializerError {
 
-    logger.info(getLogMessage(getComponentId(), null, "Initializing the worker pool"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), null, "Initializing the worker pool"));
+    }
     discoverAndRegisterWorkerNodes();
   }
 
   @Override
   public Optional<WorkerNode> getFreeWorker() {
-
-    logger.info(getLogMessage(getComponentId(), null, "Getting a free worker"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), null, "Getting a free worker"));
+    }
     return getRegisteredNodes().stream()
         .filter(n -> getStatusOfWorkerNode(n) == WorkerNodeStatus.IDLE)
         .findFirst();
@@ -93,7 +96,9 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
 
     return submittedTasks.stream()
         .map(st -> {
-          logger.info(getLogMessage(getComponentId(), st.getTaskId(), "Getting status"));
+          if (logger.isDebugEnabled()) {
+            logger.debug(getLogMessage(getComponentId(), st.getTaskId(), "Getting status"));
+          }
           Optional<WorkerNode> executionNode = getExecutionNode(st);
           if (executionNode.isPresent()) {
             return new SubmittedTaskStatus(
@@ -110,8 +115,11 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public List<SubmittedTask> getTasks(List<SubmittedTask> requestedTasks) throws MasterException {
 
-    requestedTasks.forEach(t ->
-        logger.info(getLogMessage(getComponentId(), t.getTaskId(), "Getting the task"))
+    requestedTasks.forEach(t -> {
+          if (logger.isDebugEnabled()) {
+            logger.debug(getLogMessage(getComponentId(), t.getTaskId(), "Getting the task"));
+          }
+        }
     );
 
     // Get the worker nodes executing the requested tasks.
@@ -123,8 +131,9 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
 
   @Override
   public WorkerMetaData getWorkerInformation() {
-
-    logger.info(getLogMessage(getComponentId(), null, "Getting worker information"));
+    if (logger.isDebugEnabled()) {
+      logger.debug(getLogMessage(getComponentId(), null, "Getting worker information"));
+    }
     return RESTfulEndpoint.configs.getWorkerMetaData();
   }
 
