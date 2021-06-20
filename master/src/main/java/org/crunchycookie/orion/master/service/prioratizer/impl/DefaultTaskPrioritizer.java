@@ -27,6 +27,7 @@ import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.models.SubmittedTask;
+import org.crunchycookie.orion.master.service.prioratizer.PriorityQueue;
 import org.crunchycookie.orion.master.service.prioratizer.TaskPrioritizer;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 

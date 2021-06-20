@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.worker.store.impl;
 
+import static org.crunchycookie.orion.worker.utils.WorkerUtils.logMessage;
+
 import com.google.common.util.concurrent.Monitor;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +34,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.worker.WorkerOuterClass.FileMetaData;
 import org.crunchycookie.orion.worker.exception.WorkerServerException;
 import org.crunchycookie.orion.worker.store.TaskExecutionManager;
@@ -44,6 +48,8 @@ import org.crunchycookie.orion.worker.store.constants.TaskExecutionManagerConsta
  * References for each job process gets executed in the node is kept in-memory of this instance.
  */
 public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionManager {
+
+  private static final Logger logger = LogManager.getLogger(PrimaryStorageBasedTaskExecutionManager.class);
 
   private static final String TASKS_FOLDER = "tasks";
   private static final String FILE_TYPE_SEPARATOR = ".";
@@ -97,6 +103,8 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
   public Pair<FileMetaData, InputStream> get(FileMetaData file) throws WorkerServerException {
 
     try {
+      logMessage("===== Obtaining the file: " + file.getName() + "." + file.getType()
+          + ", of the Task: " + file.getTaskId());
       String filePath = getFilePath(file);
       return new ImmutablePair<>(file, new FileInputStream(filePath));
     } catch (IOException | URISyntaxException e) {
@@ -120,6 +128,8 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
       Process executableProcess = executeScript(executableFile);
       // Store process reference in ledger.
       putTaskInLedger(executableFile, executableProcess);
+
+      logMessage("===== Executing the task: " + executableFile.getTaskId());
       return OperationStatus.SUCCESSFULLY_STARTED;
     } catch (URISyntaxException e) {
       throw new WorkerServerException("Unable to read the file", e);
@@ -149,8 +159,12 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     // Handle task status check.
     Process executableTask = getTaskFromLedger(executableFile);
     if (executableTask == null || !executableTask.isAlive()) {
+      if (!executableTask.isAlive()) {
+        logMessage("===== Task: " + executableFile.getTaskId() + ", has completed execution");
+      }
       return OperationStatus.IDLE;
     }
+    logMessage("===== Task: " + executableFile.getTaskId() + ", is still executing");
     return OperationStatus.BUSY;
   }
 

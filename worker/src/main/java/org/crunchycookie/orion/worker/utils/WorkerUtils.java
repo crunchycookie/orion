@@ -102,4 +102,8 @@ public class WorkerUtils {
       fileInputStream.close();
     }
   }
+
+  public static void logMessage(String msg) {
+    System.out.println(msg);
+  }
 }

@@ -115,4 +115,9 @@ public class DefaultTaskScheduler implements TaskScheduler {
     }
     priorityQueue.insert(submittedTask.getTaskId(), priority);
   }
+
+  @Override
+  public PriorityQueue getQueue() {
+    return this.priorityQueue;
+  }
 }

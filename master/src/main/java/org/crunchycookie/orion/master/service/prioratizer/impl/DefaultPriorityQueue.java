@@ -16,15 +16,23 @@
 
 package org.crunchycookie.orion.master.service.prioratizer.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.service.prioratizer.PriorityQueue;
 
 public class DefaultPriorityQueue implements PriorityQueue {
+
+  private static final Logger logger = LogManager.getLogger(DefaultPriorityQueue.class);
+
 
   private final java.util.PriorityQueue<PrioratizedTask> priorityQueue;
 
@@ -37,7 +45,7 @@ public class DefaultPriorityQueue implements PriorityQueue {
     );
   }
 
-  private class PrioratizedTask {
+  public class PrioratizedTask {
 
     private final UUID taskId;
     private final Priority priority;
@@ -73,5 +81,10 @@ public class DefaultPriorityQueue implements PriorityQueue {
   @Override
   public boolean hasNext() throws MasterException {
     return !this.priorityQueue.isEmpty();
+  }
+
+  @Override
+  public List<PrioratizedTask> getState() {
+    return new ArrayList<>(Arrays.asList(priorityQueue.toArray(new PrioratizedTask[]{})));
   }
 }

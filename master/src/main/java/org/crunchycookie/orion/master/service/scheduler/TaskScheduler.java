@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
+import org.crunchycookie.orion.master.service.prioratizer.PriorityQueue;
 
 /**
  * This class represents the task scheduler component. It handles task priority, task scheduling,
@@ -50,4 +51,6 @@ public interface TaskScheduler {
    * @return
    */
   boolean hasNext() throws MasterException;
+
+  PriorityQueue getQueue();
 }

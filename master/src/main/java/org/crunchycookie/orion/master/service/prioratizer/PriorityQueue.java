@@ -16,10 +16,12 @@
 
 package org.crunchycookie.orion.master.service.prioratizer;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
+import org.crunchycookie.orion.master.service.prioratizer.impl.DefaultPriorityQueue.PrioratizedTask;
 
 /**
  * This class represents the queue where the priority of the task is stored until they get
@@ -48,4 +50,11 @@ public interface PriorityQueue {
    * @return Unique Id of the task.
    */
   boolean hasNext() throws MasterException;
+
+  /**
+   * Obtain elements in this queue.
+   *
+   * @return
+   */
+  List<PrioratizedTask> getState();
 }
