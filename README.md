@@ -1,5 +1,5 @@
 
-###ORION - A modern, distributed computing framework.
+### ORION - A modern, distributed computing framework.
 
 #### Authors
 - [Tharindu Bandara](https://github.com/tharindu-bandara)
