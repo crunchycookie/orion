@@ -16,8 +16,6 @@
 
 package org.crunchycookie.orion.master.service.worker;
 
-import java.util.Optional;
-import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 

@@ -16,7 +16,6 @@
 
 package org.crunchycookie.orion.master.models;
 
-import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
 import org.crunchycookie.orion.master.exception.MasterException;
 
 /**

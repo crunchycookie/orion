@@ -20,16 +20,24 @@ import java.util.UUID;
 
 public class TaskFileMetadata {
 
+  private static final String SEPARATOR = "####";
   private String fileName;
   private String fileType;
   private UUID taskId;
-
-  private static final String SEPARATOR = "####";
 
   public TaskFileMetadata(String fileName, String fileType, UUID taskId) {
     this.fileName = fileName;
     this.fileType = fileType;
     this.taskId = taskId;
+  }
+
+  public static TaskFileMetadata parseString(String metaString) {
+
+    return new TaskFileMetadata(
+        metaString.split(SEPARATOR)[1],
+        metaString.split(SEPARATOR)[2],
+        UUID.fromString(metaString.split(SEPARATOR)[0])
+    );
   }
 
   public String getFileName() {
@@ -54,15 +62,6 @@ public class TaskFileMetadata {
 
   public void setTaskId(UUID taskId) {
     this.taskId = taskId;
-  }
-
-  public static TaskFileMetadata parseString(String metaString) {
-
-    return new TaskFileMetadata(
-        metaString.split(SEPARATOR)[1],
-        metaString.split(SEPARATOR)[2],
-        UUID.fromString(metaString.split(SEPARATOR)[0])
-    );
   }
 
   @Override

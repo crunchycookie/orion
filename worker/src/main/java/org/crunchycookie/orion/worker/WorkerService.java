@@ -30,7 +30,7 @@ public class WorkerService {
     } catch (IOException e) {
       logMessage("Failed to start the server");
       System.out.println("Failed to start the server");
-    } catch (InterruptedException e){
+    } catch (InterruptedException e) {
       logMessage("Error occurred while server timeout");
       System.out.println("Error occurred while waiting till service termination");
     } finally {

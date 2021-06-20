@@ -44,10 +44,6 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
     id = getWorkerUniqueId(host, port);
   }
 
-  private String getWorkerUniqueId(String host, String port) {
-    return host + "###" + port;
-  }
-
   @Override
   public void dispatch(SubmittedTask submittedTask) throws MasterException {
 
@@ -94,6 +90,10 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   public String getId() {
 
     return this.id;
+  }
+
+  private String getWorkerUniqueId(String host, String port) {
+    return host + "###" + port;
   }
 
 //  @Override

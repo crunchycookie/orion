@@ -22,8 +22,8 @@ import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
-import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 import org.crunchycookie.orion.master.models.file.TaskFile;
+import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
 
 /**
  * This class represents the store where submitted task files are stored until they get dispatched

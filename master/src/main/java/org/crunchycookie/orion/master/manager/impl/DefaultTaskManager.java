@@ -77,15 +77,13 @@ public class DefaultTaskManager implements TaskManager {
     List<SubmittedTask> tasksMarkedAsInProgress = getCentralStore().get(TaskStatus.IN_PROGRESS);
 
     // Get the current status of those tasks from worker pool.
-    List<SubmittedTaskStatus> latestStatus = getWorkerPoolManager()
-        .getStatus(tasksMarkedAsInProgress);
+    List<SubmittedTaskStatus> latestStatus = getWorkerPoolManager().getStatus(
+        tasksMarkedAsInProgress);
 
-    // Filter successful status, and obtain their corresponding tasks.
-    List<SubmittedTask> successfulTasks = getFilteredTasks(tasksMarkedAsInProgress, latestStatus,
-        TaskStatus.SUCCESS);
-
-    // Retrieve them from the worker pool.
-    List<SubmittedTask> successTasks = getTasksFromWorkerPool(successfulTasks);
+    // Filter success tasks and obtain those filtered tasks from the worker pool. This include
+    // latest input and output files since the process is now completed in the worker.
+    List<SubmittedTask> successTasks = getFilteredTasksFromWorkerPool(tasksMarkedAsInProgress,
+        latestStatus, TaskStatus.SUCCESS);
 
     /*
      Store success tasks in the central store. This will replace the existing entry thus now
@@ -93,23 +91,9 @@ public class DefaultTaskManager implements TaskManager {
      */
     getCentralStore().store(successTasks);
 
-    /*
-     Get the list of failed tasks. The returned SubmittedTask object will only include the task id
-     since the worker failed thus being unable to obtain files.
-     */
-    List<SubmittedTask> failedTasks = getTasksFromWorkerPool(tasksMarkedAsInProgress, latestStatus,
-        TaskStatus.FAILED);
-
-    // Now lets update the failed tasks from the proper objects in the central store.
-    failedTasks = getCentralStore().get(failedTasks.stream()
-        .map(SubmittedTask::getTaskId)
-        .collect(Collectors.toList())
-    );
-
-    // Re-schedule failed tasks.
-    for (SubmittedTask failedTask : failedTasks) {
-      this.submit(failedTask);
-    }
+    // Filter failed tasks among the in-progress list obtain from the central store and update their
+    // status as failed. Then re-schedule those failed tasks.
+    filterAndRescheduleFailedTasks(tasksMarkedAsInProgress, latestStatus);
 
     // Obtain next scheduled task and ask task distributor to distribute it.
     if (getTaskScheduler().hasNext()) {
@@ -122,23 +106,6 @@ public class DefaultTaskManager implements TaskManager {
     if (MasterUtils.isDebugEnabled(LOG)) {
       LOG.info("Synced in " + ChronoUnit.MILLIS.between(syncStart, syncCompletion) / 1000);
     }
-  }
-
-  private List<SubmittedTask> getFilteredTasks(List<SubmittedTask> tasksMarkedAsInProgress,
-      List<SubmittedTaskStatus> latestStatus, TaskStatus requiredStatus) {
-
-    // Filter required status.
-    List<SubmittedTaskStatus> filteredStatus = latestStatus.stream()
-        .filter(status -> status.getStatus().equals(requiredStatus))
-        .collect(Collectors.toList());
-
-    // Match and obtain corresponding tasks for them.
-    List<SubmittedTask> filteredTasks = tasksMarkedAsInProgress.stream()
-        .filter(t -> filteredStatus.stream().anyMatch(
-            status -> status.getTaskId().equals(t.getTaskId())
-        )).collect(Collectors.toList());
-
-    return filteredTasks;
   }
 
   @Override
@@ -176,6 +143,55 @@ public class DefaultTaskManager implements TaskManager {
       throws MasterException {
 
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);
+  }
+
+  private void filterAndRescheduleFailedTasks(List<SubmittedTask> tasksMarkedAsInProgress,
+      List<SubmittedTaskStatus> latestStatus) throws MasterException {
+
+    // Filter failed tasks.
+    List<SubmittedTask> failedTasks = getFilteredTasks(tasksMarkedAsInProgress, latestStatus,
+        TaskStatus.FAILED);
+
+    // Set status as failed.
+    failedTasks.forEach(failedTask -> failedTask.setStatus(new SubmittedTaskStatus(
+        failedTask.getTaskId(),
+        TaskStatus.FAILED
+    )));
+
+    // Re-schedule failed tasks.
+    for (SubmittedTask failedTask : failedTasks) {
+      this.submit(failedTask);
+    }
+  }
+
+  private List<SubmittedTask> getFilteredTasksFromWorkerPool(
+      List<SubmittedTask> tasksMarkedAsInProgress,
+      List<SubmittedTaskStatus> latestStatus, TaskStatus requiredStatus) throws MasterException {
+
+    // Filter successful status, and obtain their corresponding tasks.
+    List<SubmittedTask> successfulTasks = getFilteredTasks(tasksMarkedAsInProgress, latestStatus,
+        requiredStatus);
+
+    // Retrieve them from the worker pool.
+    List<SubmittedTask> successTasks = getTasksFromWorkerPool(successfulTasks);
+    return successTasks;
+  }
+
+  private List<SubmittedTask> getFilteredTasks(List<SubmittedTask> tasksMarkedAsInProgress,
+      List<SubmittedTaskStatus> latestStatus, TaskStatus requiredStatus) {
+
+    // Filter required status.
+    List<SubmittedTaskStatus> filteredStatus = latestStatus.stream()
+        .filter(status -> status.getStatus().equals(requiredStatus))
+        .collect(Collectors.toList());
+
+    // Match and obtain corresponding tasks for them.
+    List<SubmittedTask> filteredTasks = tasksMarkedAsInProgress.stream()
+        .filter(t -> filteredStatus.stream().anyMatch(
+            status -> status.getTaskId().equals(t.getTaskId())
+        )).collect(Collectors.toList());
+
+    return filteredTasks;
   }
 
   private List<SubmittedTask> getTasksFromWorkerPool(List<SubmittedTask> tasks)

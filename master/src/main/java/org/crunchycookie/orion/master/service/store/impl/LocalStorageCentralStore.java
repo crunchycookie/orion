@@ -51,25 +51,6 @@ public class LocalStorageCentralStore implements CentralStore {
   public static final String TASK_FOLDER_BACKUP_SUFFIX = "__backup";
   private final String workspace;
 
-  public enum LocalStorageCentralStoreSingleton {
-    INSTANCE;
-
-    private CentralStore centralStore;
-
-    LocalStorageCentralStoreSingleton() {
-      centralStore = new LocalStorageCentralStore();
-    }
-
-    public CentralStore get() {
-      return centralStore;
-    }
-  }
-
-  public static CentralStore getInstant() {
-
-    return LocalStorageCentralStoreSingleton.INSTANCE.get();
-  }
-
   private LocalStorageCentralStore() {
 
     String workspaceFromConfigs = RESTfulEndpoint.configs
@@ -87,6 +68,25 @@ public class LocalStorageCentralStore implements CentralStore {
     } catch (IOException e) {
       throw new RuntimeException("Failed during initialization");
     }
+  }
+
+  public enum LocalStorageCentralStoreSingleton {
+    INSTANCE;
+
+    private CentralStore centralStore;
+
+    LocalStorageCentralStoreSingleton() {
+      centralStore = new LocalStorageCentralStore();
+    }
+
+    public CentralStore get() {
+      return centralStore;
+    }
+  }
+
+  public static CentralStore getInstant() {
+
+    return LocalStorageCentralStoreSingleton.INSTANCE.get();
   }
 
   @Override
@@ -155,11 +155,6 @@ public class LocalStorageCentralStore implements CentralStore {
     }
   }
 
-  private String getString(String id) {
-
-    return id == null ? "" : id;
-  }
-
   @Override
   public SubmittedTask get(UUID taskId) throws MasterException {
 
@@ -212,10 +207,6 @@ public class LocalStorageCentralStore implements CentralStore {
     } catch (IOException e) {
       throw new MasterException(ErrorCodes.INTERNAL_SERVER_ERROR, "Failed to get data", e);
     }
-  }
-
-  private String getWorkerId(String workerId) {
-    return StringUtils.isBlank(workerId) ? null : workerId;
   }
 
   @Override
@@ -273,6 +264,15 @@ public class LocalStorageCentralStore implements CentralStore {
     submittedTask.setStatus(status);
 
     store(submittedTask);
+  }
+
+  private String getString(String id) {
+
+    return id == null ? "" : id;
+  }
+
+  private String getWorkerId(String workerId) {
+    return StringUtils.isBlank(workerId) ? null : workerId;
   }
 
   private List<UUID> getTaskIDs(TaskStatus status) throws MasterException {

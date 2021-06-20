@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -92,24 +93,6 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     }
   }
 
-  private String getWorkspaceFolder() throws URISyntaxException {
-
-    String locationOfTheCodeSource = PrimaryStorageBasedTaskExecutionManager.class
-        .getProtectionDomain()
-        .getCodeSource().getLocation().toURI().getPath();
-    if (locationOfTheCodeSource.endsWith(File.separator)) {
-      // Remove ending file separator.
-      locationOfTheCodeSource = locationOfTheCodeSource
-          .substring(0, locationOfTheCodeSource.length() - 1);
-    }
-    // Remove jar name.
-    if (locationOfTheCodeSource.endsWith(".jar")) {
-      locationOfTheCodeSource = locationOfTheCodeSource
-          .substring(0, locationOfTheCodeSource.lastIndexOf(File.separator));
-    }
-    return locationOfTheCodeSource;
-  }
-
   @Override
   public Pair<FileMetaData, InputStream> get(FileMetaData file) throws WorkerServerException {
 
@@ -153,10 +136,17 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
   public OperationStatus getStatus(FileMetaData executableFile)
       throws WorkerServerException {
 
+    // Handle node status check.
     if (StringUtils.isBlank(executableFile.getTaskId())) {
-      // TODO: 2021-06-20 check ledger and obtain status of all the executing tasks.
+      for (Entry<String, Process> p : tasksLedger.entrySet()) {
+        if (p.getValue() != null && p.getValue().isAlive()) {
+          return OperationStatus.BUSY;
+        }
+      }
+      return OperationStatus.IDLE;
     }
 
+    // Handle task status check.
     Process executableTask = getTaskFromLedger(executableFile);
     if (executableTask == null || !executableTask.isAlive()) {
       return OperationStatus.IDLE;
@@ -185,6 +175,24 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     return "PrimaryStorageWorkerStore";
   }
 
+  private String getWorkspaceFolder() throws URISyntaxException {
+
+    String locationOfTheCodeSource = PrimaryStorageBasedTaskExecutionManager.class
+        .getProtectionDomain()
+        .getCodeSource().getLocation().toURI().getPath();
+    if (locationOfTheCodeSource.endsWith(File.separator)) {
+      // Remove ending file separator.
+      locationOfTheCodeSource = locationOfTheCodeSource
+          .substring(0, locationOfTheCodeSource.length() - 1);
+    }
+    // Remove jar name.
+    if (locationOfTheCodeSource.endsWith(".jar")) {
+      locationOfTheCodeSource = locationOfTheCodeSource
+          .substring(0, locationOfTheCodeSource.lastIndexOf(File.separator));
+    }
+    return locationOfTheCodeSource;
+  }
+
   private Process executeScript(FileMetaData executableFile)
       throws URISyntaxException, IOException {
 
@@ -209,11 +217,6 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
   }
 
   private Process getTaskFromLedger(FileMetaData executableFile) {
-    return tasksLedger.get(getUniqueTaskId(executableFile));
-  }
-
-  private Process getTaskFromLedger() {
-
     return tasksLedger.get(getUniqueTaskId(executableFile));
   }
 

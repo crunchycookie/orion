@@ -21,11 +21,9 @@ import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskCapacityVa
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskPrioratizer;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolManager;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import org.crunchycookie.orion.master.exception.MasterException;
-import org.crunchycookie.orion.master.manager.TaskManager;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;

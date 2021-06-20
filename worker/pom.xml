@@ -30,46 +30,46 @@
     </extensions>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.1.1</version>
         <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
           <archive>
             <manifest>
               <mainClass>org.crunchycookie.orion.worker.WorkerService</mainClass>
             </manifest>
           </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
         </configuration>
         <executions>
           <execution>
-            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
+            <phase>package</phase>
           </execution>
         </executions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>3.1.1</version>
       </plugin>
-<!--      <plugin>-->
+      <!--      <plugin>-->
 
-<!--        &lt;!&ndash; Building an executable jar &ndash;&gt;-->
+      <!--        &lt;!&ndash; Building an executable jar &ndash;&gt;-->
 
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-jar-plugin</artifactId>-->
-<!--        <version>3.1.0</version>-->
-<!--        <configuration>-->
-<!--          <archive>-->
-<!--            <manifest>-->
+      <!--        <groupId>org.apache.maven.plugins</groupId>-->
+      <!--        <artifactId>maven-jar-plugin</artifactId>-->
+      <!--        <version>3.1.0</version>-->
+      <!--        <configuration>-->
+      <!--          <archive>-->
+      <!--            <manifest>-->
 
-<!--              &lt;!&ndash; give full qualified name of your main class&ndash;&gt;-->
-<!--              <mainClass>org.crunchycookie.orion.worker.WorkerService</mainClass>-->
+      <!--              &lt;!&ndash; give full qualified name of your main class&ndash;&gt;-->
+      <!--              <mainClass>org.crunchycookie.orion.worker.WorkerService</mainClass>-->
 
-<!--            </manifest>-->
-<!--          </archive>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
+      <!--            </manifest>-->
+      <!--          </archive>-->
+      <!--        </configuration>-->
+      <!--      </plugin>-->
       <plugin>
         <artifactId>protobuf-maven-plugin</artifactId>
         <configuration>

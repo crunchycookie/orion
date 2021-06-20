@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.config.worker.WorkerNodeDiscoveryInfo;
@@ -75,7 +74,8 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   public Optional<WorkerNode> getFreeWorker() {
 
     // TODO: 2021-06-20 Change such that node.getStatus(null) will get the node status.
-    return getRegisteredNodes().stream().filter(n -> n.getStatus() == WorkerNodeStatus.IDLE)
+    return getRegisteredNodes().stream()
+        .filter(n -> getStatusOfWorkerNode(n) == WorkerNodeStatus.IDLE)
         .findFirst();
   }
 
@@ -123,6 +123,10 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
     registeredNodes.add(node);
   }
 
+  private WorkerNodeStatus getStatusOfWorkerNode(WorkerNode n) {
+    return n.getStatus(null);
+  }
+
   private List<SubmittedTask> obtainNonExecutingTasks(List<SubmittedTask> requestedTasks,
       List<WorkerNode> executionNodes) throws MasterException {
 
@@ -138,7 +142,8 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
     return tasks;
   }
 
-  private Optional<SubmittedTask> getTaskSubmittedToNode(List<SubmittedTask> requestedTasks, WorkerNode node) {
+  private Optional<SubmittedTask> getTaskSubmittedToNode(List<SubmittedTask> requestedTasks,
+      WorkerNode node) {
     return requestedTasks.stream()
         .filter(t -> t.getWorkerId().equals(node.getId()))
         .findFirst();

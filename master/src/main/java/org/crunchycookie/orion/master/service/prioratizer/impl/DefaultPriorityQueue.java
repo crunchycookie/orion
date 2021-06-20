@@ -32,7 +32,8 @@ public class DefaultPriorityQueue implements PriorityQueue {
     int MAX_NUMBER_OF_TASKS = 100;
     priorityQueue = new java.util.PriorityQueue<>(
         MAX_NUMBER_OF_TASKS,
-        Comparator.comparing(PrioratizedTask::getPriority).reversed() // Lowest value means highest priority
+        Comparator.comparing(PrioratizedTask::getPriority).reversed()
+        // Lowest value means highest priority
     );
   }
 
