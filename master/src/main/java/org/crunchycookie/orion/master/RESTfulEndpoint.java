@@ -27,8 +27,12 @@ public class RESTfulEndpoint {
 
   public static void main(String[] args) {
 
+    // Print configs path.
+    String path = args[1];
+    System.out.println(path);
+
     // Load configurations.
-    initConfigs(args[0]);
+    initConfigs(path);
 
     // Start web server. Please refer org.crunchycookie.orion.master.rest.impl for services.
     SpringApplication.run(RESTfulEndpoint.class, args);
