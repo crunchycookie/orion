@@ -1,702 +1,702 @@
 {
-	"info": {
-		"_postman_id": "e0eba813-c8e0-4a9d-b7f6-61f239b7e910",
-		"name": "ORION Test Suit",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "getResourceLimits",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"Contains the correct resource keys\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    for (var i = 0; i < jsonData.limits.length; i++) {",
-							"        var counter = jsonData.limits[i];",
-							"        pm.expect(counter.key).to.be.oneOf([\"MEMORY\", \"STORAGE\"]);",
-							"    }",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://{{host}}:{{port}}/orion/v0.1/task-limits",
-					"protocol": "http",
-					"host": [
-						"{{host}}"
-					],
-					"port": "{{port}}",
-					"path": [
-						"orion",
-						"v0.1",
-						"task-limits"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Submit a task",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"var moment = require('moment');",
-							"pm.environment.set(\"now\", moment.utc().toJSON());",
-							"pm.environment.set(\"later\", moment.utc().add(1, 'days').toJSON());",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Task successfully accepted for execution\", function () {",
-							"    pm.response.to.have.status(202);",
-							"",
-							"});",
-							"",
-							"pm.test(\"Task is scheduled for execution\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.taskId).to.be.not.empty;",
-							"    pm.expect(jsonData.status).to.eql(\"inprogress\");",
-							"});",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"submitted-task-id\", jsonData.taskId);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disabledSystemHeaders": {
-					"accept-encoding": true,
-					"accept": true
-				}
-			},
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "false",
-						"disabled": true
-					}
-				],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "executableShellScript",
-							"value": "execute-task.sh",
-							"description": "name of the executable script",
-							"type": "text"
-						},
-						{
-							"key": "outputFiles",
-							"value": "out.txt",
-							"description": "names of the output files required after execution",
-							"type": "text"
-						},
-						{
-							"key": "resourceRequirements",
-							"value": "MEMORY=2,STORAGE=2,DEADLINE={{later}}",
-							"type": "text"
-						},
-						{
-							"key": "filename",
-							"type": "file",
-							"src": "/Users/tharindu/workspace/clouds-lab/assignment-2/orion-test-suit/submit-resources/execute-task.sh"
-						},
-						{
-							"key": "filename",
-							"type": "file",
-							"src": "/Users/tharindu/workspace/clouds-lab/assignment-2/orion-test-suit/submit-resources/in.txt"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://{{host}}:{{port}}/orion/v0.1/submit",
-					"protocol": "http",
-					"host": [
-						"{{host}}"
-					],
-					"port": "{{port}}",
-					"path": [
-						"orion",
-						"v0.1",
-						"submit"
-					]
-				},
-				"description": "You can submit a task to the orion\n"
-			},
-			"response": [
-				{
-					"name": "task submitted successfully",
-					"originalRequest": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "executableShellScript",
-									"value": "exercitation magna aliquip",
-									"description": "name of the executable script",
-									"type": "text"
-								},
-								{
-									"key": "outputFiles",
-									"value": "[\"qui sint nulla do\",\"ullamco mollit labore\"]",
-									"description": "names of the output files required after execution",
-									"type": "text"
-								},
-								{
-									"key": "resourceRequirements",
-									"value": "[\"ram=2\",\"ram=2\"]",
-									"type": "text"
-								},
-								{
-									"key": "filename",
-									"value": "[\"id consequat anim\",\"tempor minim aute eu\"]",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{baseUrl}}/submit",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"submit"
-							]
-						}
-					},
-					"status": "Accepted",
-					"code": 202,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "application/json"
-						}
-					],
-					"cookie": [],
-					"body": "{\n \"taskId\": \"123e4567-e89b-12d3-a456-426614174000\",\n \"status\": \"inprogress\"\n}"
-				},
-				{
-					"name": "task cannot be executed by orion. consult with orion task limitations",
-					"originalRequest": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "executableShellScript",
-									"value": "exercitation magna aliquip",
-									"description": "name of the executable script",
-									"type": "text"
-								},
-								{
-									"key": "outputFiles",
-									"value": "[\"qui sint nulla do\",\"ullamco mollit labore\"]",
-									"description": "names of the output files required after execution",
-									"type": "text"
-								},
-								{
-									"key": "resourceRequirements",
-									"value": "[\"ram=2\",\"ram=2\"]",
-									"type": "text"
-								},
-								{
-									"key": "filename",
-									"value": "[\"id consequat anim\",\"tempor minim aute eu\"]",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{baseUrl}}/submit",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"submit"
-							]
-						}
-					},
-					"status": "Bad Request",
-					"code": 400,
-					"_postman_previewlanguage": "text",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "text/plain"
-						}
-					],
-					"cookie": [],
-					"body": ""
-				}
-			]
-		},
-		{
-			"name": "Monitor immediate status",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Successfully\", function () {",
-							"    pm.response.to.have.status(200);",
-							"",
-							"});",
-							"",
-							"pm.test(\"Task is in progress\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.taskId).to.be.not.empty;",
-							"    pm.expect(jsonData.status).to.eql(\"inprogress\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://{{host}}:{{port}}/orion/v0.1/tasks/{{submitted-task-id}}/monitor",
-					"protocol": "http",
-					"host": [
-						"{{host}}"
-					],
-					"port": "{{port}}",
-					"path": [
-						"orion",
-						"v0.1",
-						"tasks",
-						"{{submitted-task-id}}",
-						"monitor"
-					]
-				},
-				"description": "You can monitor the status of the submitted task\n"
-			},
-			"response": [
-				{
-					"name": "status of the task",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/tasks/:task-id/monitor",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"tasks",
-								":task-id",
-								"monitor"
-							],
-							"variable": [
-								{
-									"key": "task-id"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "application/json"
-						}
-					],
-					"cookie": [],
-					"body": "\"successful\""
-				},
-				{
-					"name": "couldn't find the task",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/tasks/:task-id/monitor",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"tasks",
-								":task-id",
-								"monitor"
-							],
-							"variable": [
-								{
-									"key": "task-id"
-								}
-							]
-						}
-					},
-					"status": "Not Found",
-					"code": 404,
-					"_postman_previewlanguage": "text",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "text/plain"
-						}
-					],
-					"cookie": [],
-					"body": ""
-				}
-			]
-		},
-		{
-			"name": "Monitor status after sometime",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"setTimeout({}, 2000);"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Successfully\", function () {",
-							"    pm.response.to.have.status(200);",
-							"",
-							"});",
-							"",
-							"pm.test(\"Task is in progress\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.taskId).to.be.not.empty;",
-							"    pm.expect(jsonData.status).to.eql(\"successful\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://{{host}}:{{port}}/orion/v0.1/tasks/{{submitted-task-id}}/monitor",
-					"protocol": "http",
-					"host": [
-						"{{host}}"
-					],
-					"port": "{{port}}",
-					"path": [
-						"orion",
-						"v0.1",
-						"tasks",
-						"{{submitted-task-id}}",
-						"monitor"
-					]
-				},
-				"description": "You can monitor the status of the submitted task\n"
-			},
-			"response": [
-				{
-					"name": "status of the task",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/tasks/:task-id/monitor",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"tasks",
-								":task-id",
-								"monitor"
-							],
-							"variable": [
-								{
-									"key": "task-id"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "application/json"
-						}
-					],
-					"cookie": [],
-					"body": "\"successful\""
-				},
-				{
-					"name": "couldn't find the task",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/tasks/:task-id/monitor",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"tasks",
-								":task-id",
-								"monitor"
-							],
-							"variable": [
-								{
-									"key": "task-id"
-								}
-							]
-						}
-					},
-					"status": "Not Found",
-					"code": 404,
-					"_postman_previewlanguage": "text",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "text/plain"
-						}
-					],
-					"cookie": [],
-					"body": ""
-				}
-			]
-		},
-		{
-			"name": "Download task results",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Successfully\", function () {",
-							"    pm.response.to.have.status(200);",
-							"",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://{{host}}:{{port}}/orion/v0.1/tasks/{{submitted-task-id}}/files?filename=out.txt",
-					"protocol": "http",
-					"host": [
-						"{{host}}"
-					],
-					"port": "{{port}}",
-					"path": [
-						"orion",
-						"v0.1",
-						"tasks",
-						"{{submitted-task-id}}",
-						"files"
-					],
-					"query": [
-						{
-							"key": "filename",
-							"value": "out.txt",
-							"description": "(Required) name of the downloading file"
-						}
-					]
-				},
-				"description": "You can download files from the orion\n"
-			},
-			"response": [
-				{
-					"name": "output file",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/tasks/:task-id/files?filename=out.txt",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"tasks",
-								":task-id",
-								"files"
-							],
-							"query": [
-								{
-									"key": "filename",
-									"value": "out.txt"
-								}
-							],
-							"variable": [
-								{
-									"key": "task-id"
-								}
-							]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "text",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "application/octet-stream"
-						}
-					],
-					"cookie": [],
-					"body": "eiusmod est"
-				},
-				{
-					"name": "cannot download the file. Either the task failed or still processing\n",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/tasks/:task-id/files?filename=out.txt",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"tasks",
-								":task-id",
-								"files"
-							],
-							"query": [
-								{
-									"key": "filename",
-									"value": "out.txt"
-								}
-							],
-							"variable": [
-								{
-									"key": "task-id"
-								}
-							]
-						}
-					},
-					"status": "Bad Request",
-					"code": 400,
-					"_postman_previewlanguage": "text",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "text/plain"
-						}
-					],
-					"cookie": [],
-					"body": ""
-				},
-				{
-					"name": "couldn't find the file",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/tasks/:task-id/files?filename=out.txt",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"tasks",
-								":task-id",
-								"files"
-							],
-							"query": [
-								{
-									"key": "filename",
-									"value": "out.txt"
-								}
-							],
-							"variable": [
-								{
-									"key": "task-id"
-								}
-							]
-						}
-					},
-					"status": "Not Found",
-					"code": 404,
-					"_postman_previewlanguage": "text",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "text/plain"
-						}
-					],
-					"cookie": [],
-					"body": ""
-				}
-			]
-		},
-		{
-			"name": "Clear workspace",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"// Clear variables.",
-							"pm.environment.set(\"submitted-task-id\", \"\");"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": null
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "e0eba813-c8e0-4a9d-b7f6-61f239b7e910",
+    "name": "ORION Test Suit",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "getResourceLimits",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Contains the correct resource keys\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    for (var i = 0; i < jsonData.limits.length; i++) {",
+              "        var counter = jsonData.limits[i];",
+              "        pm.expect(counter.key).to.be.oneOf([\"MEMORY\", \"STORAGE\"]);",
+              "    }",
+              "});",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/orion/v0.1/task-limits",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "orion",
+            "v0.1",
+            "task-limits"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Submit a task",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "var moment = require('moment');",
+              "pm.environment.set(\"now\", moment.utc().toJSON());",
+              "pm.environment.set(\"later\", moment.utc().add(1, 'days').toJSON());",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Task successfully accepted for execution\", function () {",
+              "    pm.response.to.have.status(202);",
+              "",
+              "});",
+              "",
+              "pm.test(\"Task is scheduled for execution\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.taskId).to.be.not.empty;",
+              "    pm.expect(jsonData.status).to.eql(\"inprogress\");",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.environment.set(\"submitted-task-id\", jsonData.taskId);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {
+          "accept-encoding": true,
+          "accept": true
+        }
+      },
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "false",
+            "disabled": true
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "executableShellScript",
+              "value": "execute-task.sh",
+              "description": "name of the executable script",
+              "type": "text"
+            },
+            {
+              "key": "outputFiles",
+              "value": "out.txt",
+              "description": "names of the output files required after execution",
+              "type": "text"
+            },
+            {
+              "key": "resourceRequirements",
+              "value": "MEMORY=2,STORAGE=2,DEADLINE={{later}}",
+              "type": "text"
+            },
+            {
+              "key": "filename",
+              "type": "file",
+              "src": "/Users/tharindu/workspace/clouds-lab/assignment-2/orion-test-suit/submit-resources/execute-task.sh"
+            },
+            {
+              "key": "filename",
+              "type": "file",
+              "src": "/Users/tharindu/workspace/clouds-lab/assignment-2/orion-test-suit/submit-resources/in.txt"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://{{host}}:{{port}}/orion/v0.1/submit",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "orion",
+            "v0.1",
+            "submit"
+          ]
+        },
+        "description": "You can submit a task to the orion\n"
+      },
+      "response": [
+        {
+          "name": "task submitted successfully",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "executableShellScript",
+                  "value": "exercitation magna aliquip",
+                  "description": "name of the executable script",
+                  "type": "text"
+                },
+                {
+                  "key": "outputFiles",
+                  "value": "[\"qui sint nulla do\",\"ullamco mollit labore\"]",
+                  "description": "names of the output files required after execution",
+                  "type": "text"
+                },
+                {
+                  "key": "resourceRequirements",
+                  "value": "[\"ram=2\",\"ram=2\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "filename",
+                  "value": "[\"id consequat anim\",\"tempor minim aute eu\"]",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "submit"
+              ]
+            }
+          },
+          "status": "Accepted",
+          "code": 202,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n \"taskId\": \"123e4567-e89b-12d3-a456-426614174000\",\n \"status\": \"inprogress\"\n}"
+        },
+        {
+          "name": "task cannot be executed by orion. consult with orion task limitations",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "executableShellScript",
+                  "value": "exercitation magna aliquip",
+                  "description": "name of the executable script",
+                  "type": "text"
+                },
+                {
+                  "key": "outputFiles",
+                  "value": "[\"qui sint nulla do\",\"ullamco mollit labore\"]",
+                  "description": "names of the output files required after execution",
+                  "type": "text"
+                },
+                {
+                  "key": "resourceRequirements",
+                  "value": "[\"ram=2\",\"ram=2\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "filename",
+                  "value": "[\"id consequat anim\",\"tempor minim aute eu\"]",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "submit"
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/plain"
+            }
+          ],
+          "cookie": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Monitor immediate status",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Successfully\", function () {",
+              "    pm.response.to.have.status(200);",
+              "",
+              "});",
+              "",
+              "pm.test(\"Task is in progress\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.taskId).to.be.not.empty;",
+              "    pm.expect(jsonData.status).to.eql(\"inprogress\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/orion/v0.1/tasks/{{submitted-task-id}}/monitor",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "orion",
+            "v0.1",
+            "tasks",
+            "{{submitted-task-id}}",
+            "monitor"
+          ]
+        },
+        "description": "You can monitor the status of the submitted task\n"
+      },
+      "response": [
+        {
+          "name": "status of the task",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:task-id/monitor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                ":task-id",
+                "monitor"
+              ],
+              "variable": [
+                {
+                  "key": "task-id"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "\"successful\""
+        },
+        {
+          "name": "couldn't find the task",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:task-id/monitor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                ":task-id",
+                "monitor"
+              ],
+              "variable": [
+                {
+                  "key": "task-id"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/plain"
+            }
+          ],
+          "cookie": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Monitor status after sometime",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "setTimeout({}, 2000);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Successfully\", function () {",
+              "    pm.response.to.have.status(200);",
+              "",
+              "});",
+              "",
+              "pm.test(\"Task is in progress\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.taskId).to.be.not.empty;",
+              "    pm.expect(jsonData.status).to.eql(\"successful\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/orion/v0.1/tasks/{{submitted-task-id}}/monitor",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "orion",
+            "v0.1",
+            "tasks",
+            "{{submitted-task-id}}",
+            "monitor"
+          ]
+        },
+        "description": "You can monitor the status of the submitted task\n"
+      },
+      "response": [
+        {
+          "name": "status of the task",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:task-id/monitor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                ":task-id",
+                "monitor"
+              ],
+              "variable": [
+                {
+                  "key": "task-id"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "\"successful\""
+        },
+        {
+          "name": "couldn't find the task",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:task-id/monitor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                ":task-id",
+                "monitor"
+              ],
+              "variable": [
+                {
+                  "key": "task-id"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/plain"
+            }
+          ],
+          "cookie": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Download task results",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Successfully\", function () {",
+              "    pm.response.to.have.status(200);",
+              "",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{host}}:{{port}}/orion/v0.1/tasks/{{submitted-task-id}}/files?filename=out.txt",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{port}}",
+          "path": [
+            "orion",
+            "v0.1",
+            "tasks",
+            "{{submitted-task-id}}",
+            "files"
+          ],
+          "query": [
+            {
+              "key": "filename",
+              "value": "out.txt",
+              "description": "(Required) name of the downloading file"
+            }
+          ]
+        },
+        "description": "You can download files from the orion\n"
+      },
+      "response": [
+        {
+          "name": "output file",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:task-id/files?filename=out.txt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                ":task-id",
+                "files"
+              ],
+              "query": [
+                {
+                  "key": "filename",
+                  "value": "out.txt"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "task-id"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/octet-stream"
+            }
+          ],
+          "cookie": [],
+          "body": "eiusmod est"
+        },
+        {
+          "name": "cannot download the file. Either the task failed or still processing\n",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:task-id/files?filename=out.txt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                ":task-id",
+                "files"
+              ],
+              "query": [
+                {
+                  "key": "filename",
+                  "value": "out.txt"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "task-id"
+                }
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/plain"
+            }
+          ],
+          "cookie": [],
+          "body": ""
+        },
+        {
+          "name": "couldn't find the file",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/:task-id/files?filename=out.txt",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                ":task-id",
+                "files"
+              ],
+              "query": [
+                {
+                  "key": "filename",
+                  "value": "out.txt"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "task-id"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/plain"
+            }
+          ],
+          "cookie": [],
+          "body": ""
+        }
+      ]
+    },
+    {
+      "name": "Clear workspace",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Clear variables.",
+              "pm.environment.set(\"submitted-task-id\", \"\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": null
+      },
+      "response": []
+    }
+  ]
 }

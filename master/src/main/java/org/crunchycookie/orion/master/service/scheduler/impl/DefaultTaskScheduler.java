@@ -16,13 +16,18 @@
 
 package org.crunchycookie.orion.master.service.scheduler.impl;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_TASK_SCHEDULER;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getCentralStore;
+import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskCapacityValidator;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskPrioratizer;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolManager;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.models.SubmittedTask;
@@ -33,6 +38,8 @@ import org.crunchycookie.orion.master.service.prioratizer.impl.DefaultPriorityQu
 import org.crunchycookie.orion.master.service.scheduler.TaskScheduler;
 
 public class DefaultTaskScheduler implements TaskScheduler {
+
+  private static final Logger logger = LogManager.getLogger(DefaultTaskScheduler.class);
 
   private final PriorityQueue priorityQueue;
 
@@ -57,16 +64,20 @@ public class DefaultTaskScheduler implements TaskScheduler {
   @Override
   public Optional<UUID> next() throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), null, "Getting next task"));
     return priorityQueue.next();
   }
 
   @Override
   public boolean hasNext() throws MasterException {
+    logger.info(getLogMessage(getComponentId(), null, "Checking next task"));
     return priorityQueue.hasNext();
   }
 
   @Override
   public SubmittedTaskStatus schedule(SubmittedTask submittedTask) throws MasterException {
+
+    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Scheduling task"));
 
     // Validate submitted job against the worker's capacity.
     getTaskCapacityValidator().validate(
@@ -87,8 +98,14 @@ public class DefaultTaskScheduler implements TaskScheduler {
     return new SubmittedTaskStatus(submittedTask.getTaskId(), TaskStatus.IN_PROGRESS);
   }
 
+  private ComponentID getComponentId() {
+    return COMPONENT_ID_TASK_SCHEDULER;
+  }
+
   private void insertToTheQueue(SubmittedTask submittedTask, Priority priority) {
 
+    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(),
+        "Inserting task into the queue"));
     priorityQueue.insert(submittedTask.getTaskId(), priority);
   }
 }

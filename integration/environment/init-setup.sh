@@ -18,7 +18,7 @@
 CURRENT_DIRECTORY=`pwd`
 WORKER_JAR_PATH=$CURRENT_DIRECTORY/../../worker/target/worker-0.1-SNAPSHOT-jar-with-dependencies.jar
 MASTER_JAR_PATH=$CURRENT_DIRECTORY/../../master/target/master-0.1-SNAPSHOT.jar
-MASTER_CONFIG_PATH=$CURRENT_DIRECTORY/../../master/src/main/resources/orion-master.properties
+MASTER_CONFIG_PATH=$CURRENT_DIRECTORY/orion-master.properties
 
 echo $MASTER_JAR_PATH
 

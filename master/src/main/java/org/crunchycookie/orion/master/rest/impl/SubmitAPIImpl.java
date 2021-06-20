@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
@@ -40,6 +42,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class SubmitAPIImpl implements SubmitApiDelegate {
+
+  private static final Logger logger = LogManager.getLogger(SubmitAPIImpl.class);
 
   @Override
   public ResponseEntity<SubmittedTask> submitTask(String executableShellScript,

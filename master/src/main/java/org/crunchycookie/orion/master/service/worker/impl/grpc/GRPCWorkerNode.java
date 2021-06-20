@@ -16,10 +16,15 @@
 
 package org.crunchycookie.orion.master.service.worker.impl.grpc;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_WORKER_NODE;
+import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskStatus;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
@@ -32,6 +37,8 @@ import org.crunchycookie.orion.master.service.worker.WorkerNode;
  */
 public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
 
+  private static final Logger logger = LogManager.getLogger(GRPCWorkerNode.class);
+
   private String id;
 
   public GRPCWorkerNode(String host, String port) {
@@ -43,12 +50,16 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public void dispatch(SubmittedTask submittedTask) throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Dispatching the task",
+        "WorkerNode: " + getId()));
     upload(submittedTask.getTaskFiles());
     execute(submittedTask.getExecutable());
   }
 
   @Override
   public SubmittedTask obtain(SubmittedTask submittedTask) throws MasterException {
+
+    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Obtaining the task", "WorkerNode: " + getId()));
 
     // Downloading files may change the status in the worker, thus obtaining it first.
     WorkerNodeStatus status = getStatus(submittedTask);
@@ -73,6 +84,10 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public WorkerNodeStatus getStatus(SubmittedTask submittedTask) {
 
+    logger.info(
+        getLogMessage(getComponentId(), submittedTask == null ? null : submittedTask.getTaskId(),
+            "Getting the worker node status", "WorkerNode: " + getId()));
+
     TaskFileMetadata executable = submittedTask == null || submittedTask.getExecutable() == null ?
         new TaskFileMetadata(
             "",
@@ -86,6 +101,10 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   public String getId() {
 
     return this.id;
+  }
+
+  private ComponentID getComponentId() {
+    return COMPONENT_ID_WORKER_NODE;
   }
 
   private String getWorkerUniqueId(String host, String port) {

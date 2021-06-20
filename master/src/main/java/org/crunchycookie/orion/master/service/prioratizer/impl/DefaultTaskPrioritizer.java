@@ -16,7 +16,13 @@
 
 package org.crunchycookie.orion.master.service.prioratizer.impl;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_TASK_PRIORATIZER;
+import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
+
 import java.time.Instant;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
@@ -28,6 +34,8 @@ import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
  * This class implements earliest deadline first algorithm.
  */
 public class DefaultTaskPrioritizer implements TaskPrioritizer {
+
+  private static final Logger logger = LogManager.getLogger(DefaultTaskPrioritizer.class);
 
   private DefaultTaskPrioritizer() {
   }
@@ -54,6 +62,9 @@ public class DefaultTaskPrioritizer implements TaskPrioritizer {
   @Override
   public Priority getPriority(SubmittedTask submittedTask) throws MasterException {
 
+    logger
+        .info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Prioritizing the task"));
+
     // Deadline is in UTC.
     Instant deadline = Instant.parse(submittedTask.getResourceRequirement(ResourceParams.DEADLINE));
 
@@ -68,5 +79,9 @@ public class DefaultTaskPrioritizer implements TaskPrioritizer {
     return new Priority(Long.valueOf((
         deadline.toEpochMilli() - Instant.parse("2020-01-01T20:34:11Z").toEpochMilli()
     )).doubleValue());
+  }
+
+  private ComponentID getComponentId() {
+    return COMPONENT_ID_TASK_PRIORATIZER;
   }
 }

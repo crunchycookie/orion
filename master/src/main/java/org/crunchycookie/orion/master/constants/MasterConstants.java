@@ -47,4 +47,37 @@ public class MasterConstants {
       return message;
     }
   }
+
+  public enum ComponentID {
+
+    COMPONENT_ID_REST_ENDPOINT("REST_ENDPOINT"),
+    COMPONENT_ID_TASK_MANAGER("TASK_MANAGER"),
+    COMPONENT_ID_TASK_PRIORATIZER("TASK_PRIORATIZER"),
+    COMPONENT_ID_TASK_SCHEDULER("TASK_SCHEDULER"),
+    COMPONENT_ID_TASK_VALIDATOR("TASK_VALIDATOR"),
+    COMPONENT_ID_TASK_DISTRIBUTOR("TASK_DISTRIBUTOR"),
+    COMPONENT_ID_CENTRAL_STORE("CENTRAL_STORE"),
+    COMPONENT_ID_WORKER_POOL_MANAGER("WORKER_POOL_MANAGER"),
+    COMPONENT_ID_WORKER_NODE("WORKER_NODE");
+
+    private String name;
+
+    ComponentID(String name) {
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+  }
+
+  public static class Logging {
+
+    public static String LOGGING_FORMAT = "Component: %s | Task: %s | Msg: %s";
+    public static String TASK_ID_NOT_APPLICABLE = "TASK_ID_NOT_APPLICABLE";
+  }
 }

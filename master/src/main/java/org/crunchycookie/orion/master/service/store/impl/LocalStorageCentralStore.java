@@ -16,6 +16,9 @@
 
 package org.crunchycookie.orion.master.service.store.impl;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_CENTRAL_STORE;
+import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,7 +37,10 @@ import java.util.UUID;
 import java.util.Vector;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.constants.MasterConstants.ErrorCodes;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
@@ -49,6 +55,7 @@ import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 public class LocalStorageCentralStore implements CentralStore {
 
   public static final String TASK_FOLDER_BACKUP_SUFFIX = "__backup";
+  private static final Logger logger = LogManager.getLogger(LocalStorageCentralStore.class);
   private final String workspace;
 
   private LocalStorageCentralStore() {
@@ -100,6 +107,7 @@ public class LocalStorageCentralStore implements CentralStore {
   @Override
   public void store(SubmittedTask submittedTask) throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Storing the task"));
     try {
       /*
       Create task folder. Need to backup before delete if an existing one found. This is to
@@ -158,6 +166,7 @@ public class LocalStorageCentralStore implements CentralStore {
   @Override
   public SubmittedTask get(UUID taskId) throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), taskId, "Getting the task by ID"));
     try {
       // Get task folder.
       File taskFolder = getFile(taskId.toString(), true);
@@ -233,6 +242,7 @@ public class LocalStorageCentralStore implements CentralStore {
   public List<TaskFile> getFiles(UUID taskId, List<TaskFileMetadata> requestedFiles)
       throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), taskId, "Getting files"));
     SubmittedTask submittedTask = get(taskId);
     List<TaskFile> taskFiles = new ArrayList<>();
     for (TaskFileMetadata requestedFile : requestedFiles) {
@@ -242,6 +252,35 @@ public class LocalStorageCentralStore implements CentralStore {
       search(submittedTask.getOutputFiles(), requestedFile, taskFiles);
     }
     return taskFiles;
+  }
+
+  @Override
+  public void remove(UUID taskId) throws MasterException {
+
+    File taskFolder = getFile(taskId.toString(), true);
+    taskFolder.delete();
+  }
+
+  @Override
+  public SubmittedTaskStatus getStatus(UUID taskId) throws MasterException {
+
+    logger.info(getLogMessage(getComponentId(), taskId, "Getting status"));
+    return get(taskId).getStatus();
+  }
+
+  @Override
+  public void setStatus(UUID taskId, SubmittedTaskStatus status) throws MasterException {
+
+    logger.info(getLogMessage(getComponentId(), taskId, "Setting the status"));
+
+    SubmittedTask submittedTask = get(taskId);
+    submittedTask.setStatus(status);
+
+    store(submittedTask);
+  }
+
+  private ComponentID getComponentId() {
+    return COMPONENT_ID_CENTRAL_STORE;
   }
 
   private void search(List<TaskFile> files, TaskFileMetadata requestedFile,
@@ -267,28 +306,6 @@ public class LocalStorageCentralStore implements CentralStore {
     } catch (MasterException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Override
-  public void remove(UUID taskId) throws MasterException {
-
-    File taskFolder = getFile(taskId.toString(), true);
-    taskFolder.delete();
-  }
-
-  @Override
-  public SubmittedTaskStatus getStatus(UUID taskId) throws MasterException {
-
-    return get(taskId).getStatus();
-  }
-
-  @Override
-  public void setStatus(UUID taskId, SubmittedTaskStatus status) throws MasterException {
-
-    SubmittedTask submittedTask = get(taskId);
-    submittedTask.setStatus(status);
-
-    store(submittedTask);
   }
 
   private String getString(String id) {

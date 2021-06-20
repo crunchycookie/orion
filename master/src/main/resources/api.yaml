@@ -168,9 +168,9 @@ components:
     SubmittedTaskStatus:
       type: string
       enum:
-          - inprogress
-          - successful
-          - failed
+        - inprogress
+        - successful
+        - failed
     TaskLimits:
       type: object
       properties:

@@ -16,7 +16,9 @@
 
 package org.crunchycookie.orion.master.manager.impl;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_TASK_MANAGER;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getCentralStore;
+import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskDistributor;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskScheduler;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolManager;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
@@ -51,7 +54,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 public class DefaultTaskManager implements TaskManager {
 
-  private static final Logger LOG = LogManager.getLogger(DefaultTaskManager.class);
+  private static final Logger logger = LogManager.getLogger(DefaultTaskManager.class);
 
   public enum DefaultTaskManagerSingleton {
     INSTANCE;
@@ -68,7 +71,7 @@ public class DefaultTaskManager implements TaskManager {
   }
 
   @Override
-  @Scheduled(fixedDelay = 2000, initialDelay = 1000)
+  @Scheduled(fixedDelay = 5000, initialDelay = 1000)
   public void sync() throws MasterException {
 
     Instant syncStart = Instant.now();
@@ -103,14 +106,15 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     Instant syncCompletion = Instant.now();
-    if (MasterUtils.isDebugEnabled(LOG)) {
-      LOG.info("Synced in " + ChronoUnit.MILLIS.between(syncStart, syncCompletion) / 1000);
+    if (MasterUtils.isDebugEnabled(logger)) {
+      logger.info("Synced in " + ChronoUnit.MILLIS.between(syncStart, syncCompletion) / 1000);
     }
   }
 
   @Override
   public WorkerMetaData getTaskLimitations() throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), null, "Querying task limitations"));
     WorkerMetaData workerMetaData = new WorkerMetaData();
     workerMetaData.setMaxResourceCapacities(
         Map.of(
@@ -129,12 +133,15 @@ public class DefaultTaskManager implements TaskManager {
 
     UUID taskId = submittedTask.getTaskId();
     validateInputParams(submittedTask, taskId);
+
+    logger.info(getLogMessage(getComponentId(), taskId, "Task Submitted."));
     return getTaskScheduler().schedule(submittedTask);
   }
 
   @Override
   public SubmittedTaskStatus getTaskStatus(UUID uniqueTaskId) throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), uniqueTaskId, "Querying task status"));
     return getCentralStore().getStatus(uniqueTaskId);
   }
 
@@ -142,7 +149,12 @@ public class DefaultTaskManager implements TaskManager {
   public List<TaskFile> getFiles(UUID uniqueTaskId, List<TaskFileMetadata> fileInformation)
       throws MasterException {
 
+    logger.info(getLogMessage(getComponentId(), uniqueTaskId, "Obtaining files"));
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);
+  }
+
+  private ComponentID getComponentId() {
+    return COMPONENT_ID_TASK_MANAGER;
   }
 
   private void filterAndRescheduleFailedTasks(List<SubmittedTask> tasksMarkedAsInProgress,

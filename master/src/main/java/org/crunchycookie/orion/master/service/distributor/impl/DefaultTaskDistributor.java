@@ -16,11 +16,16 @@
 
 package org.crunchycookie.orion.master.service.distributor.impl;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_TASK_DISTRIBUTOR;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getCentralStore;
+import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskScheduler;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getWorkerPoolManager;
 
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
@@ -29,6 +34,8 @@ import org.crunchycookie.orion.master.service.distributor.TaskDistributor;
 import org.crunchycookie.orion.master.service.worker.WorkerNode;
 
 public class DefaultTaskDistributor implements TaskDistributor {
+
+  private static final Logger logger = LogManager.getLogger(DefaultTaskDistributor.class);
 
   private DefaultTaskDistributor() {
   }
@@ -55,6 +62,9 @@ public class DefaultTaskDistributor implements TaskDistributor {
   @Override
   public void distribute(SubmittedTask submittedTask) throws MasterException {
 
+    logger
+        .info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Distributing the task"));
+
     // Check for an available free worker.
     Optional<WorkerNode> availableWorker = getWorkerPoolManager().getFreeWorker();
 
@@ -76,6 +86,10 @@ public class DefaultTaskDistributor implements TaskDistributor {
     existingTask.setWorkerId(submittedTask.getWorkerId());
 
     getCentralStore().store(existingTask);
+  }
+
+  private ComponentID getComponentId() {
+    return COMPONENT_ID_TASK_DISTRIBUTOR;
   }
 
   private void dispatchTask(WorkerNode worker, SubmittedTask submittedTask) {

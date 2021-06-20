@@ -16,13 +16,18 @@
 
 package org.crunchycookie.orion.master.utils;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.Logging.LOGGING_FORMAT;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.manager.TaskManager;
@@ -126,5 +131,14 @@ public class MasterUtils {
 
   public static boolean isDebugEnabled(Logger LOG) {
     return Boolean.parseBoolean(RESTfulEndpoint.configs.getConfig("Log.debug"));
+  }
+
+  public static String getLogMessage(ComponentID id, UUID taskId, String msg, String... args) {
+    List<String> params = new ArrayList<>();
+    params.add(String.format(LOGGING_FORMAT, id.getName(), taskId, msg));
+    if (args != null && args.length > 0) {
+      params.addAll(Arrays.asList(args));
+    }
+    return String.join(" | ", params);
   }
 }

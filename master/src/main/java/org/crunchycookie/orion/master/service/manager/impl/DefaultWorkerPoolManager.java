@@ -16,6 +16,8 @@
 
 package org.crunchycookie.orion.master.service.manager.impl;
 
+import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_WORKER_POOL_MANAGER;
+import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
 import static org.crunchycookie.orion.master.utils.MasterUtils.getTaskStatus;
 
 import java.lang.reflect.Constructor;
@@ -24,17 +26,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.crunchycookie.orion.master.RESTfulEndpoint;
 import org.crunchycookie.orion.master.config.worker.WorkerNodeDiscoveryInfo;
+import org.crunchycookie.orion.master.constants.MasterConstants.ComponentID;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.SubmittedTask;
 import org.crunchycookie.orion.master.models.SubmittedTaskStatus;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
+import org.crunchycookie.orion.master.service.distributor.impl.DefaultTaskDistributor;
 import org.crunchycookie.orion.master.service.manager.WorkerPoolManager;
 import org.crunchycookie.orion.master.service.worker.WorkerNode;
 import org.crunchycookie.orion.master.service.worker.WorkerNode.WorkerNodeStatus;
 
 public class DefaultWorkerPoolManager implements WorkerPoolManager {
+
+  private static final Logger logger = LogManager.getLogger(DefaultTaskDistributor.class);
 
   List<WorkerNodeDiscoveryInfo> registeredWorkerNodesInfo;
   List<WorkerNode> registeredNodes = new ArrayList<>();
@@ -67,13 +75,14 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public void init() throws ExceptionInInitializerError {
 
+    logger.info(getLogMessage(getComponentId(), null, "Initializing the worker pool"));
     discoverAndRegisterWorkerNodes();
   }
 
   @Override
   public Optional<WorkerNode> getFreeWorker() {
 
-    // TODO: 2021-06-20 Change such that node.getStatus(null) will get the node status.
+    logger.info(getLogMessage(getComponentId(), null, "Getting a free worker"));
     return getRegisteredNodes().stream()
         .filter(n -> getStatusOfWorkerNode(n) == WorkerNodeStatus.IDLE)
         .findFirst();
@@ -84,6 +93,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
 
     return submittedTasks.stream()
         .map(st -> {
+          logger.info(getLogMessage(getComponentId(), st.getTaskId(), "Getting status"));
           Optional<WorkerNode> executionNode = getExecutionNode(st);
           if (executionNode.isPresent()) {
             return new SubmittedTaskStatus(
@@ -100,6 +110,10 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public List<SubmittedTask> getTasks(List<SubmittedTask> requestedTasks) throws MasterException {
 
+    requestedTasks.forEach(t ->
+        logger.info(getLogMessage(getComponentId(), t.getTaskId(), "Getting the task"))
+    );
+
     // Get the worker nodes executing the requested tasks.
     List<WorkerNode> executionNodes = getExecutionNodes(requestedTasks);
 
@@ -110,6 +124,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   @Override
   public WorkerMetaData getWorkerInformation() {
 
+    logger.info(getLogMessage(getComponentId(), null, "Getting worker information"));
     return RESTfulEndpoint.configs.getWorkerMetaData();
   }
 
@@ -121,6 +136,10 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
   protected void registerNode(WorkerNode node) {
 
     registeredNodes.add(node);
+  }
+
+  private ComponentID getComponentId() {
+    return COMPONENT_ID_WORKER_POOL_MANAGER;
   }
 
   private WorkerNodeStatus getStatusOfWorkerNode(WorkerNode n) {
