@@ -15,6 +15,5 @@
 # limitations under the License.
 #
 echo "Executing the task..."
-sleep 500
 cat in.txt > out.txt 2>&1
 echo "Done executing the task."
