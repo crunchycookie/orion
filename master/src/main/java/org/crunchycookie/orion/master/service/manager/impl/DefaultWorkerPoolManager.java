@@ -162,9 +162,7 @@ public class DefaultWorkerPoolManager implements WorkerPoolManager {
     for (WorkerNode node : executionNodes) {
       Optional<SubmittedTask> taskSubmittedToNode = getTaskSubmittedToNode(requestedTasks, node);
       if (taskSubmittedToNode.isPresent()) {
-        if (!node.getStatus(taskSubmittedToNode.get()).equals(WorkerNodeStatus.EXECUTING)) {
-          tasks.add(node.obtain(taskSubmittedToNode.get()));
-        }
+        tasks.add(node.obtain(taskSubmittedToNode.get()));
       }
     }
     return tasks;

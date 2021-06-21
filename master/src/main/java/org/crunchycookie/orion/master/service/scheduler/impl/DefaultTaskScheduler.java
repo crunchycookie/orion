@@ -113,6 +113,9 @@ public class DefaultTaskScheduler implements TaskScheduler {
       logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(),
           "Inserting task into the queue"));
     }
+    logger.info(String.format("Action: %s | Task: %s",
+        "Insert Into Queue", submittedTask.getTaskId()
+    ));
     priorityQueue.insert(submittedTask.getTaskId(), priority);
   }
 

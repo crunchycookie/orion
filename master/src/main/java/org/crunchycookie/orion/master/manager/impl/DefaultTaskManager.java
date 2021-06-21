@@ -96,6 +96,14 @@ public class DefaultTaskManager implements TaskManager {
      Store success tasks in the central store. This will replace the existing entry thus now
      includes output files and updated status.
      */
+    if (successTasks.size() > 0) {
+      logger.info(String.format("Action: %s | Tasks: %s",
+          "Collect Success Tasks",
+          successTasks.stream()
+              .map(st -> ("\n" + "Task ID: " + st.getTaskId()))
+              .collect(Collectors.toList()).toString()
+      ));
+    }
     getCentralStore().store(successTasks);
 
     // Filter failed tasks among the in-progress list obtain from the central store and update their
@@ -110,9 +118,13 @@ public class DefaultTaskManager implements TaskManager {
 
     // Obtain next scheduled task and ask task distributor to distribute it.
     if (getTaskScheduler().hasNext()) {
-      getTaskDistributor().distribute(getCentralStore().get(
-          getTaskScheduler().next().get()
+      UUID nextTaskId = getTaskScheduler().next().get();
+      logger.info(String.format("Action: %s | Task: %s",
+          "Dispatch Task", nextTaskId
       ));
+      getTaskDistributor().distribute(
+          getCentralStore().get(nextTaskId)
+      );
     }
 
     Instant syncCompletion = Instant.now();
@@ -125,14 +137,30 @@ public class DefaultTaskManager implements TaskManager {
 
   private void logPriorityQueueStatus() throws MasterException {
     List<PrioratizedTask> queueTasks = getTaskScheduler().getQueue().getState();
-    logger.info("");
-    logger.info("=== Begin of the priority queue report ===");
-    queueTasks.stream()
-        .sorted((pt1, pt2) -> pt1.getPriority().compareTo(pt2.getPriority()))
-        .forEach(pt -> logger
-            .info("Task: " + pt.getTaskId() + " | Priority: " + pt.getPriority().getPriority()));
-    logger.info("=== End of the priority queue report ===");
-    logger.info("");
+//    logger.info("");
+//    logger.info("=== Begin of the priority queue report ===");
+//    queueTasks.stream()
+//        .sorted((pt1, pt2) -> pt1.getPriority().compareTo(pt2.getPriority()))
+//        .forEach(pt -> logger
+//            .info("Task: " + pt.getTaskId() + " | Priority: " + pt.getPriority().getPriority()));
+//    logger.info("=== End of the priority queue report ===");
+//    logger.info("");
+
+    if (queueTasks.size() == 0) {
+      return;
+    }
+
+    logger.info(String.format("Action: %s | Queue: %s",
+        "Priority Queue Status",
+        queueTasks.stream()
+            .sorted((pt1, pt2) -> pt1.getPriority().compareTo(pt2.getPriority()))
+            .map(prioratizedTask -> (
+                "\n" + "Task ID: " + prioratizedTask.getTaskId()
+                    + " -- Priority(Lowest is the highest priority): " + prioratizedTask
+                    .getPriority().getPriority())
+            )
+            .collect(Collectors.toList()).toString()
+    ));
   }
 
   @Override
@@ -162,6 +190,10 @@ public class DefaultTaskManager implements TaskManager {
     if (logger.isDebugEnabled()) {
       logger.debug(getLogMessage(getComponentId(), taskId, "Task Submitted."));
     }
+
+    logger.info(String.format("Action: %s | Task: %s",
+        "Submit Task", submittedTask.getTaskId()
+    ));
     return getTaskScheduler().schedule(submittedTask);
   }
 
@@ -195,6 +227,15 @@ public class DefaultTaskManager implements TaskManager {
     List<SubmittedTask> failedTasks = getFilteredTasks(tasksMarkedAsInProgress, latestStatus,
         TaskStatus.FAILED);
 
+    if (failedTasks.size() > 0) {
+      logger.info(String.format("Action: %s | Tasks: %s",
+          "Reschedule Failed Tasks",
+          failedTasks.stream()
+              .map(st -> ("\n" + "Task ID: " + st.getTaskId()))
+              .collect(Collectors.toList()).toString()
+      ));
+    }
+
     // Set status as failed.
     failedTasks.forEach(failedTask -> failedTask.setStatus(new SubmittedTaskStatus(
         failedTask.getTaskId(),
@@ -208,6 +249,8 @@ public class DefaultTaskManager implements TaskManager {
           failedTask.getTaskId(),
           TaskStatus.PENDING
       ));
+      failedTask.setWorkerId(null);
+
       this.submit(failedTask);
     }
   }

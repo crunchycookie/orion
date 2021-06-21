@@ -61,12 +61,8 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   @Override
   public SubmittedTask obtain(SubmittedTask submittedTask) throws MasterException {
 
-    if (logger.isDebugEnabled()) {
-      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Obtaining the task",
-          "WorkerNode: " + getId()));
-    }
-    // Downloading files may change the status in the worker, thus obtaining it first.
-    WorkerNodeStatus status = getStatus(submittedTask);
+    // This method trust that the submittedTask is completed in the worker. Caller must ensure
+    // this beforehand.
 
     // Download files from the worker.
     List<TaskFile> downloadedInputFiles = download(submittedTask.getTaskFiles().stream()
@@ -79,7 +75,7 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
     submittedTask.setOutputFiles(downloadedOutputFiles);
     submittedTask.setStatus(new SubmittedTaskStatus(
         submittedTask.getTaskId(),
-        getTaskStatus(status)
+        getTaskStatus(WorkerNodeStatus.COMPLETED)
     ));
 
     return submittedTask;

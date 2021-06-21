@@ -93,6 +93,9 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
       // Open stream to write the file.
       OutputStream outputStream = new FileOutputStream(file);
 
+      logMessage(String.format("Action: %s | Task ID: %s | File Name: %s",
+          "Store File", metaData.getTaskId(), metaData.getName() + "." + metaData.getType()));
+
       return Optional.of(outputStream);
     } catch (IOException | URISyntaxException e) {
       throw new WorkerServerException("Unable to create the directories", e);
@@ -103,8 +106,9 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
   public Pair<FileMetaData, InputStream> get(FileMetaData file) throws WorkerServerException {
 
     try {
-      logMessage("===== Obtaining the file: " + file.getName() + "." + file.getType()
-          + ", of the Task: " + file.getTaskId());
+      logMessage(String.format("Action: %s | Task ID: %s | File Name: %s ",
+          "Return File", file.getTaskId(), file.getName() + "." + file.getType()));
+
       String filePath = getFilePath(file);
       return new ImmutablePair<>(file, new FileInputStream(filePath));
     } catch (IOException | URISyntaxException e) {
@@ -129,7 +133,8 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
       // Store process reference in ledger.
       putTaskInLedger(executableFile, executableProcess);
 
-      logMessage("===== Executing the task: " + executableFile.getTaskId());
+      logMessage(String.format("Action: %s | Task ID: %s", "Executing Task", executableFile
+          .getTaskId()));
       return OperationStatus.SUCCESSFULLY_STARTED;
     } catch (URISyntaxException e) {
       throw new WorkerServerException("Unable to read the file", e);
@@ -150,9 +155,12 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     if (StringUtils.isBlank(executableFile.getTaskId())) {
       for (Entry<String, Process> p : tasksLedger.entrySet()) {
         if (p.getValue() != null && p.getValue().isAlive()) {
+          logMessage(String.format("Action: %s | Status: %s | Process ID: %s",
+              "Get Worker Status", "Executing", p.getValue().pid()));
           return OperationStatus.BUSY;
         }
       }
+      logMessage(String.format("Action: %s | Status: %s", "Get Worker Status", "Not Executing"));
       return OperationStatus.IDLE;
     }
 
@@ -160,11 +168,13 @@ public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionMan
     Process executableTask = getTaskFromLedger(executableFile);
     if (executableTask == null || !executableTask.isAlive()) {
       if (!executableTask.isAlive()) {
-        logMessage("===== Task: " + executableFile.getTaskId() + ", has completed execution");
+        logMessage(String.format("Action: %s | Task ID: %s | Status: %s",
+            "Get Task Status", executableFile.getTaskId(), "Not Executing"));
       }
       return OperationStatus.IDLE;
     }
-    logMessage("===== Task: " + executableFile.getTaskId() + ", is still executing");
+    logMessage(String.format("Action: %s | Task ID: %s | Status: %s",
+        "Get Task Status", executableFile.getTaskId(), "Executing"));
     return OperationStatus.BUSY;
   }
 

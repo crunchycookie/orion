@@ -13,8 +13,5 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-echo "Starting the heavy task..."
-sleep 12
-echo "Task execution completed. Writing the output."
+sleep 20
 cat in.txt > out.txt 2>&1
-echo "Done executing the task."

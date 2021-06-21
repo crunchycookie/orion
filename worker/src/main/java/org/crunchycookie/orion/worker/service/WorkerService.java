@@ -56,7 +56,6 @@ public class WorkerService extends WorkerImplBase {
   @Override
   public StreamObserver<FileUploadRequest> upload(StreamObserver<FileUploadResponse>
       responseObserver) {
-    logMessage("Received an upload request");
     return new FileUploadRequestObserver(responseObserver);
   }
 
@@ -78,7 +77,6 @@ public class WorkerService extends WorkerImplBase {
    */
   @Override
   public void execute(Task request, StreamObserver<Result> responseObserver) {
-    logMessage("Received an execute request");
     try {
       OperationStatus status = WorkerUtils.getTaskExecutionManager().execute(
           request.getExecutableShellScriptMetadata()
@@ -98,7 +96,6 @@ public class WorkerService extends WorkerImplBase {
    */
   @Override
   public void monitor(Task request, StreamObserver<Result> responseObserver) {
-    logMessage("Received a monitor request");
     try {
       OperationStatus status = WorkerUtils.getTaskExecutionManager().getStatus(
           request.getExecutableShellScriptMetadata()
@@ -125,7 +122,6 @@ public class WorkerService extends WorkerImplBase {
    */
   @Override
   public void download(FileMetaData request, StreamObserver<Result> responseObserver) {
-    logMessage("Received a download request");
     try {
       // Send file metadata as the first element in the stream.
       responseObserver.onNext(Result.newBuilder().setOutputFileMetaData(request).build());
