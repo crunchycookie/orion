@@ -61,7 +61,7 @@ public class DefaultTaskDistributor implements TaskDistributor {
 
   @Override
   public void distribute(SubmittedTask submittedTask) throws MasterException {
-    
+
     if (logger.isDebugEnabled()) {
       logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(),
           "Distributing the task"));

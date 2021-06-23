@@ -51,8 +51,9 @@ public class GRPCWorkerNode extends GRPCWorkerClient implements WorkerNode {
   public void dispatch(SubmittedTask submittedTask) throws MasterException {
 
     if (logger.isDebugEnabled()) {
-      logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Dispatching the task",
-          "WorkerNode: " + getId()));
+      logger
+          .debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Dispatching the task",
+              "WorkerNode: " + getId()));
     }
     upload(submittedTask.getTaskFiles());
     execute(submittedTask.getExecutable());

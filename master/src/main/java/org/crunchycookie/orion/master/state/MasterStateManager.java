@@ -24,6 +24,9 @@ public class MasterStateManager {
 
   private State state = new State();
 
+  private MasterStateManager() {
+  }
+
   public enum MasterStateManagerSingleton {
     INSTANCE;
 
@@ -36,29 +39,6 @@ public class MasterStateManager {
     public MasterStateManager get() {
       return manager;
     }
-  }
-
-  public static MasterStateManager getInstance() {
-    return MasterStateManagerSingleton.INSTANCE.get();
-  }
-
-  public State getState() {
-    return state;
-  }
-
-  public void addToQueue(List<MonitorResult> result) {
-    this.getState().setQueue(result);
-  }
-
-  public void addToWorkerPool(List<MonitorResult> result) {
-    this.getState().setWorkerPool(result);
-  }
-
-  public void addToCentralStorage(List<MonitorResult> result) {
-    this.getState().setCentralStorage(result);
-  }
-
-  private MasterStateManager() {
   }
 
   public class State {
@@ -92,5 +72,25 @@ public class MasterStateManager {
         List<MonitorResult> centralStorage) {
       this.centralStorage = centralStorage;
     }
+  }
+
+  public static MasterStateManager getInstance() {
+    return MasterStateManagerSingleton.INSTANCE.get();
+  }
+
+  public State getState() {
+    return state;
+  }
+
+  public void addToQueue(List<MonitorResult> result) {
+    this.getState().setQueue(result);
+  }
+
+  public void addToWorkerPool(List<MonitorResult> result) {
+    this.getState().setWorkerPool(result);
+  }
+
+  public void addToCentralStorage(List<MonitorResult> result) {
+    this.getState().setCentralStorage(result);
   }
 }

@@ -137,41 +137,6 @@ public class DefaultTaskManager implements TaskManager {
     }
   }
 
-  private void handleStatePublish() throws MasterException {
-
-    List<PrioratizedTask> queueTasks = getTaskScheduler().getQueue().getState();
-
-    // Update priority queue state.
-    MasterStateManager.getInstance().addToQueue(
-        queueTasks.stream().map(qt -> {
-          MonitorResult mt = new MonitorResult();
-          mt.setTaskId(qt.getTaskId());
-          mt.setStatus(org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.INPROGRESS);
-          mt.setWorkerId(null);
-          return mt;
-        }).collect(Collectors.toList())
-    );
-
-    // Update central store state.
-    getCentralStore().updateState();
-
-    if (queueTasks.size() == 0) {
-      return;
-    }
-
-    logger.info(String.format("Action: %s | Queue: %s",
-        "Priority Queue Status",
-        queueTasks.stream()
-            .sorted((pt1, pt2) -> pt1.getPriority().compareTo(pt2.getPriority()))
-            .map(prioratizedTask -> (
-                "\n" + "Task ID: " + prioratizedTask.getTaskId()
-                    + " -- Priority(Lowest is the highest priority): " + prioratizedTask
-                    .getPriority().getPriority())
-            )
-            .collect(Collectors.toList()).toString()
-    ));
-  }
-
   @Override
   public WorkerMetaData getTaskLimitations() throws MasterException {
     if (logger.isDebugEnabled()) {
@@ -223,6 +188,41 @@ public class DefaultTaskManager implements TaskManager {
       logger.debug(getLogMessage(getComponentId(), uniqueTaskId, "Obtaining files"));
     }
     return getCentralStore().getFiles(uniqueTaskId, fileInformation);
+  }
+
+  private void handleStatePublish() throws MasterException {
+
+    List<PrioratizedTask> queueTasks = getTaskScheduler().getQueue().getState();
+
+    // Update priority queue state.
+    MasterStateManager.getInstance().addToQueue(
+        queueTasks.stream().map(qt -> {
+          MonitorResult mt = new MonitorResult();
+          mt.setTaskId(qt.getTaskId());
+          mt.setStatus(org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.INPROGRESS);
+          mt.setWorkerId(null);
+          return mt;
+        }).collect(Collectors.toList())
+    );
+
+    // Update central store state.
+    getCentralStore().updateState();
+
+    if (queueTasks.size() == 0) {
+      return;
+    }
+
+    logger.info(String.format("Action: %s | Queue: %s",
+        "Priority Queue Status",
+        queueTasks.stream()
+            .sorted((pt1, pt2) -> pt1.getPriority().compareTo(pt2.getPriority()))
+            .map(prioratizedTask -> (
+                "\n" + "Task ID: " + prioratizedTask.getTaskId()
+                    + " -- Priority(Lowest is the highest priority): " + prioratizedTask
+                    .getPriority().getPriority())
+            )
+            .collect(Collectors.toList()).toString()
+    ));
   }
 
   private ComponentID getComponentId() {

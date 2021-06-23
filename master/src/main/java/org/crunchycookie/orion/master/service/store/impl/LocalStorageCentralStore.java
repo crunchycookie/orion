@@ -108,7 +108,7 @@ public class LocalStorageCentralStore implements CentralStore {
 
   @Override
   public void store(SubmittedTask submittedTask) throws MasterException {
-    
+
     if (logger.isDebugEnabled()) {
       logger.debug(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Storing the task"));
     }
@@ -169,7 +169,7 @@ public class LocalStorageCentralStore implements CentralStore {
 
   @Override
   public SubmittedTask get(UUID taskId) throws MasterException {
-    
+
     if (logger.isDebugEnabled()) {
       logger.debug(getLogMessage(getComponentId(), taskId, "Getting the task by ID"));
     }
@@ -264,21 +264,6 @@ public class LocalStorageCentralStore implements CentralStore {
     );
   }
 
-  private List<MonitorResult> getStatus(TaskStatus status,
-      org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus stStatus) throws MasterException {
-
-    List<MonitorResult> tasksState = new ArrayList<>();
-    List<SubmittedTask> successTasks = get(status);
-    successTasks.forEach(st -> {
-      MonitorResult result = new MonitorResult();
-      result.setStatus(stStatus);
-      result.setTaskId(st.getTaskId());
-      result.setWorkerId(st.getWorkerId());
-      tasksState.add(result);
-    });
-    return tasksState;
-  }
-
   @Override
   public List<TaskFile> getFiles(UUID taskId, List<TaskFileMetadata> requestedFiles)
       throws MasterException {
@@ -324,6 +309,38 @@ public class LocalStorageCentralStore implements CentralStore {
     submittedTask.setStatus(status);
 
     store(submittedTask);
+  }
+
+  private List<MonitorResult> getStatus(TaskStatus status,
+      org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus stStatus)
+      throws MasterException {
+
+    List<MonitorResult> tasksState = new ArrayList<>();
+    List<SubmittedTask> successTasks = get(status);
+    successTasks.forEach(st -> {
+      MonitorResult result = new MonitorResult();
+      result.setStatus(stStatus);
+      result.setTaskId(st.getTaskId());
+      result.setWorkerId(st.getWorkerId());
+      tasksState.add(result);
+    });
+
+    successTasks.stream().forEach(st -> {
+      invalidateOpenedFiles(st.getTaskFiles());
+      invalidateOpenedFiles(st.getOutputFiles());
+    });
+
+    return tasksState;
+  }
+
+  private void invalidateOpenedFiles(List<TaskFile> files) {
+    files.forEach(f -> {
+      try {
+        f.invalidate();
+      } catch (MasterException e) {
+        throw new RuntimeException("Failed to invalidate the task file");
+      }
+    });
   }
 
   private ComponentID getComponentId() {

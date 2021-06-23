@@ -103,6 +103,11 @@ public class DefaultTaskScheduler implements TaskScheduler {
     return new SubmittedTaskStatus(submittedTask.getTaskId(), TaskStatus.IN_PROGRESS);
   }
 
+  @Override
+  public PriorityQueue getQueue() {
+    return this.priorityQueue;
+  }
+
   private ComponentID getComponentId() {
     return COMPONENT_ID_TASK_SCHEDULER;
   }
@@ -117,10 +122,5 @@ public class DefaultTaskScheduler implements TaskScheduler {
         "Insert Into Queue", submittedTask.getTaskId()
     ));
     priorityQueue.insert(submittedTask.getTaskId(), priority);
-  }
-
-  @Override
-  public PriorityQueue getQueue() {
-    return this.priorityQueue;
   }
 }

@@ -17,7 +17,6 @@
 package org.crunchycookie.orion.master.service.prioratizer.impl;
 
 import static org.crunchycookie.orion.master.constants.MasterConstants.ComponentID.COMPONENT_ID_TASK_PRIORATIZER;
-import static org.crunchycookie.orion.master.utils.MasterUtils.getLogMessage;
 
 import java.time.Instant;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +26,6 @@ import org.crunchycookie.orion.master.exception.MasterClientException;
 import org.crunchycookie.orion.master.exception.MasterException;
 import org.crunchycookie.orion.master.models.Priority;
 import org.crunchycookie.orion.master.models.SubmittedTask;
-import org.crunchycookie.orion.master.service.prioratizer.PriorityQueue;
 import org.crunchycookie.orion.master.service.prioratizer.TaskPrioritizer;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 

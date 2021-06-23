@@ -18,23 +18,24 @@
 <Configuration status="INFO">
   <Appenders>
     <Console name="ConsoleAppender" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
-    <File name="FileAppender" fileName="application-${date:yyyyMMdd}.log" immediateFlush="false" append="true">
+    <File append="true" fileName="application-${date:yyyyMMdd}.log" immediateFlush="false"
+      name="FileAppender">
       <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </File>
     <Http name="Http" url="https://localhost:9200/test/log4j/">
-      <Property name="X-Java-Runtime" value="$${java:runtime}" />
       <JsonLayout properties="true"/>
+      <Property name="X-Java-Runtime" value="$${java:runtime}"/>
       <SSL>
-        <KeyStore   location="log4j2-keystore.jks" passwordEnvironmentVariable="KEYSTORE_PASSWORD"/>
-        <TrustStore location="truststore.jks"      passwordFile="${sys:user.home}/truststore.pwd"/>
+        <KeyStore location="log4j2-keystore.jks" passwordEnvironmentVariable="KEYSTORE_PASSWORD"/>
+        <TrustStore location="truststore.jks" passwordFile="${sys:user.home}/truststore.pwd"/>
       </SSL>
     </Http>
   </Appenders>
   <Loggers>
     <Root level="debug">
-      <AppenderRef ref="ConsoleAppender" />
+      <AppenderRef ref="ConsoleAppender"/>
       <AppenderRef ref="FileAppender"/>
     </Root>
   </Loggers>

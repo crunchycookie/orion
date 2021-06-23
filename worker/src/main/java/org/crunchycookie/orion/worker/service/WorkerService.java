@@ -16,7 +16,6 @@
 
 package org.crunchycookie.orion.worker.service;
 
-import static org.crunchycookie.orion.worker.WorkerService.logMessage;
 import static org.crunchycookie.orion.worker.utils.WorkerUtils.getResponseStatus;
 import static org.crunchycookie.orion.worker.utils.WorkerUtils.handleResponse;
 import static org.crunchycookie.orion.worker.utils.WorkerUtils.streamInChunks;

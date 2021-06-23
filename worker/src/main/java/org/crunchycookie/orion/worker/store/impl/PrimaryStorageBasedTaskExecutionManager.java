@@ -49,7 +49,8 @@ import org.crunchycookie.orion.worker.store.constants.TaskExecutionManagerConsta
  */
 public class PrimaryStorageBasedTaskExecutionManager implements TaskExecutionManager {
 
-  private static final Logger logger = LogManager.getLogger(PrimaryStorageBasedTaskExecutionManager.class);
+  private static final Logger logger = LogManager
+      .getLogger(PrimaryStorageBasedTaskExecutionManager.class);
 
   private static final String TASKS_FOLDER = "tasks";
   private static final String FILE_TYPE_SEPARATOR = ".";
