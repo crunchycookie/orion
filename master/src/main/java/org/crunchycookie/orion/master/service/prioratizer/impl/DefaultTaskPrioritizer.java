@@ -63,9 +63,6 @@ public class DefaultTaskPrioritizer implements TaskPrioritizer {
   @Override
   public Priority getPriority(SubmittedTask submittedTask) throws MasterException {
 
-//    logger
-//        .info(getLogMessage(getComponentId(), submittedTask.getTaskId(), "Prioritizing the task"));
-
     // Deadline is in UTC.
     Instant deadline = Instant.parse(submittedTask.getResourceRequirement(ResourceParams.DEADLINE));
 

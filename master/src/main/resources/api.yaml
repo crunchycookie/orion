@@ -140,8 +140,45 @@ paths:
                 $ref: '#/components/schemas/MonitorResult'
         '404':
           description: couldn't find the task
+  /get-state:
+    get:
+      tags:
+        - Client Admin
+      summary: provide current state of the master
+      operationId: getState
+      description: |
+        You can obtain master state data.
+      responses:
+        '200':
+          description: master state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterStatus'
+        '404':
+          description: Could not find any state
+
 components:
   schemas:
+    ClusterStatus:
+      type: object
+      properties:
+        restEndpoint:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorResult'
+        priorityQueue:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorResult'
+        workerPool:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorResult'
+        centralStore:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonitorResult'
     BinaryFile:
       type: string
       format: binary
@@ -165,6 +202,8 @@ components:
           format: uuid
         status:
           $ref: '#/components/schemas/SubmittedTaskStatus'
+        workerId:
+          type: string
     SubmittedTaskStatus:
       type: string
       enum:

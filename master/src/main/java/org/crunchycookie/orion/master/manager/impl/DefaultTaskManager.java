@@ -44,7 +44,9 @@ import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.WorkerMetaData;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
+import org.crunchycookie.orion.master.rest.model.MonitorResult;
 import org.crunchycookie.orion.master.service.prioratizer.impl.DefaultPriorityQueue.PrioratizedTask;
+import org.crunchycookie.orion.master.state.MasterStateManager;
 import org.crunchycookie.orion.master.utils.MasterUtils;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 import org.springframework.context.annotation.Configuration;
@@ -77,8 +79,8 @@ public class DefaultTaskManager implements TaskManager {
 
     Instant syncStart = Instant.now();
 
-    // Status on queue.
-    logPriorityQueueStatus();
+    // Status publishing.
+    handleStatePublish();
 
     // Obtain all in-progress tasks from the central store.
     List<SubmittedTask> tasksMarkedAsInProgress = getCentralStore().get(TaskStatus.IN_PROGRESS);
@@ -135,16 +137,23 @@ public class DefaultTaskManager implements TaskManager {
     }
   }
 
-  private void logPriorityQueueStatus() throws MasterException {
+  private void handleStatePublish() throws MasterException {
+
     List<PrioratizedTask> queueTasks = getTaskScheduler().getQueue().getState();
-//    logger.info("");
-//    logger.info("=== Begin of the priority queue report ===");
-//    queueTasks.stream()
-//        .sorted((pt1, pt2) -> pt1.getPriority().compareTo(pt2.getPriority()))
-//        .forEach(pt -> logger
-//            .info("Task: " + pt.getTaskId() + " | Priority: " + pt.getPriority().getPriority()));
-//    logger.info("=== End of the priority queue report ===");
-//    logger.info("");
+
+    // Update priority queue state.
+    MasterStateManager.getInstance().addToQueue(
+        queueTasks.stream().map(qt -> {
+          MonitorResult mt = new MonitorResult();
+          mt.setTaskId(qt.getTaskId());
+          mt.setStatus(org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.INPROGRESS);
+          mt.setWorkerId(null);
+          return mt;
+        }).collect(Collectors.toList())
+    );
+
+    // Update central store state.
+    getCentralStore().updateState();
 
     if (queueTasks.size() == 0) {
       return;

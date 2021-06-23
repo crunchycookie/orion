@@ -49,7 +49,9 @@ import org.crunchycookie.orion.master.models.SubmittedTaskStatus.TaskStatus;
 import org.crunchycookie.orion.master.models.file.StreamingTaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFile;
 import org.crunchycookie.orion.master.models.file.TaskFileMetadata;
+import org.crunchycookie.orion.master.rest.model.MonitorResult;
 import org.crunchycookie.orion.master.service.store.CentralStore;
+import org.crunchycookie.orion.master.state.MasterStateManager;
 import org.crunchycookie.orion.master.utils.RESTUtils.ResourceParams;
 
 public class LocalStorageCentralStore implements CentralStore {
@@ -240,6 +242,41 @@ public class LocalStorageCentralStore implements CentralStore {
 
     // return identified tasks.
     return get(retrievingTasks);
+  }
+
+  @Override
+  public void updateState() throws MasterException {
+
+    List<MonitorResult> centralStorageResults = new ArrayList<>();
+    centralStorageResults.addAll(
+        getStatus(TaskStatus.SUCCESS,
+            org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.SUCCESSFUL)
+    );
+    centralStorageResults.addAll(
+        getStatus(TaskStatus.FAILED,
+            org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.FAILED)
+    );
+    MasterStateManager.getInstance().addToCentralStorage(centralStorageResults);
+
+    MasterStateManager.getInstance().addToWorkerPool(
+        getStatus(TaskStatus.IN_PROGRESS,
+            org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus.INPROGRESS)
+    );
+  }
+
+  private List<MonitorResult> getStatus(TaskStatus status,
+      org.crunchycookie.orion.master.rest.model.SubmittedTaskStatus stStatus) throws MasterException {
+
+    List<MonitorResult> tasksState = new ArrayList<>();
+    List<SubmittedTask> successTasks = get(status);
+    successTasks.forEach(st -> {
+      MonitorResult result = new MonitorResult();
+      result.setStatus(stStatus);
+      result.setTaskId(st.getTaskId());
+      result.setWorkerId(st.getWorkerId());
+      tasksState.add(result);
+    });
+    return tasksState;
   }
 
   @Override
