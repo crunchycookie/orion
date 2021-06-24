@@ -1,19 +1,8 @@
-import './App.css';
-import {makeStyles, Paper} from "@material-ui/core";
+import {Paper} from "@material-ui/core";
 import Element from "./common/Element";
 import {useEffect, useState} from "react";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    '& > *': {
-      margin: theme.spacing(1),
-      width: theme.spacing(16),
-      height: theme.spacing(16),
-    },
-  },
-}));
+import "./css/MasterCanvas.css";
+import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 
 function MasterCanvas() {
 
@@ -23,51 +12,58 @@ function MasterCanvas() {
   const [queue, setQueue] = useState([]);
   const [centralStore, setCentralStore] = useState([]);
 
-  const classes = useStyles();
-
-  useEffect(() => {
+  const getStats = async () => {
     axios.get('http://localhost:8080/orion/v0.1/get-state')
     .then(function (response) {
       setQueue(response.data.priorityQueue);
       setCentralStore(response.data.centralStore);
       setWorkerPool(response.data.workerPool);
+      console.log("Received stats: ", response.data);
     })
     .catch(function (error) {
       // handle error
-      console.log(error);
     })
     .then(function () {
       // always executed
     });
-  });
+  }
+
+  useEffect(() => {
+    getStats();
+
+    const interval = setInterval(() => {
+      getStats()
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, []);
 
   return (
-      <div className={classes.root}>
-        <Paper elevation={0}>
+      <div className="master-canvas">
+        <Paper elevation={0} className="element">
           <Element
-              tasks={[
-                {id: 123},
-                {id: 456}
-              ]}
-              elemantName="Central Store"
-          />
-        </Paper>
-        <Paper elevation={0}>
-          <Element
-              tasks={[
-                {id: 123},
-                {id: 456}
-              ]}
+              tasks={queue.map(task => {
+                return {id: task.taskId, state: task.status}
+              })}
               elemantName="Priority Queue"
           />
         </Paper>
-        <Paper elevation={0} >
+        <ArrowForwardIcon fontSize="large"/>
+        <Paper elevation={0} className="element">
           <Element
-              tasks={[
-                {id: 123},
-                {id: 456}
-              ]}
+              tasks={workerPool.map(task => {
+                return {id: task.taskId, state: task.status}
+              })}
               elemantName="Worker Pool"
+          />
+        </Paper>
+        <ArrowForwardIcon fontSize="large"/>
+        <Paper elevation={0} className="element">
+          <Element
+              tasks={centralStore.map(task => {
+                return {id: task.taskId, state: task.status}
+              })}
+              elemantName="Central Store"
           />
         </Paper>
       </div>

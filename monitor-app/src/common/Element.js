@@ -17,6 +17,10 @@
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import PauseCircleOutlineIcon from '@material-ui/icons/PauseCircleOutline';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import {
   Card,
   CardContent,
@@ -27,33 +31,41 @@ import {
 } from "@material-ui/core";
 
 function Element(props) {
-  console.log(props.tasks);
   return (
-      <div className="element">
-        <Grid container alignItems="center">
-          <Card className="card">
-            <CardContent>
-              <List>
-                {
-                  props.tasks.map(task => (
-                      <Paper variant="outlined">
-                        <ListItem>
-                          <ListItemText
-                              primary="Submitted Task"
-                              secondary={"Task ID: " + task.id}
-                          />
-                        </ListItem>
-                      </Paper>
-                  ))
-                }
-              </List>
-              <Divider light/>
-              <Typography variant="h6" component="subtitle1">
+      <div className="orion-element">
+        <Grid container spacing={3}>
+          <Card className="card" style={{overflow: 'auto'}}>
+            <CardContent style={{overflow: 'auto'}}>
+              <Paper style={{maxHeight: 700, overflow: 'auto'}}>
+                <List>
+                  {
+                    props.tasks.map(task => (
+                        <Paper variant="outlined">
+                          <ListItem>
+                            {task.state === "successful" && (
+                                <CheckCircleIcon/>)}
+                            {(task.state === "inprogress"
+                                && !props.elemantName.includes(
+                                    "Priority Queue")) && (<CircularProgress/>)}
+                            {(task.state === "inprogress"
+                                && props.elemantName.includes("Priority Queue"))
+                            && (<PauseCircleOutlineIcon/>)}
+                            <ListItemText
+                                primary={task.state.toUpperCase()}
+                                secondary={task.id}
+                            />
+                          </ListItem>
+                        </Paper>
+                    ))
+                  }
+                </List>
+              </Paper>
+              <Divider variant="middle"/>
+              <Typography variant="subtitle1" align="center">
                 {props.elemantName}
               </Typography>
             </CardContent>
           </Card>
-
         </Grid>
       </div>
   );
