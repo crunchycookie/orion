@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "getResourceLimits",
+			"name": "Get status",
 			"event": [
 				{
 					"listen": "test",

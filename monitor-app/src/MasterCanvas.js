@@ -18,7 +18,6 @@ function MasterCanvas() {
       setQueue(response.data.priorityQueue);
       setCentralStore(response.data.centralStore);
       setWorkerPool(response.data.workerPool);
-      console.log("Received stats: ", response.data);
     })
     .catch(function (error) {
       // handle error
