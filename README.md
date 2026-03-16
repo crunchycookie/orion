@@ -52,7 +52,7 @@ orion/
 
 - Java 11+
 - Maven 3.6+
-- 
+
 ### Build
 
 From the project root:
